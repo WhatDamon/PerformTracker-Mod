@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.controller.TrackerController;
+import org.damon233.performtrackermod.utils.TranslationService;
 
 public class PtrackerCommand {
     private static final int PERMISSION_LEVEL = 2;
@@ -27,7 +28,7 @@ public class PtrackerCommand {
                         .executes(context -> {
                             TrackerController controller = PerformTracker.getTrackerController();
                             if (controller == null) {
-                                context.getSource().sendError(Text.literal("Tracker not initialized"));
+                                context.getSource().sendError(TranslationService.get("error.not_initialized"));
                                 return 0;
                             }
 
@@ -35,12 +36,12 @@ public class PtrackerCommand {
                                 controller.start();
                                 String filePath = controller.getCsvFilePath();
                                 context.getSource().sendFeedback(
-                                    () -> Text.literal("Performance tracking started. Output saved to: " + filePath),
+                                    TranslationService.getSupplier("start.success", filePath),
                                     false
                                 );
                                 return 1;
                             } catch (IllegalStateException e) {
-                                context.getSource().sendError(Text.literal(e.getMessage()));
+                                context.getSource().sendError(TranslationService.get(e.getMessage().contains("already running") ? "error.already_running" : "error.not_initialized"));
                                 return 0;
                             }
                         })
@@ -49,7 +50,7 @@ public class PtrackerCommand {
                         .executes(context -> {
                             TrackerController controller = PerformTracker.getTrackerController();
                             if (controller == null) {
-                                context.getSource().sendError(Text.literal("Tracker not initialized"));
+                                context.getSource().sendError(TranslationService.get("error.not_initialized"));
                                 return 0;
                             }
 
@@ -57,12 +58,12 @@ public class PtrackerCommand {
                                 int sampleCount = controller.getSampleCount();
                                 controller.stop();
                                 context.getSource().sendFeedback(
-                                    () -> Text.literal("Performance tracking stopped. " + sampleCount + " samples collected."),
+                                    TranslationService.getSupplier("stop.success", sampleCount),
                                     false
                                 );
                                 return 1;
                             } catch (IllegalStateException e) {
-                                context.getSource().sendError(Text.literal(e.getMessage()));
+                                context.getSource().sendError(TranslationService.get("error.not_running"));
                                 return 0;
                             }
                         })

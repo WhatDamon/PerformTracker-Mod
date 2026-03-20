@@ -13,6 +13,7 @@ import org.damon233.performtrackermod.collector.ServerTickCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
 import org.damon233.performtrackermod.utils.CsvFileWriter;
+import org.damon233.performtrackermod.utils.TranslationService;
 
 public class TrackerController {
     private static final String CSV_DIRECTORY = "performance_data";
@@ -55,7 +56,7 @@ public class TrackerController {
 
     public synchronized void start() {
         if (state.get() == TrackerState.RUNNING) {
-            throw new IllegalStateException("Tracker is already running");
+            throw new IllegalStateException("error.already_running");
         }
 
         try {
@@ -71,7 +72,7 @@ public class TrackerController {
 
     public synchronized void stop() {
         if (state.get() == TrackerState.IDLE) {
-            throw new IllegalStateException("Tracker is not running");
+            throw new IllegalStateException("error.not_running");
         }
 
         active.set(false);
@@ -118,7 +119,7 @@ public class TrackerController {
 
         if (server != null) {
             server.getPlayerManager().getPlayerList().forEach(player -> 
-                player.sendMessage(Text.literal("[PerformanceTracker] " + metrics.toChatString()))
+                player.sendMessage(TranslationService.chatWithMetrics(metrics.toChatString()))
             );
         }
 
