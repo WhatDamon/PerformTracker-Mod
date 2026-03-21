@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -56,6 +57,18 @@ public class TrackerController {
         instance = this;
 
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
+        ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
+    }
+    
+    private void onServerStopping(MinecraftServer server) {
+        if (isRunning()) {
+            LOGGER.info("Server stopping, auto-stopping performance tracker");
+            try {
+                stop();
+            } catch (Exception e) {
+                LOGGER.error("Failed to stop tracker on server shutdown", e);
+            }
+        }
     }
 
     public static TrackerController getInstance() {
@@ -86,6 +99,8 @@ public class TrackerController {
 
         state.set(TrackerState.RUNNING);
         active.set(true);
+        
+        serverCollector.reset();
         
         LOGGER.info("Performance tracking started, sessionId: {}", sessionId);
     }

@@ -49,6 +49,15 @@ public class ServerTickCollector {
 
     /** Timestamp when current tick started */
     private volatile long tickStartTime = 0;
+    
+    /** Whether we have recorded a valid tick (to skip first-tick anomaly) */
+    private volatile boolean hasValidTick = false;
+    
+    /** Expected tick duration in milliseconds (50ms for 20 TPS) */
+    private static final double EXPECTED_TICK_MS = 50.0;
+    
+    /** Max acceptable tick duration before considering it a pause/resume (3x expected) */
+    private static final double MAX_ACCEPTABLE_TICK_MS = EXPECTED_TICK_MS * 3;
 
     /** Total tick duration counter (for long-term average fallback) */
     private final ThreadSafeCounter totalDurationCounter = new ThreadSafeCounter();
@@ -76,6 +85,13 @@ public class ServerTickCollector {
         // Calculate tick duration
         long currentTime = System.nanoTime();
         long tickDuration = currentTime - tickStartTime;
+        double tickDurationMs = tickDuration / NANOS_TO_MILLIS;
+
+        // Skip outliers (likely pause/resume) - don't record abnormally long ticks
+        if (tickDurationMs > MAX_ACCEPTABLE_TICK_MS) {
+            tickStartTime = currentTime;
+            return;
+        }
 
         // Store in circular buffer
         int index = bufferIndex.getAndIncrement() % WINDOW_SIZE;
@@ -98,6 +114,7 @@ public class ServerTickCollector {
 
         // Record start time for next tick
         tickStartTime = currentTime;
+        hasValidTick = true;
     }
 
     /**
@@ -116,26 +133,38 @@ public class ServerTickCollector {
         return Math.min(TARGET_TPS, 1000.0 / mspt);
     }
 
-    /**
-     * Returns the current MSPT (Milliseconds Per Tick).
-     *
-     * <p>MSPT is calculated as the rolling average of the last 100 tick
-     * durations. If no ticks have been recorded yet, returns 0.0.
-     *
-     * @return the average tick duration in milliseconds (0.0 if no ticks recorded)
-     */
     public double getMspt() {
+        if (!hasValidTick) {
+            return 1000.0 / TARGET_TPS;
+        }
+        
         int count = tickCount.get();
         if (count == 0) {
-            return 0.0;
+            return 1000.0 / TARGET_TPS;
         }
 
-        // Calculate average from the running sum
         long sum = durationSum.get();
         int actualCount = Math.min(count, WINDOW_SIZE);
+        double windowMspt = (sum / actualCount) / NANOS_TO_MILLIS;
 
-        // Convert from nanoseconds to milliseconds
-        return (sum / actualCount) / NANOS_TO_MILLIS;
+        double tpsBasedMspt = 1000.0 / getTpsFromWindow(actualCount, sum);
+
+        if (windowMspt > tpsBasedMspt * 1.5 && tpsBasedMspt > 0) {
+            return tpsBasedMspt;
+        }
+
+        return windowMspt;
+    }
+    
+    private double getTpsFromWindow(int count, long sum) {
+        if (count == 0 || sum == 0) {
+            return TARGET_TPS;
+        }
+        double mspt = (sum / count) / NANOS_TO_MILLIS;
+        if (mspt <= 0) {
+            return TARGET_TPS;
+        }
+        return Math.min(TARGET_TPS, 1000.0 / mspt);
     }
 
     /**
@@ -174,7 +203,8 @@ public class ServerTickCollector {
         durationSum.set(0);
         totalDurationCounter.reset();
         tickCounter.reset();
-        tickStartTime = 0;
+        tickStartTime = System.nanoTime();
+        hasValidTick = false;
     }
 
     /**
