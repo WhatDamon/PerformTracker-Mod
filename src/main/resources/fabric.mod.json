@@ -24,13 +24,6 @@
 			"org.damon233.performtrackermod.config.PerformTrackerModMenuIntegration"
 		]
 	},
-	"mixins": [
-		"performtracker.mixins.json",
-		{
-			"config": "performtracker.client.mixins.json",
-			"environment": "client"
-		}
-	],
 	"depends": {
 		"fabricloader": ">=0.18.4",
 		"minecraft": "~1.21.11",
