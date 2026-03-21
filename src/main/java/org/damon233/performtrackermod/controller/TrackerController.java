@@ -11,21 +11,18 @@ import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.collector.ServerTickCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
+import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
 import org.damon233.performtrackermod.utils.CsvFileWriter;
 import org.damon233.performtrackermod.utils.TranslationService;
 
 public class TrackerController {
-    private static final String CSV_DIRECTORY = "performance_data";
     private static final String CSV_BASENAME = "performance";
     private static final String CSV_STATUS_FINAL = "FINAL";
-
-    private static final int DEFAULT_OUTPUT_INTERVAL_TICKS = 100;
 
     private final ServerTickCollector serverCollector;
     private IFpsProvider fpsProvider;
     private final AtomicReference<TrackerState> state;
-    private final AtomicInteger outputIntervalTicks;
     private final AtomicBoolean active;
 
     private CsvFileWriter csvWriter;
@@ -39,7 +36,6 @@ public class TrackerController {
         this.serverCollector = serverCollector;
         this.fpsProvider = fpsProvider;
         this.state = new AtomicReference<>(TrackerState.IDLE);
-        this.outputIntervalTicks = new AtomicInteger(DEFAULT_OUTPUT_INTERVAL_TICKS);
         this.active = new AtomicBoolean(false);
         this.tickCounter = 0;
         this.sampleCount = 0;
@@ -59,11 +55,13 @@ public class TrackerController {
             throw new IllegalStateException("error.already_running");
         }
 
-        try {
-            csvWriter = new CsvFileWriter(CSV_DIRECTORY, CSV_BASENAME);
-            csvWriter.writeHeader("fps", "tps", "mspt", "status");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to create CSV file", e);
+        if (ConfigAccess.isCsvEnabled()) {
+            try {
+                csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
+                csvWriter.writeHeader("fps", "tps", "mspt", "status");
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create CSV file", e);
+            }
         }
 
         state.set(TrackerState.RUNNING);
@@ -107,7 +105,7 @@ public class TrackerController {
 
         tickCounter++;
 
-        if (tickCounter >= outputIntervalTicks.get()) {
+        if (tickCounter >= ConfigAccess.getOutputIntervalTicks()) {
             tickCounter = 0;
             outputMetrics();
         }
@@ -117,7 +115,7 @@ public class TrackerController {
         PerformanceMetrics metrics = getMetrics();
         sampleCount++;
 
-        if (server != null) {
+        if (ConfigAccess.isChatEnabled() && server != null) {
             server.getPlayerManager().getPlayerList().forEach(player -> 
                 player.sendMessage(TranslationService.chatWithMetrics(metrics.toChatString()))
             );
@@ -137,14 +135,7 @@ public class TrackerController {
     }
 
     public int getOutputIntervalTicks() {
-        return outputIntervalTicks.get();
-    }
-
-    public void setOutputIntervalTicks(int ticks) {
-        if (ticks <= 0) {
-            throw new IllegalArgumentException("Output interval must be positive");
-        }
-        outputIntervalTicks.set(ticks);
+        return ConfigAccess.getOutputIntervalTicks();
     }
 
     public PerformanceMetrics getMetrics() {

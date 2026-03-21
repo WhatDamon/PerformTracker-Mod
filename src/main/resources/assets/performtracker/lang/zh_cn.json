@@ -10,5 +10,11 @@
   "performtracker.status.critical": "严重",
   "performtracker.command.start": "启动",
   "performtracker.command.stop": "停止",
-  "performtracker.command.description": "性能追踪命令"
+  "performtracker.command.description": "性能追踪命令",
+  "performtracker.config.title": "PerformTracker 设置",
+  "performtracker.config.category.general": "常规",
+  "performtracker.config.output_interval": "输出间隔（秒）",
+  "performtracker.config.chat_enabled": "启用聊天栏输出",
+  "performtracker.config.csv_enabled": "启用CSV导出",
+  "performtracker.config.csv_directory": "CSV输出目录"
 }

@@ -16,6 +16,12 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	maven("https://maven.shedaniel.me/") {
+		name = "Shedaniel"
+	}
+	maven("https://maven.terraformersmc.com/releases/") {
+		name = "TerraformersMC"
+	}
 }
 
 loom {
@@ -38,6 +44,13 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
 	
+	// Cloth Config API (bundled - for in-game config screen)
+	modImplementation("me.shedaniel.cloth:cloth-config-fabric:${providers.gradleProperty("cloth_config_version").get()}") {
+		exclude(group = "net.fabricmc.fabric-api")
+	}
+	
+	// Mod Menu API (compile-only - for config screen integration)
+	modCompileOnly("com.terraformersmc:modmenu:${providers.gradleProperty("modmenu_version").get()}")
 }
 
 tasks.processResources {

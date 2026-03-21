@@ -10,5 +10,11 @@
   "performtracker.status.critical": "CRITICAL",
   "performtracker.command.start": "start",
   "performtracker.command.stop": "stop",
-  "performtracker.command.description": "Performance tracking commands"
+  "performtracker.command.description": "Performance tracking commands",
+  "performtracker.config.title": "PerformTracker Settings",
+  "performtracker.config.category.general": "General",
+  "performtracker.config.output_interval": "Output Interval (seconds)",
+  "performtracker.config.chat_enabled": "Enable Chat Output",
+  "performtracker.config.csv_enabled": "Enable CSV Export",
+  "performtracker.config.csv_directory": "CSV Output Directory"
 }

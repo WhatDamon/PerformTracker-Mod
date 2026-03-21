@@ -3,15 +3,14 @@
 	"id": "performtracker",
 	"version": "${version}",
 	"name": "PerformTracker",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "A Simple Performance Tracker",
 	"authors": [
-		"Me!"
+		"WhatDamon"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/WhatDamon/PerformTracker-Mod"
 	},
-	"license": "CC0-1.0",
+	"license": "Apache 2.0",
 	"icon": "assets/performtracker/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -20,6 +19,9 @@
 		],
 		"client": [
 			"org.damon233.performtrackermod.PerformTrackerClient"
+		],
+		"modmenu": [
+			"org.damon233.performtrackermod.config.PerformTrackerModMenuIntegration"
 		]
 	},
 	"mixins": [
@@ -34,5 +36,8 @@
 		"minecraft": "~1.21.11",
 		"java": ">=21",
 		"fabric-api": "*"
-	}
+	},
+	"optionalDependencies": [
+		"cloth-config"
+	]
 }
