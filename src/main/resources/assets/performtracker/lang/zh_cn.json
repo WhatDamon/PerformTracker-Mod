@@ -13,8 +13,11 @@
   "performtracker.command.description": "性能追踪命令",
   "performtracker.config.title": "PerformTracker 设置",
   "performtracker.config.category.general": "常规",
+  "performtracker.config.category.network": "网络",
   "performtracker.config.output_interval": "输出间隔（秒）",
   "performtracker.config.chat_enabled": "启用聊天栏输出",
   "performtracker.config.csv_enabled": "启用CSV导出",
-  "performtracker.config.csv_directory": "CSV输出目录"
+  "performtracker.config.csv_directory": "CSV输出目录",
+  "performtracker.config.network_enabled": "启用网络传输",
+  "performtracker.config.network_url": "HTTP 端点地址"
 }

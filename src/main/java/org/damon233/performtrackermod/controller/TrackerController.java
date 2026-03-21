@@ -1,6 +1,9 @@
 package org.damon233.performtrackermod.controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,10 +16,15 @@ import org.damon233.performtrackermod.collector.ServerTickCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
+import org.damon233.performtrackermod.network.HttpSender;
+import org.damon233.performtrackermod.network.JsonFormatter;
 import org.damon233.performtrackermod.utils.CsvFileWriter;
 import org.damon233.performtrackermod.utils.TranslationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TrackerController {
+    private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
     private static final String CSV_BASENAME = "performance";
     private static final String CSV_STATUS_FINAL = "FINAL";
 
@@ -26,6 +34,8 @@ public class TrackerController {
     private final AtomicBoolean active;
 
     private CsvFileWriter csvWriter;
+    private HttpSender httpSender;
+    private String sessionId;
     private int tickCounter;
     private int sampleCount;
     private MinecraftServer server;
@@ -40,6 +50,8 @@ public class TrackerController {
         this.tickCounter = 0;
         this.sampleCount = 0;
         this.csvWriter = null;
+        this.httpSender = null;
+        this.sessionId = null;
         this.server = null;
         instance = this;
 
@@ -55,6 +67,8 @@ public class TrackerController {
             throw new IllegalStateException("error.already_running");
         }
 
+        this.sessionId = generateSessionId();
+
         if (ConfigAccess.isCsvEnabled()) {
             try {
                 csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
@@ -64,8 +78,16 @@ public class TrackerController {
             }
         }
 
+        if (ConfigAccess.isNetworkEnabled()) {
+            httpSender = new HttpSender();
+            httpSender.initialize(ConfigAccess.getNetworkUrl());
+            httpSender.start();
+        }
+
         state.set(TrackerState.RUNNING);
         active.set(true);
+        
+        LOGGER.info("Performance tracking started, sessionId: {}", sessionId);
     }
 
     public synchronized void stop() {
@@ -86,14 +108,28 @@ public class TrackerController {
             csvWriter = null;
         }
 
+        if (httpSender != null) {
+            httpSender.stop();
+            httpSender = null;
+        }
+
+        LOGGER.info("Performance tracking stopped, samples: {}", sampleCount);
+        
         state.set(TrackerState.IDLE);
         tickCounter = 0;
         sampleCount = 0;
+        sessionId = null;
 
         serverCollector.reset();
         if (fpsProvider != null) {
             fpsProvider.reset();
         }
+    }
+    
+    private String generateSessionId() {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String uuid = UUID.randomUUID().toString().substring(0, 6);
+        return timestamp + "_" + uuid;
     }
 
     private void onServerTick(MinecraftServer server) {
@@ -114,6 +150,7 @@ public class TrackerController {
     private void outputMetrics() {
         PerformanceMetrics metrics = getMetrics();
         sampleCount++;
+        long timestamp = System.currentTimeMillis();
 
         if (ConfigAccess.isChatEnabled() && server != null) {
             server.getPlayerManager().getPlayerList().forEach(player -> 
@@ -127,6 +164,11 @@ public class TrackerController {
             } catch (IOException e) {
                 // Silently fail - don't disrupt tracking
             }
+        }
+
+        if (httpSender != null && sessionId != null) {
+            String json = JsonFormatter.formatMetrics(timestamp, sessionId, true, sampleCount, metrics);
+            httpSender.send(json);
         }
     }
 

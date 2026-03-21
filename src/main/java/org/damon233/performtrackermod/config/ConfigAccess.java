@@ -2,7 +2,6 @@ package org.damon233.performtrackermod.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,13 +14,14 @@ import java.nio.file.Path;
 
 public class ConfigAccess {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
-    private static final String MOD_ID = "performtracker";
     private static final String CONFIG_FILE_NAME = "performtracker.json";
     
     private static final int DEFAULT_OUTPUT_INTERVAL_SECONDS = 5;
     private static final boolean DEFAULT_CHAT_ENABLED = true;
     private static final boolean DEFAULT_CSV_ENABLED = true;
     private static final String DEFAULT_CSV_DIRECTORY = "performance_data";
+    private static final boolean DEFAULT_NETWORK_ENABLED = false;
+    private static final String DEFAULT_NETWORK_URL = "http://localhost:31415/api/metrics";
     
     private static ConfigData configData;
     private static boolean initialized = false;
@@ -31,6 +31,8 @@ public class ConfigAccess {
         boolean chatEnabled = DEFAULT_CHAT_ENABLED;
         boolean csvEnabled = DEFAULT_CSV_ENABLED;
         String csvDirectory = DEFAULT_CSV_DIRECTORY;
+        boolean networkEnabled = DEFAULT_NETWORK_ENABLED;
+        String networkUrl = DEFAULT_NETWORK_URL;
     }
     
     /**
@@ -55,6 +57,10 @@ public class ConfigAccess {
                 ConfigData loaded = gson.fromJson(content, ConfigData.class);
                 if (loaded != null) {
                     configData = loaded;
+                    // Ensure all fields exist in old configs
+                    if (configData.networkUrl == null) {
+                        configData.networkUrl = DEFAULT_NETWORK_URL;
+                    }
                     LOGGER.info("Loaded config from {}", configFile);
                     return;
                 }
@@ -123,6 +129,20 @@ public class ConfigAccess {
         return DEFAULT_CSV_DIRECTORY;
     }
     
+    public static boolean isNetworkEnabled() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            return configData != null ? configData.networkEnabled : DEFAULT_NETWORK_ENABLED;
+        }
+        return DEFAULT_NETWORK_ENABLED;
+    }
+    
+    public static String getNetworkUrl() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            return configData != null ? configData.networkUrl : DEFAULT_NETWORK_URL;
+        }
+        return DEFAULT_NETWORK_URL;
+    }
+    
     @Environment(EnvType.CLIENT)
     public static void setOutputIntervalSeconds(int seconds) {
         if (configData != null) {
@@ -151,6 +171,22 @@ public class ConfigAccess {
     public static void setCsvDirectory(String directory) {
         if (configData != null) {
             configData.csvDirectory = (directory != null && !directory.isBlank()) ? directory : DEFAULT_CSV_DIRECTORY;
+            save();
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public static void setNetworkEnabled(boolean enabled) {
+        if (configData != null) {
+            configData.networkEnabled = enabled;
+            save();
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public static void setNetworkUrl(String url) {
+        if (configData != null) {
+            configData.networkUrl = (url != null && !url.isBlank()) ? url : DEFAULT_NETWORK_URL;
             save();
         }
     }

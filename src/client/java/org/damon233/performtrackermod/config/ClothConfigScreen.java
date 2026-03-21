@@ -46,6 +46,22 @@ public class ClothConfigScreen {
                 .setSaveConsumer(ConfigAccess::setCsvDirectory)
                 .build());
         
+        ConfigCategory network = builder.getOrCreateCategory(Text.translatable("performtracker.config.category.network"));
+        
+        network.addEntry(entryBuilder.startBooleanToggle(
+                Text.translatable("performtracker.config.network_enabled"),
+                ConfigAccess.isNetworkEnabled())
+                .setDefaultValue(false)
+                .setSaveConsumer(ConfigAccess::setNetworkEnabled)
+                .build());
+        
+        network.addEntry(entryBuilder.startTextField(
+                Text.translatable("performtracker.config.network_url"),
+                ConfigAccess.getNetworkUrl())
+                .setDefaultValue("http://localhost:31415/api/metrics")
+                .setSaveConsumer(ConfigAccess::setNetworkUrl)
+                .build());
+        
         return builder.build();
     }
 }
