@@ -15,6 +15,8 @@ public class PerformTrackerClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		LOGGER.info("PerformTrackerClient initializing...");
 		
+		ConfigAccess.init();
+		
 		clientTickCollector = new ClientTickCollector();
 		PerformTracker.setFpsProvider(clientTickCollector);
 		

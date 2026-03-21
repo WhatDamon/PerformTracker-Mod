@@ -3,7 +3,7 @@
 	"id": "performtracker",
 	"version": "${version}",
 	"name": "PerformTracker",
-	"description": "A Simple Performance Tracker",
+	"description": "Track game performance metrics",
 	"authors": [
 		"WhatDamon"
 	],
