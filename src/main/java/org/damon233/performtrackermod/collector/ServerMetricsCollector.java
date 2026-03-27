@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
-public class ServerTickCollector {
+public class ServerMetricsCollector {
     private static final double TARGET_TPS = 20.0;
     private static final double NANOS_TO_SECONDS = 1_000_000_000.0;
     private static final long WINDOW_SECONDS = 5;
@@ -14,7 +14,7 @@ public class ServerTickCollector {
     private final ConcurrentLinkedDeque<Long> tickTimes = new ConcurrentLinkedDeque<>();
     private final AtomicBoolean enabled = new AtomicBoolean(true);
 
-    public ServerTickCollector() {
+    public ServerMetricsCollector() {
         ServerTickEvents.END_SERVER_TICK.register(this::onEndServerTick);
     }
 

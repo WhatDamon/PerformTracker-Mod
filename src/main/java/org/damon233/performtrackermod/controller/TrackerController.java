@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 
-import org.damon233.performtrackermod.collector.ServerTickCollector;
+import org.damon233.performtrackermod.collector.ServerMetricsCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
@@ -27,7 +27,7 @@ public class TrackerController {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
     private static final String CSV_BASENAME = "performance";
 
-    private final ServerTickCollector serverCollector;
+    private final ServerMetricsCollector serverCollector;
     private IFpsProvider fpsProvider;
     private final AtomicReference<TrackerState> state;
     private final AtomicBoolean active;
@@ -42,7 +42,7 @@ public class TrackerController {
 
     private static TrackerController instance;
 
-    public TrackerController(ServerTickCollector serverCollector, IFpsProvider fpsProvider) {
+    public TrackerController(ServerMetricsCollector serverCollector, IFpsProvider fpsProvider) {
         this.serverCollector = serverCollector;
         this.fpsProvider = fpsProvider;
         this.state = new AtomicReference<>(TrackerState.IDLE);

@@ -3,7 +3,7 @@ package org.damon233.performtrackermod.collector;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 
-public class ClientTickCollector implements IFpsProvider {
+public class ClientMetricsCollector implements IFpsProvider {
     
     private static final int DEFAULT_WINDOW_SIZE = 60;
     
@@ -12,11 +12,11 @@ public class ClientTickCollector implements IFpsProvider {
     private int sampleCount;
     private volatile boolean enabled;
     
-    public ClientTickCollector() {
+    public ClientMetricsCollector() {
         this(DEFAULT_WINDOW_SIZE);
     }
     
-    public ClientTickCollector(int windowSize) {
+    public ClientMetricsCollector(int windowSize) {
         this.fpsWindow = new int[Math.max(1, windowSize)];
         this.windowIndex = 0;
         this.sampleCount = 0;

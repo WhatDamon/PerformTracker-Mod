@@ -4,12 +4,12 @@ import net.fabricmc.api.ClientModInitializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.damon233.performtrackermod.collector.ClientTickCollector;
+import org.damon233.performtrackermod.collector.ClientMetricsCollector;
 import org.damon233.performtrackermod.config.ConfigAccess;
 
 public class PerformTrackerClient implements ClientModInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PerformTracker.MOD_ID);
-	private static ClientTickCollector clientTickCollector;
+	private static ClientMetricsCollector clientMetricsCollector;
 
 	@Override
 	public void onInitializeClient() {
@@ -17,8 +17,8 @@ public class PerformTrackerClient implements ClientModInitializer {
 		
 		ConfigAccess.init();
 		
-		clientTickCollector = new ClientTickCollector();
-		PerformTracker.setFpsProvider(clientTickCollector);
+		clientMetricsCollector = new ClientMetricsCollector();
+		PerformTracker.setFpsProvider(clientMetricsCollector);
 		
 		LOGGER.info("PerformTracker client components ready.");
 		if (ConfigAccess.isClothConfigLoaded()) {
