@@ -5,6 +5,7 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import java.util.Optional;
 
 public class ClothConfigScreen {
     
@@ -79,10 +80,20 @@ public class ClothConfigScreen {
                 .build());
         
         network.addEntry(entryBuilder.startTextField(
-                Text.translatable("performtracker.config.network_url"),
-                ConfigAccess.getNetworkUrl())
-                .setDefaultValue("http://localhost:31415/api/metrics")
-                .setSaveConsumer(ConfigAccess::setNetworkUrl)
+                Text.translatable("performtracker.config.network_endpoint"),
+                ConfigAccess.getNetworkEndpoint())
+                .setDefaultValue("http://localhost:31415")
+                .setSaveConsumer(newValue -> {
+                    if (ConfigAccess.isValidNetworkEndpoint(newValue)) {
+                        ConfigAccess.setNetworkEndpoint(newValue);
+                    }
+                })
+                .setErrorSupplier(newValue -> {
+                    if (!ConfigAccess.isValidNetworkEndpoint(newValue)) {
+                        return Optional.of(Text.translatable("performtracker.config.network_endpoint.error"));
+                    }
+                    return Optional.empty();
+                })
                 .build());
         
         return builder.build();

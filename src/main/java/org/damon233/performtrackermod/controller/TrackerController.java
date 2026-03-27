@@ -243,8 +243,10 @@ public class TrackerController {
         }
 
         if (httpSender != null && sessionId != null) {
-            String json = JsonFormatter.formatMetrics(timestamp, sessionId, true, sampleCount, metrics,
-                ConfigAccess.isCollectFps(), ConfigAccess.isCollectTps(), ConfigAccess.isCollectMspt());
+            String json = JsonFormatter.formatMetrics(timestamp, sessionId, sampleCount,
+                ConfigAccess.isCollectFps(), metrics.fps(),
+                ConfigAccess.isCollectTps(), metrics.tps(),
+                ConfigAccess.isCollectMspt(), metrics.mspt());
             httpSender.send(json);
         }
     }

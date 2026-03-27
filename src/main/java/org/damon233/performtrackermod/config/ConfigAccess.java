@@ -15,13 +15,15 @@ import java.nio.file.Path;
 public class ConfigAccess {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
     private static final String CONFIG_FILE_NAME = "performtracker.json";
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     
     private static final int DEFAULT_OUTPUT_INTERVAL_SECONDS = 5;
     private static final boolean DEFAULT_CHAT_ENABLED = true;
     private static final boolean DEFAULT_CSV_ENABLED = true;
     private static final String DEFAULT_CSV_DIRECTORY = "performance_data";
     private static final boolean DEFAULT_NETWORK_ENABLED = false;
-    private static final String DEFAULT_NETWORK_URL = "http://localhost:31415/api/metrics";
+    private static final String DEFAULT_NETWORK_ENDPOINT = "http://localhost:31415";
+    private static final String API_PATH = "/api/metrics";
     private static final boolean DEFAULT_COLLECT_FPS = true;
     private static final boolean DEFAULT_COLLECT_TPS = true;
     private static final boolean DEFAULT_COLLECT_MSPT = true;
@@ -35,7 +37,7 @@ public class ConfigAccess {
         boolean csvEnabled = DEFAULT_CSV_ENABLED;
         String csvDirectory = DEFAULT_CSV_DIRECTORY;
         boolean networkEnabled = DEFAULT_NETWORK_ENABLED;
-        String networkUrl = DEFAULT_NETWORK_URL;
+        String networkEndpoint = DEFAULT_NETWORK_ENDPOINT;
         boolean collectFps = DEFAULT_COLLECT_FPS;
         boolean collectTps = DEFAULT_COLLECT_TPS;
         boolean collectMspt = DEFAULT_COLLECT_MSPT;
@@ -59,13 +61,11 @@ public class ConfigAccess {
         if (Files.exists(configFile)) {
             try {
                 String content = Files.readString(configFile);
-                Gson gson = new Gson();
-                ConfigData loaded = gson.fromJson(content, ConfigData.class);
+                ConfigData loaded = GSON.fromJson(content, ConfigData.class);
                 if (loaded != null) {
                     configData = loaded;
-                    // Ensure all fields exist in old configs
-                    if (configData.networkUrl == null) {
-                        configData.networkUrl = DEFAULT_NETWORK_URL;
+                    if (configData.networkEndpoint == null) {
+                        configData.networkEndpoint = DEFAULT_NETWORK_ENDPOINT;
                     }
                     LOGGER.info("Loaded config from {}", configFile);
                     return;
@@ -94,8 +94,7 @@ public class ConfigAccess {
         Path configFile = configDir.resolve(CONFIG_FILE_NAME);
         
         try {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String content = gson.toJson(configData);
+            String content = GSON.toJson(configData);
             Files.writeString(configFile, content);
             LOGGER.debug("Saved config to {}", configFile);
         } catch (IOException e) {
@@ -142,11 +141,15 @@ public class ConfigAccess {
         return DEFAULT_NETWORK_ENABLED;
     }
     
-    public static String getNetworkUrl() {
+    public static String getNetworkEndpoint() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.networkUrl : DEFAULT_NETWORK_URL;
+            return configData != null ? configData.networkEndpoint : DEFAULT_NETWORK_ENDPOINT;
         }
-        return DEFAULT_NETWORK_URL;
+        return DEFAULT_NETWORK_ENDPOINT;
+    }
+    
+    public static String getNetworkUrl() {
+        return getNetworkEndpoint() + API_PATH;
     }
     
     public static boolean isCollectFps() {
@@ -211,11 +214,30 @@ public class ConfigAccess {
     }
     
     @Environment(EnvType.CLIENT)
-    public static void setNetworkUrl(String url) {
+    public static void setNetworkEndpoint(String endpoint) {
         if (configData != null) {
-            configData.networkUrl = (url != null && !url.isBlank()) ? url : DEFAULT_NETWORK_URL;
+            String validated = validateNetworkEndpoint(endpoint);
+            configData.networkEndpoint = validated != null ? validated : DEFAULT_NETWORK_ENDPOINT;
             save();
         }
+    }
+    
+    public static String validateNetworkEndpoint(String endpoint) {
+        if (endpoint == null || endpoint.isBlank()) {
+            return null;
+        }
+        String trimmed = endpoint.trim();
+        if (!trimmed.matches("^https?://[\\w\\-]+(\\.[\\w\\-]+)*(:\\d+)?$")) {
+            return null;
+        }
+        if (!trimmed.endsWith("/")) {
+            trimmed = trimmed + "/";
+        }
+        return trimmed;
+    }
+    
+    public static boolean isValidNetworkEndpoint(String endpoint) {
+        return validateNetworkEndpoint(endpoint) != null;
     }
     
     @Environment(EnvType.CLIENT)

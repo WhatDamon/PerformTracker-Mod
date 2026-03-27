@@ -3,179 +3,172 @@
 Test server for PerformTracker network transmission testing.
 
 Usage:
-    python3 test_server.py                    # Default port 8080
+    python3 test_server.py                    # Default port 31415
     python3 test_server.py --port 9000        # Custom port
-    python3 test_server.py --pretty            # Pretty print JSON
-    python3 test_server.py --save logs/        # Save to file
+    python3 test_server.py --save logs/       # Save to file
 """
 
 import argparse
 import json
-import sys
 import os
+import socket
+import threading
 from datetime import datetime
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
 
-class MetricsHandler(BaseHTTPRequestHandler):
-    pretty_print = False
+class PerformTrackerHandler:
     log_dir = None
-    request_count = 0
+    sample_count = 0
     
-    def log_message(self, format, *args):
-        pass
-    
-    def do_GET(self):
-        parsed = urlparse(self.path)
-        if parsed.path == '/':
-            self.send_html()
-        elif parsed.path == '/stats':
-            self.send_stats()
-        else:
-            self.send_error(404)
-    
-    def do_POST(self):
-        if self.path != '/api/metrics':
-            self.send_error(404, "Not Found")
-            return
-        
+    @classmethod
+    def handle(cls, client_socket, client_address):
         try:
-            content_length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(content_length)
+            client_socket.settimeout(30)
             
-            if not body:
-                self.send_error(400, "Empty body")
-                return
-            
-            data = json.loads(body)
-            MetricsHandler.request_count += 1
-            
-            self.process_metrics(data)
-            
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps({'status': 'ok', 'received': MetricsHandler.request_count}).encode())
-            
-        except json.JSONDecodeError as e:
-            self.send_error(400, f"Invalid JSON: {e}")
+            while True:
+                try:
+                    header_data = b''
+                    while b'\r\n\r\n' not in header_data:
+                        chunk = client_socket.recv(1)
+                        if not chunk:
+                            return
+                        header_data += chunk
+                    
+                    header_str = header_data.decode('utf-8')
+                    headers = {}
+                    
+                    for line in header_str.split('\r\n'):
+                        if ':' in line:
+                            key, value = line.split(':', 1)
+                            headers[key.strip().lower()] = value.strip()
+                    
+                    content_length = int(headers.get('content-length', 0))
+                    
+                    if content_length > 0:
+                        body = b''
+                        while len(body) < content_length:
+                            chunk = client_socket.recv(content_length - len(body))
+                            if not chunk:
+                                break
+                            body += chunk
+                        
+                        cls.process_body(body)
+                    
+                    keep_alive = headers.get('connection', '').lower() != 'close'
+                    response = cls.build_response(keep_alive)
+                    client_socket.sendall(response)
+                    
+                    if not keep_alive:
+                        return
+                        
+                except socket.timeout:
+                    return
+                    
         except Exception as e:
-            self.send_error(500, str(e))
+            pass
+        finally:
+            try:
+                client_socket.close()
+            except:
+                pass
     
-    def process_metrics(self, data):
-        msg_type = data.get('type', 'unknown')
+    @classmethod
+    def build_response(cls, keep_alive):
+        body = b'{"status":"ok"}'
+        response = (
+            b'HTTP/1.1 200 OK\r\n'
+            b'Content-Type: application/json\r\n'
+            b'Content-Length: 11\r\n'
+            b'Access-Control-Allow-Origin: *\r\n'
+        )
+        if keep_alive:
+            response += b'Connection: keep-alive\r\n'
+        else:
+            response += b'Connection: close\r\n'
+        response += b'\r\n' + body
+        return response
+    
+    @classmethod
+    def process_body(cls, body):
+        try:
+            data = json.loads(body.decode('utf-8'))
+            cls.sample_count += 1
+            cls.print_metrics(data)
+            
+            if cls.log_dir:
+                cls.save_log(data)
+        except json.JSONDecodeError:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Invalid JSON: {body.decode('utf-8')[:50]}...")
+    
+    @classmethod
+    def print_metrics(cls, data):
         session_id = data.get('sessionId', 'N/A')
-        timestamp = data.get('unixTimestamp', 0)
-        session_active = data.get('sessionActive', None)
+        timestamp = data.get('timestamp', 0)
+        sample_number = data.get('sampleNumber', 0)
         
-        output = []
-        output.append("=" * 60)
-        output.append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg_type.upper()}")
-        output.append(f"Session ID: {session_id}")
+        print("=" * 60)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] METRICS (total: {cls.sample_count})")
+        print(f"Session ID: {session_id}")
+        print(f"Sample #: {sample_number}")
         
         if timestamp:
-            dt = datetime.fromtimestamp(timestamp)
-            output.append(f"Timestamp: {dt.strftime('%Y-%m-%d %H:%M:%S')}")
-        
-        if session_active is not None:
-            output.append(f"Session Active: {session_active}")
+            dt = datetime.fromtimestamp(timestamp / 1000)
+            print(f"Timestamp: {dt.strftime('%Y-%m-%d %H:%M:%S')}")
         
         if 'data' in data:
             d = data['data']
-            output.append("\nMetrics:")
-            output.append(f"  FPS:   {d.get('fps', 'N/A')}")
-            output.append(f"  TPS:   {d.get('tps', 'N/A')}")
-            output.append(f"  MSPT:  {d.get('mspt', 'N/A')}")
-            output.append(f"  Status: {d.get('status', 'N/A')}")
+            print("\nMetrics:")
+            if 'fps' in d:
+                print(f"  FPS:   {d.get('fps', 'N/A')}")
+            if 'tps' in d:
+                print(f"  TPS:   {d.get('tps', 'N/A')}")
+            if 'mspt' in d:
+                print(f"  MSPT:  {d.get('mspt', 'N/A')}")
         
-        output.append("=" * 60)
-        
-        line = '\n'.join(output)
-        print(line)
-        
-        if self.log_dir:
-            self.save_log(data)
+        print("=" * 60)
     
-    def save_log(self, data):
-        if not self.log_dir:
+    @classmethod
+    def save_log(cls, data):
+        if not cls.log_dir:
             return
-        os.makedirs(self.log_dir, exist_ok=True)
-        filename = f"{self.log_dir}/metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        os.makedirs(cls.log_dir, exist_ok=True)
+        filename = f"{cls.log_dir}/metrics_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
         with open(filename, 'w') as f:
             json.dump(data, f, indent=2)
+
+
+def start_server(host, port):
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind((host, port))
+    server_socket.listen(5)
+    server_socket.settimeout(1)
     
-    def send_html(self):
-        html = f"""<!DOCTYPE html>
-<html>
-<head>
-    <title>PerformTracker Test Server</title>
-    <style>
-        body {{ font-family: monospace; background: #1a1a2e; color: #eee; padding: 20px; }}
-        h1 {{ color: #00d9ff; }}
-        .stats {{ background: #16213e; padding: 15px; border-radius: 8px; margin: 20px 0; }}
-        .ok {{ color: #00ff88; }}
-        .endpoint {{ color: #ffd700; }}
-        pre {{ background: #0f0f23; padding: 15px; border-radius: 5px; overflow-x: auto; }}
-        code {{ color: #ff6b6b; }}
-    </style>
-</head>
-<body>
-    <h1>PerformTracker Test Server</h1>
-    <div class="stats">
-        <p>Requests received: <span class="ok">{MetricsHandler.request_count}</span></p>
-        <p>Server time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-    </div>
-    <h2>Expected Endpoint</h2>
-    <p class="endpoint">POST <code>/api/metrics</code></p>
-    <h2>Example Request Body</h2>
-    <pre>{json.dumps({
-        "type": "performance_metrics",
-        "timestamp": 1710950400000,
-        "unixTimestamp": 1710950400,
-        "sessionId": "20240320_103200_a1b2c3",
-        "sessionActive": True,
-        "sampleNumber": 1,
-        "data": {
-            "fps": 60.0,
-            "tps": 20.0,
-            "mspt": 0.50,
-            "status": "OK"
-        }
-    }, indent=2)}</pre>
-</body>
-</html>"""
-        
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/html')
-        self.end_headers()
-        self.wfile.write(html.encode())
+    print(f"Server listening on {host}:{port}")
     
-    def send_stats(self):
-        stats = {
-            'request_count': MetricsHandler.request_count,
-            'server_time': datetime.now().isoformat()
-        }
-        
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps(stats).encode())
+    running = True
+    while running:
+        try:
+            client_socket, client_address = server_socket.accept()
+            thread = threading.Thread(target=PerformTrackerHandler.handle, args=(client_socket, client_address))
+            thread.daemon = True
+            thread.start()
+        except socket.timeout:
+            continue
+        except KeyboardInterrupt:
+            running = False
+    
+    server_socket.close()
 
 
 def main():
     parser = argparse.ArgumentParser(description='PerformTracker Test Server')
     parser.add_argument('--port', '-p', type=int, default=31415, help='Port to listen on (default: 31415)')
-    parser.add_argument('--pretty', action='store_true', help='Pretty print received JSON')
     parser.add_argument('--save', '-s', metavar='DIR', help='Save received data to directory')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind (default: 0.0.0.0)')
     
     args = parser.parse_args()
     
-    MetricsHandler.pretty_print = args.pretty
-    MetricsHandler.log_dir = args.save
-    
-    server = HTTPServer((args.host, args.port), MetricsHandler)
+    PerformTrackerHandler.log_dir = args.save
     
     print(f"""
 ╔══════════════════════════════════════════════════════════╗
@@ -183,12 +176,13 @@ def main():
 ╠══════════════════════════════════════════════════════════╣
 ║  URL:      http://localhost:{args.port}                        ║
 ║  Endpoint: POST /api/metrics                            ║
-║  Web UI:   http://localhost:{args.port}/                        ║
-║  Stats:    http://localhost:{args.port}/stats                   ║
 ╠══════════════════════════════════════════════════════════╣
 ║  Config in Mod Menu:                                    ║
-║    Enable Network Transmission: ✓                        ║
-║    HTTP Endpoint URL: http://localhost:{args.port}/api/metrics ║
+║    Enable Network Transmission: ✓                       ║
+║    HTTP Endpoint URL: http://localhost:{args.port}/api/metrics  ║
+╠══════════════════════════════════════════════════════════╣
+║  Keep-Alive: Enabled                                   ║
+║  Threading: Enabled (handles concurrent requests)      ║
 ╠══════════════════════════════════════════════════════════╣
 ║  Press Ctrl+C to stop                                   ║
 ╚══════════════════════════════════════════════════════════╝
@@ -198,10 +192,9 @@ def main():
         print(f"Saving received data to: {args.save}/\n")
     
     try:
-        server.serve_forever()
+        start_server(args.host, args.port)
     except KeyboardInterrupt:
         print("\n\nShutting down...")
-        server.shutdown()
 
 
 if __name__ == '__main__':
