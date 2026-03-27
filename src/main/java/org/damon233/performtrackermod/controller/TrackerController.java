@@ -86,14 +86,7 @@ public class TrackerController {
         if (ConfigAccess.isCsvEnabled()) {
             try {
                 csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
-                StringBuilder header = new StringBuilder();
-                if (ConfigAccess.isCollectFps()) header.append("fps,");
-                if (ConfigAccess.isCollectTps()) header.append("tps,");
-                if (ConfigAccess.isCollectMspt()) header.append("mspt,");
-                if (header.length() > 0) {
-                    header.setLength(header.length() - 1);
-                }
-                csvWriter.writeHeader(header.toString().split(","));
+                csvWriter.writeHeader(buildCsvHeaders());
             } catch (IOException e) {
                 throw new RuntimeException("Failed to create CSV file", e);
             }
@@ -160,12 +153,22 @@ public class TrackerController {
                (ConfigAccess.isCollectMspt() ? 4 : 0);
     }
     
+    private String[] buildCsvHeaders() {
+        StringBuilder sb = new StringBuilder();
+        if (ConfigAccess.isCollectFps()) sb.append("fps,");
+        if (ConfigAccess.isCollectTps()) sb.append("tps,");
+        if (ConfigAccess.isCollectMspt()) sb.append("mspt,");
+        if (sb.length() > 0) sb.setLength(sb.length() - 1);
+        return sb.toString().split(",");
+    }
+    
     private void restartOutputs() {
+        String oldFilePath = csvWriter != null ? csvWriter.getFilePath().toString() : null;
+        
         if (csvWriter != null) {
             try {
                 csvWriter.close();
-            } catch (IOException e) {
-                // ignore
+            } catch (IOException ignored) {
             }
             csvWriter = null;
         }
@@ -174,14 +177,7 @@ public class TrackerController {
         if (csvEnabled) {
             try {
                 csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
-                StringBuilder header = new StringBuilder();
-                if (ConfigAccess.isCollectFps()) header.append("fps,");
-                if (ConfigAccess.isCollectTps()) header.append("tps,");
-                if (ConfigAccess.isCollectMspt()) header.append("mspt,");
-                if (header.length() > 0) {
-                    header.setLength(header.length() - 1);
-                }
-                csvWriter.writeHeader(header.toString().split(","));
+                csvWriter.writeHeader(buildCsvHeaders());
             } catch (IOException e) {
                 LOGGER.error("Failed to restart CSV writer", e);
             }
@@ -190,11 +186,10 @@ public class TrackerController {
         sampleCount = 0;
         
         if (ConfigAccess.isChatEnabled() && server != null) {
-            net.minecraft.text.MutableText message = csvEnabled 
-                ? TranslationService.chat("restart.csv", csvWriter.getFilePath().toString())
-                : TranslationService.chat("restart");
+            String key = csvEnabled ? "restart.csv" : "restart";
+            Object[] args = csvEnabled ? new Object[]{csvWriter.getFilePath().toString()} : new Object[]{};
             server.getPlayerManager().getPlayerList().forEach(player -> 
-                player.sendMessage(message)
+                player.sendMessage(TranslationService.chat(key, args))
             );
         }
     }
@@ -236,9 +231,8 @@ public class TrackerController {
 
         if (csvWriter != null) {
             try {
-                writeCsvRow(metrics);
-            } catch (IOException e) {
-                // Silently fail - don't disrupt tracking
+                csvWriter.writeRow(buildCsvRowValues(metrics));
+            } catch (IOException ignored) {
             }
         }
 
@@ -255,37 +249,34 @@ public class TrackerController {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         if (ConfigAccess.isCollectFps()) {
+            if (!first) sb.append(" | ");
             sb.append("FPS: ").append(String.format("%.1f", metrics.fps()));
             first = false;
         }
         if (ConfigAccess.isCollectTps()) {
             if (!first) sb.append(" | ");
-            sb.append("TPS: ").append(formatValue(metrics.tps()));
+            sb.append("TPS: ").append(PerformanceMetrics.formatValue(metrics.tps()));
             first = false;
         }
         if (ConfigAccess.isCollectMspt()) {
             if (!first) sb.append(" | ");
-            sb.append("MSPT: ").append(formatValue(metrics.mspt()));
+            sb.append("MSPT: ").append(PerformanceMetrics.formatValue(metrics.mspt()));
         }
         return sb.toString();
     }
     
-    private String formatValue(double value) {
-        if (Double.isInfinite(value)) {
-            return "\u221E";
-        }
-        return String.format("%.2f", value);
-    }
-    
-    private void writeCsvRow(PerformanceMetrics metrics) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        if (ConfigAccess.isCollectFps()) sb.append(metrics.fps()).append(",");
-        if (ConfigAccess.isCollectTps()) sb.append(metrics.tps()).append(",");
-        if (ConfigAccess.isCollectMspt()) sb.append(metrics.mspt()).append(",");
-        if (sb.length() > 0) {
-            sb.setLength(sb.length() - 1);
-        }
-        csvWriter.writeRow(sb.toString().split(","));
+    private Object[] buildCsvRowValues(PerformanceMetrics metrics) {
+        int count = 0;
+        if (ConfigAccess.isCollectFps()) count++;
+        if (ConfigAccess.isCollectTps()) count++;
+        if (ConfigAccess.isCollectMspt()) count++;
+        
+        Object[] values = new Object[count];
+        int i = 0;
+        if (ConfigAccess.isCollectFps()) values[i++] = metrics.fps();
+        if (ConfigAccess.isCollectTps()) values[i++] = metrics.tps();
+        if (ConfigAccess.isCollectMspt()) values[i++] = metrics.mspt();
+        return values;
     }
 
     public TrackerState getState() {

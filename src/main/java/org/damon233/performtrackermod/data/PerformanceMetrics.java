@@ -13,15 +13,10 @@ public record PerformanceMetrics(
         mspt = Math.max(0.0, mspt);
     }
 
-    private static String formatValue(double value) {
+    public static String formatValue(double value) {
         if (Double.isInfinite(value)) {
             return "\u221E";
         }
         return String.format("%.2f", value);
-    }
-
-    public String toChatString() {
-        return String.format("FPS: %.1f | TPS: %s | MSPT: %s", 
-            fps, formatValue(tps), formatValue(mspt));
     }
 }

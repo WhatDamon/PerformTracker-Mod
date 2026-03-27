@@ -35,14 +35,4 @@ public class TranslationService {
     public static MutableText chatWithMetrics(String metricsText) {
         return Text.translatable(PREFIX + "chat.prefix").append(" ").append(Text.literal(metricsText));
     }
-
-    public static String getStatusKey(boolean ok, boolean critical) {
-        if (ok) {
-            return "status.ok";
-        } else if (critical) {
-            return "status.critical";
-        } else {
-            return "status.lag";
-        }
-    }
 }
