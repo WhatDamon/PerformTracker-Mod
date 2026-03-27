@@ -6,7 +6,6 @@
   "performtracker.error.not_initialized": "Tracker not initialized",
   "performtracker.error.already_running": "Tracker is already running",
   "performtracker.error.not_running": "Tracker is not running",
-  "performtracker.chat.prefix": "[⚓]",
   "performtracker.command.start": "start",
   "performtracker.command.stop": "stop",
   "performtracker.command.description": "Performance tracking commands",

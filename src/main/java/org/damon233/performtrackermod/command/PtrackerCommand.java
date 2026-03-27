@@ -11,6 +11,7 @@ import net.minecraft.text.Text;
 import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.controller.TrackerController;
+import org.damon233.performtrackermod.utils.TranslationService;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -94,22 +95,25 @@ public class PtrackerCommand {
             Text name = Text.translatable(translationKey);
             Text val = value instanceof Boolean ? 
                 Text.translatable((Boolean) value ? "performtracker.config.value.true" : "performtracker.config.value.false") :
-                Text.literal(String.valueOf(value));
-            source.sendFeedback(() -> Text.translatable("performtracker.config.set.success", name, val), false);
+                Text.literal(TranslationService.colorValue(String.valueOf(value)));
+            source.sendFeedback(() -> Text.translatable("performtracker.config.set.success", 
+                Text.literal(TranslationService.colorLabel(name.getString())), val), false);
         }
         
         void sendInfo(ServerCommandSource source) {
             source.sendFeedback(() -> Text.translatable("performtracker.config.info",
-                Text.translatable(translationKey), getter.get(), defaultGetter.get()), false);
+                Text.literal(TranslationService.colorLabel(Text.translatable(translationKey).getString())), 
+                Text.literal(TranslationService.colorValue(String.valueOf(getter.get()))), 
+                Text.literal(TranslationService.colorValue(String.valueOf(defaultGetter.get())))), false);
         }
         
         void sendLine(ServerCommandSource source) {
-            Text current = getter.get() instanceof Boolean ?
-                Text.literal((Boolean) getter.get() ? "true" : "false") :
-                Text.literal(String.valueOf(getter.get()));
-            Text def = defaultGetter.get() instanceof Boolean ?
-                Text.literal((Boolean) defaultGetter.get() ? "true" : "false") :
-                Text.literal(String.valueOf(defaultGetter.get()));
+            Text current = Text.literal(TranslationService.colorValue(getter.get() instanceof Boolean ?
+                ((Boolean) getter.get() ? "true" : "false") :
+                String.valueOf(getter.get())));
+            Text def = Text.literal(TranslationService.colorValue(defaultGetter.get() instanceof Boolean ?
+                ((Boolean) defaultGetter.get() ? "true" : "false") :
+                String.valueOf(defaultGetter.get())));
             source.sendFeedback(() -> Text.translatable(translationKey).append(": ").append(current).append(" (default: ").append(def).append(")"), false);
         }
     }

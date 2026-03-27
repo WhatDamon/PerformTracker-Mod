@@ -247,23 +247,25 @@ public class TrackerController {
         boolean first = true;
         if (ConfigAccess.isCollectFps()) {
             if (!first) sb.append(" | ");
-            sb.append("FPS: ").append(String.format("%.1f", metrics.fps()));
+            sb.append(TranslationService.colorLabel("FPS: ")).append(TranslationService.colorValue(String.format("%.1f", metrics.fps())));
             first = false;
         }
         if (ConfigAccess.isCollectTps()) {
             if (!first) sb.append(" | ");
-            sb.append("TPS: ").append(PerformanceMetrics.formatValue(metrics.tps()));
+            sb.append(TranslationService.colorLabel("TPS: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.tps())));
             first = false;
         }
         if (ConfigAccess.isCollectMspt()) {
             if (!first) sb.append(" | ");
-            sb.append("MSPT: ").append(PerformanceMetrics.formatValue(metrics.mspt()));
+            sb.append(TranslationService.colorLabel("MSPT: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.mspt())));
             first = false;
         }
         if (ConfigAccess.isCollectHeap()) {
             if (!first) sb.append(" | ");
-            sb.append("Heap: ").append(PerformanceMetrics.formatMemoryMB(metrics.heapUsed()))
-              .append(" / ").append(PerformanceMetrics.formatMemoryMB(metrics.heapMax()));
+            sb.append(TranslationService.colorLabel("Heap: "))
+              .append(TranslationService.colorValue(PerformanceMetrics.formatMemoryMB(metrics.heapUsed())))
+              .append(" / ")
+              .append(TranslationService.colorValue(PerformanceMetrics.formatMemoryMB(metrics.heapMax())));
         }
         return sb.toString();
     }

@@ -6,7 +6,6 @@
   "performtracker.error.not_initialized": "追蹤器未始",
   "performtracker.error.already_running": "追蹤器方行中",
   "performtracker.error.not_running": "追蹤器未運",
-  "performtracker.chat.prefix": "[⚓]",
   "performtracker.command.start": "啟",
   "performtracker.command.stop": "止",
   "performtracker.command.description": "效能追蹤令",
