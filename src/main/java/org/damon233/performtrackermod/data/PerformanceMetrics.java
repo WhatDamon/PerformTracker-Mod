@@ -35,13 +35,16 @@ public record PerformanceMetrics(
         mspt = Math.max(0.0, mspt);
     }
 
-    /**
-     * Returns a formatted string for chat display.
-     *
-     * @return a string like "FPS: 60.0 | TPS: 20.00 | MSPT: 0.50"
-     */
+    private static String formatValue(double value) {
+        if (Double.isInfinite(value)) {
+            return "\u221E";
+        }
+        return String.format("%.2f", value);
+    }
+
     public String toChatString() {
-        return String.format("FPS: %.1f | TPS: %.2f | MSPT: %.2f", fps, tps, mspt);
+        return String.format("FPS: %.1f | TPS: %s | MSPT: %s", 
+            fps, formatValue(tps), formatValue(mspt));
     }
 
     /**

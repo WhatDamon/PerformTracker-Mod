@@ -37,7 +37,7 @@ public class TrackerController {
     private CsvFileWriter csvWriter;
     private HttpSender httpSender;
     private String sessionId;
-    private int tickCounter;
+    private long lastOutputTime;
     private int sampleCount;
     private MinecraftServer server;
 
@@ -48,7 +48,7 @@ public class TrackerController {
         this.fpsProvider = fpsProvider;
         this.state = new AtomicReference<>(TrackerState.IDLE);
         this.active = new AtomicBoolean(false);
-        this.tickCounter = 0;
+        this.lastOutputTime = 0;
         this.sampleCount = 0;
         this.csvWriter = null;
         this.httpSender = null;
@@ -131,7 +131,7 @@ public class TrackerController {
         LOGGER.info("Performance tracking stopped, samples: {}", sampleCount);
         
         state.set(TrackerState.IDLE);
-        tickCounter = 0;
+        lastOutputTime = 0;
         sampleCount = 0;
         sessionId = null;
 
@@ -154,10 +154,11 @@ public class TrackerController {
             return;
         }
 
-        tickCounter++;
+        long currentTime = System.currentTimeMillis();
+        long intervalMs = ConfigAccess.getOutputIntervalSeconds() * 1000L;
 
-        if (tickCounter >= ConfigAccess.getOutputIntervalTicks()) {
-            tickCounter = 0;
+        if (lastOutputTime == 0 || (currentTime - lastOutputTime) >= intervalMs) {
+            lastOutputTime = currentTime;
             outputMetrics();
         }
     }
@@ -189,10 +190,6 @@ public class TrackerController {
 
     public TrackerState getState() {
         return state.get();
-    }
-
-    public int getOutputIntervalTicks() {
-        return ConfigAccess.getOutputIntervalTicks();
     }
 
     public PerformanceMetrics getMetrics() {

@@ -126,45 +126,32 @@ public class ServerTickCollector {
      * @return the current TPS value (0.0 if no ticks recorded)
      */
     public double getTps() {
-        double mspt = getMspt();
-        if (mspt <= 0.0) {
-            return 0.0;
-        }
-        return Math.min(TARGET_TPS, 1000.0 / mspt);
-    }
-
-    public double getMspt() {
         if (!hasValidTick) {
-            return 1000.0 / TARGET_TPS;
+            return TARGET_TPS;
         }
         
         int count = tickCount.get();
         if (count == 0) {
-            return 1000.0 / TARGET_TPS;
+            return TARGET_TPS;
         }
 
         long sum = durationSum.get();
         int actualCount = Math.min(count, WINDOW_SIZE);
         double windowMspt = (sum / actualCount) / NANOS_TO_MILLIS;
-
-        double tpsBasedMspt = 1000.0 / getTpsFromWindow(actualCount, sum);
-
-        if (windowMspt > tpsBasedMspt * 1.5 && tpsBasedMspt > 0) {
-            return tpsBasedMspt;
+        
+        if (windowMspt <= 0) {
+            return TARGET_TPS;
         }
-
-        return windowMspt;
+        
+        return Math.min(TARGET_TPS, 1000.0 / windowMspt);
     }
-    
-    private double getTpsFromWindow(int count, long sum) {
-        if (count == 0 || sum == 0) {
-            return TARGET_TPS;
+
+    public double getMspt() {
+        double tps = getTps();
+        if (tps <= 0) {
+            return 1000.0 / TARGET_TPS;
         }
-        double mspt = (sum / count) / NANOS_TO_MILLIS;
-        if (mspt <= 0) {
-            return TARGET_TPS;
-        }
-        return Math.min(TARGET_TPS, 1000.0 / mspt);
+        return 1000.0 / tps;
     }
 
     /**

@@ -125,7 +125,12 @@ public class CsvFileWriter implements AutoCloseable {
         for (Object value : values) {
             sb.append(",");
             if (value != null) {
-                String strValue = value.toString();
+                String strValue;
+                if (value instanceof Double d && Double.isInfinite(d)) {
+                    strValue = "infinite";
+                } else {
+                    strValue = value.toString();
+                }
                 if (strValue.contains(",") || strValue.contains("\"") || strValue.contains("\n")) {
                     sb.append("\"").append(strValue.replace("\"", "\"\"")).append("\"");
                 } else {
