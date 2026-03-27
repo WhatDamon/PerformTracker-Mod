@@ -40,13 +40,11 @@ public class JsonFormatter {
         public final double fps;
         public final double tps;
         public final double mspt;
-        public final String status;
         
         public MetricsData(PerformanceMetrics metrics) {
-            this.fps = metrics.getFps();
-            this.tps = metrics.getTps();
-            this.mspt = metrics.getMspt();
-            this.status = metrics.getStatusIndicator();
+            this.fps = metrics.fps();
+            this.tps = metrics.tps();
+            this.mspt = metrics.mspt();
         }
     }
     

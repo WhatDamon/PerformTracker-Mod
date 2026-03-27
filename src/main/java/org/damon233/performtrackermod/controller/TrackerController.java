@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 public class TrackerController {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
     private static final String CSV_BASENAME = "performance";
-    private static final String CSV_STATUS_FINAL = "FINAL";
 
     private final ServerTickCollector serverCollector;
     private IFpsProvider fpsProvider;
@@ -85,7 +84,7 @@ public class TrackerController {
         if (ConfigAccess.isCsvEnabled()) {
             try {
                 csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
-                csvWriter.writeHeader("fps", "tps", "mspt", "status");
+                csvWriter.writeHeader("fps", "tps", "mspt");
             } catch (IOException e) {
                 throw new RuntimeException("Failed to create CSV file", e);
             }
@@ -114,8 +113,6 @@ public class TrackerController {
 
         if (csvWriter != null) {
             try {
-                PerformanceMetrics metrics = getMetrics();
-                csvWriter.writeRow(metrics.getFps(), metrics.getTps(), metrics.getMspt(), CSV_STATUS_FINAL);
                 csvWriter.close();
             } catch (IOException e) {
                 throw new RuntimeException("Failed to close CSV file", e);
@@ -176,7 +173,7 @@ public class TrackerController {
 
         if (csvWriter != null) {
             try {
-                csvWriter.writeRow(metrics.getFps(), metrics.getTps(), metrics.getMspt(), metrics.getStatusIndicator());
+                csvWriter.writeRow(metrics.fps(), metrics.tps(), metrics.mspt());
             } catch (IOException e) {
                 // Silently fail - don't disrupt tracking
             }
