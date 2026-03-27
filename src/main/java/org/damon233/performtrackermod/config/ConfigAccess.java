@@ -2,8 +2,6 @@ package org.damon233.performtrackermod.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +28,7 @@ public class ConfigAccess {
     
     private static ConfigData configData;
     private static boolean initialized = false;
+    private static Path configFilePath;
     
     private static class ConfigData {
         int outputIntervalSeconds = DEFAULT_OUTPUT_INTERVAL_SECONDS;
@@ -43,31 +42,24 @@ public class ConfigAccess {
         boolean collectMspt = DEFAULT_COLLECT_MSPT;
     }
     
-    /**
-     * Initialize config - must be called on client startup.
-     * Safe to call multiple times.
-     */
-    @Environment(EnvType.CLIENT)
     public static void init() {
         if (initialized) {
             return;
         }
         initialized = true;
         
-        Path configDir = FabricLoader.getInstance().getConfigDir();
-        Path configFile = configDir.resolve(CONFIG_FILE_NAME);
+        configFilePath = FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE_NAME);
         
-        // Load existing config or create default
-        if (Files.exists(configFile)) {
+        if (Files.exists(configFilePath)) {
             try {
-                String content = Files.readString(configFile);
+                String content = Files.readString(configFilePath);
                 ConfigData loaded = GSON.fromJson(content, ConfigData.class);
                 if (loaded != null) {
                     configData = loaded;
                     if (configData.networkEndpoint == null) {
                         configData.networkEndpoint = DEFAULT_NETWORK_ENDPOINT;
                     }
-                    LOGGER.info("Loaded config from {}", configFile);
+                    LOGGER.info("Loaded config from {}", configFilePath);
                     return;
                 }
             } catch (IOException e) {
@@ -75,38 +67,28 @@ public class ConfigAccess {
             }
         }
         
-        // Use defaults
         configData = new ConfigData();
         LOGGER.info("Using default config");
         save();
     }
     
-    /**
-     * Save config to file.
-     */
-    @Environment(EnvType.CLIENT)
     private static void save() {
-        if (configData == null) {
+        if (configData == null || configFilePath == null) {
             return;
         }
         
-        Path configDir = FabricLoader.getInstance().getConfigDir();
-        Path configFile = configDir.resolve(CONFIG_FILE_NAME);
-        
         try {
+            Files.createDirectories(configFilePath.getParent());
             String content = GSON.toJson(configData);
-            Files.writeString(configFile, content);
-            LOGGER.debug("Saved config to {}", configFile);
+            Files.writeString(configFilePath, content);
+            LOGGER.debug("Saved config to {}", configFilePath);
         } catch (IOException e) {
             LOGGER.error("Failed to save config file", e);
         }
     }
     
     public static int getOutputIntervalSeconds() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.outputIntervalSeconds : DEFAULT_OUTPUT_INTERVAL_SECONDS;
-        }
-        return DEFAULT_OUTPUT_INTERVAL_SECONDS;
+        return configData != null ? configData.outputIntervalSeconds : DEFAULT_OUTPUT_INTERVAL_SECONDS;
     }
     
     public static int getOutputIntervalTicks() {
@@ -114,38 +96,23 @@ public class ConfigAccess {
     }
     
     public static boolean isChatEnabled() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.chatEnabled : DEFAULT_CHAT_ENABLED;
-        }
-        return DEFAULT_CHAT_ENABLED;
+        return configData != null ? configData.chatEnabled : DEFAULT_CHAT_ENABLED;
     }
     
     public static boolean isCsvEnabled() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.csvEnabled : DEFAULT_CSV_ENABLED;
-        }
-        return DEFAULT_CSV_ENABLED;
+        return configData != null ? configData.csvEnabled : DEFAULT_CSV_ENABLED;
     }
     
     public static String getCsvDirectory() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.csvDirectory : DEFAULT_CSV_DIRECTORY;
-        }
-        return DEFAULT_CSV_DIRECTORY;
+        return configData != null ? configData.csvDirectory : DEFAULT_CSV_DIRECTORY;
     }
     
     public static boolean isNetworkEnabled() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.networkEnabled : DEFAULT_NETWORK_ENABLED;
-        }
-        return DEFAULT_NETWORK_ENABLED;
+        return configData != null ? configData.networkEnabled : DEFAULT_NETWORK_ENABLED;
     }
     
     public static String getNetworkEndpoint() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.networkEndpoint : DEFAULT_NETWORK_ENDPOINT;
-        }
-        return DEFAULT_NETWORK_ENDPOINT;
+        return configData != null ? configData.networkEndpoint : DEFAULT_NETWORK_ENDPOINT;
     }
     
     public static String getNetworkUrl() {
@@ -153,27 +120,17 @@ public class ConfigAccess {
     }
     
     public static boolean isCollectFps() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.collectFps : DEFAULT_COLLECT_FPS;
-        }
-        return DEFAULT_COLLECT_FPS;
+        return configData != null ? configData.collectFps : DEFAULT_COLLECT_FPS;
     }
     
     public static boolean isCollectTps() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.collectTps : DEFAULT_COLLECT_TPS;
-        }
-        return DEFAULT_COLLECT_TPS;
+        return configData != null ? configData.collectTps : DEFAULT_COLLECT_TPS;
     }
     
     public static boolean isCollectMspt() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            return configData != null ? configData.collectMspt : DEFAULT_COLLECT_MSPT;
-        }
-        return DEFAULT_COLLECT_MSPT;
+        return configData != null ? configData.collectMspt : DEFAULT_COLLECT_MSPT;
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setOutputIntervalSeconds(int seconds) {
         if (configData != null) {
             configData.outputIntervalSeconds = Math.max(1, Math.min(3600, seconds));
@@ -181,7 +138,6 @@ public class ConfigAccess {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setChatEnabled(boolean enabled) {
         if (configData != null) {
             configData.chatEnabled = enabled;
@@ -189,7 +145,6 @@ public class ConfigAccess {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setCsvEnabled(boolean enabled) {
         if (configData != null) {
             configData.csvEnabled = enabled;
@@ -197,7 +152,6 @@ public class ConfigAccess {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setCsvDirectory(String directory) {
         if (configData != null) {
             configData.csvDirectory = (directory != null && !directory.isBlank()) ? directory : DEFAULT_CSV_DIRECTORY;
@@ -205,7 +159,6 @@ public class ConfigAccess {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setNetworkEnabled(boolean enabled) {
         if (configData != null) {
             configData.networkEnabled = enabled;
@@ -213,7 +166,6 @@ public class ConfigAccess {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setNetworkEndpoint(String endpoint) {
         if (configData != null) {
             String validated = validateNetworkEndpoint(endpoint);
@@ -240,7 +192,6 @@ public class ConfigAccess {
         return validateNetworkEndpoint(endpoint) != null;
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setCollectFps(boolean enabled) {
         if (configData != null) {
             configData.collectFps = enabled;
@@ -248,7 +199,6 @@ public class ConfigAccess {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setCollectTps(boolean enabled) {
         if (configData != null) {
             configData.collectTps = enabled;
@@ -256,7 +206,6 @@ public class ConfigAccess {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     public static void setCollectMspt(boolean enabled) {
         if (configData != null) {
             configData.collectMspt = enabled;
@@ -266,5 +215,41 @@ public class ConfigAccess {
     
     public static boolean isClothConfigLoaded() {
         return FabricLoader.getInstance().isModLoaded("cloth-config");
+    }
+    
+    public static int getDefaultOutputIntervalSeconds() {
+        return DEFAULT_OUTPUT_INTERVAL_SECONDS;
+    }
+    
+    public static boolean getDefaultChatEnabled() {
+        return DEFAULT_CHAT_ENABLED;
+    }
+    
+    public static boolean getDefaultCsvEnabled() {
+        return DEFAULT_CSV_ENABLED;
+    }
+    
+    public static String getDefaultCsvDirectory() {
+        return DEFAULT_CSV_DIRECTORY;
+    }
+    
+    public static boolean getDefaultNetworkEnabled() {
+        return DEFAULT_NETWORK_ENABLED;
+    }
+    
+    public static String getDefaultNetworkEndpoint() {
+        return DEFAULT_NETWORK_ENDPOINT;
+    }
+    
+    public static boolean getDefaultCollectFps() {
+        return DEFAULT_COLLECT_FPS;
+    }
+    
+    public static boolean getDefaultCollectTps() {
+        return DEFAULT_COLLECT_TPS;
+    }
+    
+    public static boolean getDefaultCollectMspt() {
+        return DEFAULT_COLLECT_MSPT;
     }
 }

@@ -8,6 +8,8 @@
   "performtracker.command.start": "启动",
   "performtracker.command.stop": "停止",
   "performtracker.command.description": "性能追踪命令",
+  "performtracker.command.start.error.not_initialized": "追踪器未初始化",
+  "performtracker.command.stop.error.not_initialized": "追踪器未初始化",
   "performtracker.config.title": "PerformTracker 设置",
   "performtracker.config.category.general": "常规",
   "performtracker.config.category.network": "网络",
@@ -22,6 +24,11 @@
   "performtracker.config.collect_fps": "收集 FPS",
   "performtracker.config.collect_tps": "收集 TPS",
   "performtracker.config.collect_mspt": "收集 MSPT",
+  "performtracker.config.info": "%s: %s（默认: %s）",
+  "performtracker.config.set.success": "配置已更新: %s 设置为 %s",
+  "performtracker.config.value.true": "是",
+  "performtracker.config.value.false": "否",
+  "performtracker.config.usage": "用法: /ptracker config <选项> [值]",
   "performtracker.restart": "指标配置已更改，追踪已重启。",
   "performtracker.restart.csv": "指标配置已更改，追踪已重启。新CSV文件: %s"
 }

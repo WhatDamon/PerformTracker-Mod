@@ -8,6 +8,8 @@
   "performtracker.command.start": "start",
   "performtracker.command.stop": "stop",
   "performtracker.command.description": "Performance tracking commands",
+  "performtracker.command.start.error.not_initialized": "Tracker not initialized",
+  "performtracker.command.stop.error.not_initialized": "Tracker not initialized",
   "performtracker.config.title": "PerformTracker Settings",
   "performtracker.config.category.general": "General",
   "performtracker.config.category.network": "Network",
@@ -22,6 +24,11 @@
   "performtracker.config.collect_fps": "Collect FPS",
   "performtracker.config.collect_tps": "Collect TPS",
   "performtracker.config.collect_mspt": "Collect MSPT",
+  "performtracker.config.info": "%s: %s (default: %s)",
+  "performtracker.config.set.success": "Config updated: %s set to %s",
+  "performtracker.config.value.true": "true",
+  "performtracker.config.value.false": "false",
+  "performtracker.config.usage": "Usage: /ptracker config <item> [value]",
   "performtracker.restart": "Metrics config changed, tracking restarted.",
   "performtracker.restart.csv": "Metrics config changed, tracking restarted. New CSV file: %s"
 }
