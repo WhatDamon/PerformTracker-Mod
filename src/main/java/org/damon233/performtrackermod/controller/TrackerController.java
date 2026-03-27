@@ -1,6 +1,7 @@
 package org.damon233.performtrackermod.controller;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -19,7 +20,7 @@ import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
 import org.damon233.performtrackermod.network.HttpSender;
 import org.damon233.performtrackermod.network.JsonFormatter;
-import org.damon233.performtrackermod.utils.CsvFileWriter;
+import org.damon233.performtrackermod.utils.CsvWriter;
 import org.damon233.performtrackermod.utils.TranslationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class TrackerController {
     private final AtomicReference<TrackerState> state;
     private final AtomicBoolean active;
 
-    private CsvFileWriter csvWriter;
+    private CsvWriter csvWriter;
     private HttpSender httpSender;
     private String sessionId;
     private long lastOutputTime;
@@ -85,8 +86,9 @@ public class TrackerController {
 
         if (ConfigAccess.isCsvEnabled()) {
             try {
-                csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
+                csvWriter = new CsvWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
                 csvWriter.writeHeader(buildCsvHeaders());
+                csvWriter.start();
             } catch (IOException e) {
                 throw new RuntimeException("Failed to create CSV file", e);
             }
@@ -163,7 +165,7 @@ public class TrackerController {
     }
     
     private void restartOutputs() {
-        String oldFilePath = csvWriter != null ? csvWriter.getFilePath().toString() : null;
+        Path oldFilePath = csvWriter != null ? csvWriter.getFilePath() : null;
         
         if (csvWriter != null) {
             try {
@@ -176,8 +178,9 @@ public class TrackerController {
         boolean csvEnabled = ConfigAccess.isCsvEnabled();
         if (csvEnabled) {
             try {
-                csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
+                csvWriter = new CsvWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
                 csvWriter.writeHeader(buildCsvHeaders());
+                csvWriter.start();
             } catch (IOException e) {
                 LOGGER.error("Failed to restart CSV writer", e);
             }
@@ -230,10 +233,7 @@ public class TrackerController {
         }
 
         if (csvWriter != null) {
-            try {
-                csvWriter.writeRow(buildCsvRowValues(metrics));
-            } catch (IOException ignored) {
-            }
+            csvWriter.enqueue(buildCsvRowValues(metrics));
         }
 
         if (httpSender != null && sessionId != null) {
