@@ -1,10 +1,12 @@
 {
+  "modmenu.descriptionTranslation.performtracker": "Track game performance metrics",
+  "modmenu.summaryTranslation.performtracker": "Track game performance metrics",
   "performtracker.start.success": "Performance tracking started. Output saved to: %s",
   "performtracker.stop.success": "Performance tracking stopped. %d samples collected.",
   "performtracker.error.not_initialized": "Tracker not initialized",
   "performtracker.error.already_running": "Tracker is already running",
   "performtracker.error.not_running": "Tracker is not running",
-  "performtracker.chat.prefix": "[PerformanceTracker]",
+  "performtracker.chat.prefix": "[⚓]",
   "performtracker.command.start": "start",
   "performtracker.command.stop": "stop",
   "performtracker.command.description": "Performance tracking commands",
