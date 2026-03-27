@@ -146,7 +146,8 @@ public class TrackerController {
     private int getCollectConfigHash() {
         return (ConfigAccess.isCollectFps() ? 1 : 0) |
                (ConfigAccess.isCollectTps() ? 2 : 0) |
-               (ConfigAccess.isCollectMspt() ? 4 : 0);
+               (ConfigAccess.isCollectMspt() ? 4 : 0) |
+               (ConfigAccess.isCollectHeap() ? 8 : 0);
     }
     
     private String[] buildCsvHeaders() {
@@ -154,6 +155,7 @@ public class TrackerController {
         if (ConfigAccess.isCollectFps()) sb.append("fps,");
         if (ConfigAccess.isCollectTps()) sb.append("tps,");
         if (ConfigAccess.isCollectMspt()) sb.append("mspt,");
+        if (ConfigAccess.isCollectHeap()) sb.append("heap_used,heap_max,");
         if (sb.length() > 0) sb.setLength(sb.length() - 1);
         return sb.toString().split(",");
     }
@@ -234,7 +236,8 @@ public class TrackerController {
             String json = JsonFormatter.formatMetrics(timestamp, sessionId, sampleCount,
                 ConfigAccess.isCollectFps(), metrics.fps(),
                 ConfigAccess.isCollectTps(), metrics.tps(),
-                ConfigAccess.isCollectMspt(), metrics.mspt());
+                ConfigAccess.isCollectMspt(), metrics.mspt(),
+                ConfigAccess.isCollectHeap(), metrics.heapUsed(), metrics.heapMax());
             httpSender.send(json);
         }
     }
@@ -255,6 +258,12 @@ public class TrackerController {
         if (ConfigAccess.isCollectMspt()) {
             if (!first) sb.append(" | ");
             sb.append("MSPT: ").append(PerformanceMetrics.formatValue(metrics.mspt()));
+            first = false;
+        }
+        if (ConfigAccess.isCollectHeap()) {
+            if (!first) sb.append(" | ");
+            sb.append("Heap: ").append(PerformanceMetrics.formatMemoryMB(metrics.heapUsed()))
+              .append(" / ").append(PerformanceMetrics.formatMemoryMB(metrics.heapMax()));
         }
         return sb.toString();
     }
@@ -264,12 +273,17 @@ public class TrackerController {
         if (ConfigAccess.isCollectFps()) count++;
         if (ConfigAccess.isCollectTps()) count++;
         if (ConfigAccess.isCollectMspt()) count++;
+        if (ConfigAccess.isCollectHeap()) count += 2;
         
         Object[] values = new Object[count];
         int i = 0;
         if (ConfigAccess.isCollectFps()) values[i++] = metrics.fps();
         if (ConfigAccess.isCollectTps()) values[i++] = metrics.tps();
         if (ConfigAccess.isCollectMspt()) values[i++] = metrics.mspt();
+        if (ConfigAccess.isCollectHeap()) {
+            values[i++] = metrics.heapUsed();
+            values[i++] = metrics.heapMax();
+        }
         return values;
     }
 
@@ -277,7 +291,9 @@ public class TrackerController {
         double fps = ConfigAccess.isCollectFps() ? fpsProvider.getAverageFps() : 0;
         double tps = ConfigAccess.isCollectTps() ? serverCollector.getTps() : 0;
         double mspt = ConfigAccess.isCollectMspt() ? serverCollector.getMspt() : 0;
-        return new PerformanceMetrics(fps, tps, mspt);
+        double heapUsed = ConfigAccess.isCollectHeap() ? serverCollector.getHeapUsedMB() : 0;
+        double heapMax = ConfigAccess.isCollectHeap() ? serverCollector.getHeapMaxMB() : 0;
+        return new PerformanceMetrics(fps, tps, mspt, heapUsed, heapMax);
     }
 
     public boolean isRunning() {

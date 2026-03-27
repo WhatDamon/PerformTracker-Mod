@@ -123,8 +123,18 @@ class PerformTrackerHandler:
                 print(f"  TPS:   {d.get('tps', 'N/A')}")
             if 'mspt' in d:
                 print(f"  MSPT:  {d.get('mspt', 'N/A')}")
+            if 'heapUsed' in d and 'heapMax' in d:
+                heap_used = d.get('heapUsed', 0)
+                heap_max = d.get('heapMax', 0)
+                print(f"  Heap:  {cls.format_memory(heap_used)} / {cls.format_memory(heap_max)}")
         
         print("=" * 60)
+    
+    @classmethod
+    def format_memory(cls, mb):
+        if mb >= 1024:
+            return f"{mb/1024:.1f}GiB"
+        return f"{mb:.0f}MiB"
     
     @classmethod
     def save_log(cls, data):

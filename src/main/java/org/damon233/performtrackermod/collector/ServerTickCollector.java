@@ -56,6 +56,15 @@ public class ServerTickCollector {
         }
         return 1000.0 / tps;
     }
+    
+    public double getHeapUsedMB() {
+        Runtime runtime = Runtime.getRuntime();
+        return (runtime.totalMemory() - runtime.freeMemory()) / (1024.0 * 1024.0);
+    }
+    
+    public double getHeapMaxMB() {
+        return Runtime.getRuntime().maxMemory() / (1024.0 * 1024.0);
+    }
 
     public void reset() {
         tickTimes.clear();

@@ -26,6 +26,8 @@
   "performtracker.config.collect_fps": "稽察幀率（FPS）",
   "performtracker.config.collect_tps": "稽察刻率（TPS）",
   "performtracker.config.collect_mspt": "稽察每刻耗時（MSPT）",
+  "performtracker.config.collect_heap": "稽察堆區之存",
+  "performtracker.config.binary_units": "採二冪之度（MiB/GiB）",
   "performtracker.config.info": "%s：%s（常設：%s）",
   "performtracker.config.set.success": "置設既更：%s 設爲 %s",
   "performtracker.config.value.true": "然",

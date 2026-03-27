@@ -25,6 +25,8 @@ public class ConfigAccess {
     private static final boolean DEFAULT_COLLECT_FPS = true;
     private static final boolean DEFAULT_COLLECT_TPS = true;
     private static final boolean DEFAULT_COLLECT_MSPT = true;
+    private static final boolean DEFAULT_COLLECT_HEAP = true;
+    private static final boolean DEFAULT_BINARY_UNITS = true;
     
     private static ConfigData configData;
     private static boolean initialized = false;
@@ -40,6 +42,8 @@ public class ConfigAccess {
         boolean collectFps = DEFAULT_COLLECT_FPS;
         boolean collectTps = DEFAULT_COLLECT_TPS;
         boolean collectMspt = DEFAULT_COLLECT_MSPT;
+        boolean collectHeap = DEFAULT_COLLECT_HEAP;
+        boolean binaryUnits = DEFAULT_BINARY_UNITS;
     }
     
     public static void init() {
@@ -127,6 +131,14 @@ public class ConfigAccess {
         return configData != null ? configData.collectMspt : DEFAULT_COLLECT_MSPT;
     }
     
+    public static boolean isCollectHeap() {
+        return configData != null ? configData.collectHeap : DEFAULT_COLLECT_HEAP;
+    }
+    
+    public static boolean isBinaryUnits() {
+        return configData != null ? configData.binaryUnits : DEFAULT_BINARY_UNITS;
+    }
+    
     public static void setOutputIntervalSeconds(int seconds) {
         if (configData != null) {
             configData.outputIntervalSeconds = Math.max(1, Math.min(3600, seconds));
@@ -209,6 +221,20 @@ public class ConfigAccess {
         }
     }
     
+    public static void setCollectHeap(boolean enabled) {
+        if (configData != null) {
+            configData.collectHeap = enabled;
+            save();
+        }
+    }
+    
+    public static void setBinaryUnits(boolean enabled) {
+        if (configData != null) {
+            configData.binaryUnits = enabled;
+            save();
+        }
+    }
+    
     public static boolean isClothConfigLoaded() {
         return FabricLoader.getInstance().isModLoaded("cloth-config");
     }
@@ -247,5 +273,13 @@ public class ConfigAccess {
     
     public static boolean getDefaultCollectMspt() {
         return DEFAULT_COLLECT_MSPT;
+    }
+    
+    public static boolean getDefaultCollectHeap() {
+        return DEFAULT_COLLECT_HEAP;
+    }
+    
+    public static boolean getDefaultBinaryUnits() {
+        return DEFAULT_BINARY_UNITS;
     }
 }

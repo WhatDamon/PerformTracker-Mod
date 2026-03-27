@@ -50,6 +50,13 @@ public class ClothConfigScreen {
                 .setSaveConsumer(ConfigAccess::setCsvDirectory)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(
+                        Text.translatable("performtracker.config.binary_units"),
+                        ConfigAccess.isBinaryUnits())
+                .setDefaultValue(true)
+                .setSaveConsumer(ConfigAccess::setBinaryUnits)
+                .build());
+
         ConfigCategory metrics = builder.getOrCreateCategory(Text.translatable("performtracker.config.category.metrics"));
 
         metrics.addEntry(entryBuilder.startBooleanToggle(
@@ -71,6 +78,13 @@ public class ClothConfigScreen {
                         ConfigAccess.isCollectMspt())
                 .setDefaultValue(true)
                 .setSaveConsumer(ConfigAccess::setCollectMspt)
+                .build());
+
+        metrics.addEntry(entryBuilder.startBooleanToggle(
+                        Text.translatable("performtracker.config.collect_heap"),
+                        ConfigAccess.isCollectHeap())
+                .setDefaultValue(true)
+                .setSaveConsumer(ConfigAccess::setCollectHeap)
                 .build());
         
         ConfigCategory network = builder.getOrCreateCategory(Text.translatable("performtracker.config.category.network"));

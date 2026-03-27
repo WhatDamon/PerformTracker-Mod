@@ -26,6 +26,8 @@
   "performtracker.config.collect_fps": "Collect FPS",
   "performtracker.config.collect_tps": "Collect TPS",
   "performtracker.config.collect_mspt": "Collect MSPT",
+  "performtracker.config.collect_heap": "Collect Heap Memory",
+  "performtracker.config.binary_units": "Use Binary Units (MiB/GiB)",
   "performtracker.config.info": "%s: %s (default: %s)",
   "performtracker.config.set.success": "Config updated: %s set to %s",
   "performtracker.config.value.true": "true",

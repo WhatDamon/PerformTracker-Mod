@@ -61,7 +61,17 @@ public class PtrackerCommand {
         BOOL6("collect_mspt", "performtracker.config.collect_mspt", true,
             (Supplier<Object>) ConfigAccess::isCollectMspt,
             v -> ConfigAccess.setCollectMspt((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCollectMspt);
+            (Supplier<Object>) ConfigAccess::getDefaultCollectMspt),
+        
+        BOOL7("collect_heap", "performtracker.config.collect_heap", true,
+            (Supplier<Object>) ConfigAccess::isCollectHeap,
+            v -> ConfigAccess.setCollectHeap((Boolean) v),
+            (Supplier<Object>) ConfigAccess::getDefaultCollectHeap),
+        
+        BOOL8("binary_units", "performtracker.config.binary_units", true,
+            (Supplier<Object>) ConfigAccess::isBinaryUnits,
+            v -> ConfigAccess.setBinaryUnits((Boolean) v),
+            (Supplier<Object>) ConfigAccess::getDefaultBinaryUnits);
         
         final String key;
         final String translationKey;

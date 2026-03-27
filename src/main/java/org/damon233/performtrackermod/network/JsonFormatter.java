@@ -6,7 +6,8 @@ public class JsonFormatter {
                                        int sampleNumber,
                                        boolean collectFps, double fps,
                                        boolean collectTps, double tps,
-                                       boolean collectMspt, double mspt) {
+                                       boolean collectMspt, double mspt,
+                                       boolean collectHeap, double heapUsed, double heapMax) {
         StringBuilder sb = new StringBuilder(128);
         sb.append("{\"timestamp\":").append(timestamp);
         sb.append(",\"sessionId\":\"").append(sessionId).append('"');
@@ -26,6 +27,12 @@ public class JsonFormatter {
         if (collectMspt) {
             if (!first) sb.append(',');
             sb.append("\"mspt\":").append(mspt);
+            first = false;
+        }
+        if (collectHeap) {
+            if (!first) sb.append(',');
+            sb.append("\"heapUsed\":").append(heapUsed);
+            sb.append(",\"heapMax\":").append(heapMax);
         }
         sb.append("}}");
         

@@ -26,6 +26,8 @@
   "performtracker.config.collect_fps": "收集 FPS",
   "performtracker.config.collect_tps": "收集 TPS",
   "performtracker.config.collect_mspt": "收集 MSPT",
+  "performtracker.config.collect_heap": "收集堆内存",
+  "performtracker.config.binary_units": "使用二进制单位 (MiB/GiB)",
   "performtracker.config.info": "%s: %s（默认: %s）",
   "performtracker.config.set.success": "配置已更新: %s 设置为 %s",
   "performtracker.config.value.true": "是",
