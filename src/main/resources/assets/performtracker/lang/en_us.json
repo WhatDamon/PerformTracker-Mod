@@ -11,10 +11,16 @@
   "performtracker.config.title": "PerformTracker Settings",
   "performtracker.config.category.general": "General",
   "performtracker.config.category.network": "Network",
+  "performtracker.config.category.metrics": "Metrics",
   "performtracker.config.output_interval": "Output Interval (seconds)",
   "performtracker.config.chat_enabled": "Enable Chat Output",
   "performtracker.config.csv_enabled": "Enable CSV Export",
   "performtracker.config.csv_directory": "CSV Output Directory",
   "performtracker.config.network_enabled": "Enable Network Transmission",
-  "performtracker.config.network_url": "HTTP Endpoint URL"
+  "performtracker.config.network_url": "HTTP Endpoint URL",
+  "performtracker.config.collect_fps": "Collect FPS",
+  "performtracker.config.collect_tps": "Collect TPS",
+  "performtracker.config.collect_mspt": "Collect MSPT",
+  "performtracker.restart": "Metrics config changed, tracking restarted.",
+  "performtracker.restart.csv": "Metrics config changed, tracking restarted. New CSV file: %s"
 }

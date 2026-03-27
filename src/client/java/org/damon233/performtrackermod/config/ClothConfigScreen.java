@@ -45,6 +45,29 @@ public class ClothConfigScreen {
                 .setDefaultValue("performance_data")
                 .setSaveConsumer(ConfigAccess::setCsvDirectory)
                 .build());
+
+        ConfigCategory metrics = builder.getOrCreateCategory(Text.translatable("performtracker.config.category.metrics"));
+
+        metrics.addEntry(entryBuilder.startBooleanToggle(
+                        Text.translatable("performtracker.config.collect_fps"),
+                        ConfigAccess.isCollectFps())
+                .setDefaultValue(true)
+                .setSaveConsumer(ConfigAccess::setCollectFps)
+                .build());
+
+        metrics.addEntry(entryBuilder.startBooleanToggle(
+                        Text.translatable("performtracker.config.collect_tps"),
+                        ConfigAccess.isCollectTps())
+                .setDefaultValue(true)
+                .setSaveConsumer(ConfigAccess::setCollectTps)
+                .build());
+
+        metrics.addEntry(entryBuilder.startBooleanToggle(
+                        Text.translatable("performtracker.config.collect_mspt"),
+                        ConfigAccess.isCollectMspt())
+                .setDefaultValue(true)
+                .setSaveConsumer(ConfigAccess::setCollectMspt)
+                .build());
         
         ConfigCategory network = builder.getOrCreateCategory(Text.translatable("performtracker.config.category.network"));
         

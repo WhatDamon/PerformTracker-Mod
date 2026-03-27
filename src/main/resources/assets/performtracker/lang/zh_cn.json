@@ -11,10 +11,16 @@
   "performtracker.config.title": "PerformTracker 设置",
   "performtracker.config.category.general": "常规",
   "performtracker.config.category.network": "网络",
+  "performtracker.config.category.metrics": "指标",
   "performtracker.config.output_interval": "输出间隔（秒）",
   "performtracker.config.chat_enabled": "启用聊天栏输出",
   "performtracker.config.csv_enabled": "启用CSV导出",
   "performtracker.config.csv_directory": "CSV输出目录",
   "performtracker.config.network_enabled": "启用网络传输",
-  "performtracker.config.network_url": "HTTP 端点地址"
+  "performtracker.config.network_url": "HTTP 端点地址",
+  "performtracker.config.collect_fps": "收集 FPS",
+  "performtracker.config.collect_tps": "收集 TPS",
+  "performtracker.config.collect_mspt": "收集 MSPT",
+  "performtracker.restart": "指标配置已更改，追踪已重启。",
+  "performtracker.restart.csv": "指标配置已更改，追踪已重启。新CSV文件: %s"
 }

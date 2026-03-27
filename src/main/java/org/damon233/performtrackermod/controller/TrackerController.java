@@ -39,6 +39,7 @@ public class TrackerController {
     private long lastOutputTime;
     private int sampleCount;
     private MinecraftServer server;
+    private int lastCollectConfig;
 
     private static TrackerController instance;
 
@@ -53,6 +54,7 @@ public class TrackerController {
         this.httpSender = null;
         this.sessionId = null;
         this.server = null;
+        this.lastCollectConfig = 0;
         instance = this;
 
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
@@ -84,7 +86,14 @@ public class TrackerController {
         if (ConfigAccess.isCsvEnabled()) {
             try {
                 csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
-                csvWriter.writeHeader("fps", "tps", "mspt");
+                StringBuilder header = new StringBuilder();
+                if (ConfigAccess.isCollectFps()) header.append("fps,");
+                if (ConfigAccess.isCollectTps()) header.append("tps,");
+                if (ConfigAccess.isCollectMspt()) header.append("mspt,");
+                if (header.length() > 0) {
+                    header.setLength(header.length() - 1);
+                }
+                csvWriter.writeHeader(header.toString().split(","));
             } catch (IOException e) {
                 throw new RuntimeException("Failed to create CSV file", e);
             }
@@ -98,6 +107,7 @@ public class TrackerController {
 
         state.set(TrackerState.RUNNING);
         active.set(true);
+        lastCollectConfig = getCollectConfigHash();
         
         serverCollector.reset();
         
@@ -143,12 +153,64 @@ public class TrackerController {
         String uuid = UUID.randomUUID().toString().substring(0, 6);
         return timestamp + "_" + uuid;
     }
+    
+    private int getCollectConfigHash() {
+        return (ConfigAccess.isCollectFps() ? 1 : 0) |
+               (ConfigAccess.isCollectTps() ? 2 : 0) |
+               (ConfigAccess.isCollectMspt() ? 4 : 0);
+    }
+    
+    private void restartOutputs() {
+        if (csvWriter != null) {
+            try {
+                csvWriter.close();
+            } catch (IOException e) {
+                // ignore
+            }
+            csvWriter = null;
+        }
+        
+        boolean csvEnabled = ConfigAccess.isCsvEnabled();
+        if (csvEnabled) {
+            try {
+                csvWriter = new CsvFileWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
+                StringBuilder header = new StringBuilder();
+                if (ConfigAccess.isCollectFps()) header.append("fps,");
+                if (ConfigAccess.isCollectTps()) header.append("tps,");
+                if (ConfigAccess.isCollectMspt()) header.append("mspt,");
+                if (header.length() > 0) {
+                    header.setLength(header.length() - 1);
+                }
+                csvWriter.writeHeader(header.toString().split(","));
+            } catch (IOException e) {
+                LOGGER.error("Failed to restart CSV writer", e);
+            }
+        }
+        
+        sampleCount = 0;
+        
+        if (ConfigAccess.isChatEnabled() && server != null) {
+            net.minecraft.text.MutableText message = csvEnabled 
+                ? TranslationService.chat("restart.csv", csvWriter.getFilePath().toString())
+                : TranslationService.chat("restart");
+            server.getPlayerManager().getPlayerList().forEach(player -> 
+                player.sendMessage(message)
+            );
+        }
+    }
 
     private void onServerTick(MinecraftServer server) {
         this.server = server;
 
         if (!active.get()) {
             return;
+        }
+
+        int currentConfig = getCollectConfigHash();
+        if (currentConfig != lastCollectConfig) {
+            LOGGER.info("Collect config changed, restarting tracking");
+            lastCollectConfig = currentConfig;
+            restartOutputs();
         }
 
         long currentTime = System.currentTimeMillis();
@@ -166,23 +228,62 @@ public class TrackerController {
         long timestamp = System.currentTimeMillis();
 
         if (ConfigAccess.isChatEnabled() && server != null) {
+            String chatMsg = buildChatMessage(metrics);
             server.getPlayerManager().getPlayerList().forEach(player -> 
-                player.sendMessage(TranslationService.chatWithMetrics(metrics.toChatString()))
+                player.sendMessage(TranslationService.chatWithMetrics(chatMsg))
             );
         }
 
         if (csvWriter != null) {
             try {
-                csvWriter.writeRow(metrics.fps(), metrics.tps(), metrics.mspt());
+                writeCsvRow(metrics);
             } catch (IOException e) {
                 // Silently fail - don't disrupt tracking
             }
         }
 
         if (httpSender != null && sessionId != null) {
-            String json = JsonFormatter.formatMetrics(timestamp, sessionId, true, sampleCount, metrics);
+            String json = JsonFormatter.formatMetrics(timestamp, sessionId, true, sampleCount, metrics,
+                ConfigAccess.isCollectFps(), ConfigAccess.isCollectTps(), ConfigAccess.isCollectMspt());
             httpSender.send(json);
         }
+    }
+    
+    private String buildChatMessage(PerformanceMetrics metrics) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        if (ConfigAccess.isCollectFps()) {
+            sb.append("FPS: ").append(String.format("%.1f", metrics.fps()));
+            first = false;
+        }
+        if (ConfigAccess.isCollectTps()) {
+            if (!first) sb.append(" | ");
+            sb.append("TPS: ").append(formatValue(metrics.tps()));
+            first = false;
+        }
+        if (ConfigAccess.isCollectMspt()) {
+            if (!first) sb.append(" | ");
+            sb.append("MSPT: ").append(formatValue(metrics.mspt()));
+        }
+        return sb.toString();
+    }
+    
+    private String formatValue(double value) {
+        if (Double.isInfinite(value)) {
+            return "\u221E";
+        }
+        return String.format("%.2f", value);
+    }
+    
+    private void writeCsvRow(PerformanceMetrics metrics) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        if (ConfigAccess.isCollectFps()) sb.append(metrics.fps()).append(",");
+        if (ConfigAccess.isCollectTps()) sb.append(metrics.tps()).append(",");
+        if (ConfigAccess.isCollectMspt()) sb.append(metrics.mspt()).append(",");
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        csvWriter.writeRow(sb.toString().split(","));
     }
 
     public TrackerState getState() {
@@ -190,9 +291,9 @@ public class TrackerController {
     }
 
     public PerformanceMetrics getMetrics() {
-        double fps = fpsProvider.getAverageFps();
-        double tps = serverCollector.getTps();
-        double mspt = serverCollector.getMspt();
+        double fps = ConfigAccess.isCollectFps() ? fpsProvider.getAverageFps() : 0;
+        double tps = ConfigAccess.isCollectTps() ? serverCollector.getTps() : 0;
+        double mspt = ConfigAccess.isCollectMspt() ? serverCollector.getMspt() : 0;
         return new PerformanceMetrics(fps, tps, mspt);
     }
 

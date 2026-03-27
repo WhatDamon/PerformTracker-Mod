@@ -22,6 +22,9 @@ public class ConfigAccess {
     private static final String DEFAULT_CSV_DIRECTORY = "performance_data";
     private static final boolean DEFAULT_NETWORK_ENABLED = false;
     private static final String DEFAULT_NETWORK_URL = "http://localhost:31415/api/metrics";
+    private static final boolean DEFAULT_COLLECT_FPS = true;
+    private static final boolean DEFAULT_COLLECT_TPS = true;
+    private static final boolean DEFAULT_COLLECT_MSPT = true;
     
     private static ConfigData configData;
     private static boolean initialized = false;
@@ -33,6 +36,9 @@ public class ConfigAccess {
         String csvDirectory = DEFAULT_CSV_DIRECTORY;
         boolean networkEnabled = DEFAULT_NETWORK_ENABLED;
         String networkUrl = DEFAULT_NETWORK_URL;
+        boolean collectFps = DEFAULT_COLLECT_FPS;
+        boolean collectTps = DEFAULT_COLLECT_TPS;
+        boolean collectMspt = DEFAULT_COLLECT_MSPT;
     }
     
     /**
@@ -143,6 +149,27 @@ public class ConfigAccess {
         return DEFAULT_NETWORK_URL;
     }
     
+    public static boolean isCollectFps() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            return configData != null ? configData.collectFps : DEFAULT_COLLECT_FPS;
+        }
+        return DEFAULT_COLLECT_FPS;
+    }
+    
+    public static boolean isCollectTps() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            return configData != null ? configData.collectTps : DEFAULT_COLLECT_TPS;
+        }
+        return DEFAULT_COLLECT_TPS;
+    }
+    
+    public static boolean isCollectMspt() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            return configData != null ? configData.collectMspt : DEFAULT_COLLECT_MSPT;
+        }
+        return DEFAULT_COLLECT_MSPT;
+    }
+    
     @Environment(EnvType.CLIENT)
     public static void setOutputIntervalSeconds(int seconds) {
         if (configData != null) {
@@ -187,6 +214,30 @@ public class ConfigAccess {
     public static void setNetworkUrl(String url) {
         if (configData != null) {
             configData.networkUrl = (url != null && !url.isBlank()) ? url : DEFAULT_NETWORK_URL;
+            save();
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public static void setCollectFps(boolean enabled) {
+        if (configData != null) {
+            configData.collectFps = enabled;
+            save();
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public static void setCollectTps(boolean enabled) {
+        if (configData != null) {
+            configData.collectTps = enabled;
+            save();
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public static void setCollectMspt(boolean enabled) {
+        if (configData != null) {
+            configData.collectMspt = enabled;
             save();
         }
     }
