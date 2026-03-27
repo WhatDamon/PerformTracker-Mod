@@ -19,49 +19,49 @@ public class PtrackerCommand {
     
     private enum ConfigType {
         INT("output_interval", "performtracker.config.output_interval", 5,
-            (Supplier<Object>) () -> ConfigAccess.getOutputIntervalSeconds(),
+            (Supplier<Object>) ConfigAccess::getOutputIntervalSeconds,
             v -> ConfigAccess.setOutputIntervalSeconds((Integer) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultOutputIntervalSeconds()),
+            (Supplier<Object>) ConfigAccess::getDefaultOutputIntervalSeconds),
         
         BOOL("chat_enabled", "performtracker.config.chat_enabled", true,
-            (Supplier<Object>) () -> ConfigAccess.isChatEnabled(),
+            (Supplier<Object>) ConfigAccess::isChatEnabled,
             v -> ConfigAccess.setChatEnabled((Boolean) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultChatEnabled()),
+            (Supplier<Object>) ConfigAccess::getDefaultChatEnabled),
         
         BOOL2("csv_enabled", "performtracker.config.csv_enabled", true,
-            (Supplier<Object>) () -> ConfigAccess.isCsvEnabled(),
+            (Supplier<Object>) ConfigAccess::isCsvEnabled,
             v -> ConfigAccess.setCsvEnabled((Boolean) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultCsvEnabled()),
+            (Supplier<Object>) ConfigAccess::getDefaultCsvEnabled),
         
         STRING("csv_directory", "performtracker.config.csv_directory", "performance_data",
-            (Supplier<Object>) () -> ConfigAccess.getCsvDirectory(),
+            (Supplier<Object>) ConfigAccess::getCsvDirectory,
             v -> ConfigAccess.setCsvDirectory((String) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultCsvDirectory()),
+            (Supplier<Object>) ConfigAccess::getDefaultCsvDirectory),
         
         BOOL3("network_enabled", "performtracker.config.network_enabled", false,
-            (Supplier<Object>) () -> ConfigAccess.isNetworkEnabled(),
+            (Supplier<Object>) ConfigAccess::isNetworkEnabled,
             v -> ConfigAccess.setNetworkEnabled((Boolean) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultNetworkEnabled()),
+            (Supplier<Object>) ConfigAccess::getDefaultNetworkEnabled),
         
         STRING2("network_endpoint", "performtracker.config.network_endpoint", "http://localhost:31415",
-            (Supplier<Object>) () -> ConfigAccess.getNetworkEndpoint(),
+            (Supplier<Object>) ConfigAccess::getNetworkEndpoint,
             v -> ConfigAccess.setNetworkEndpoint((String) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultNetworkEndpoint()),
+            (Supplier<Object>) ConfigAccess::getDefaultNetworkEndpoint),
         
         BOOL4("collect_fps", "performtracker.config.collect_fps", true,
-            (Supplier<Object>) () -> ConfigAccess.isCollectFps(),
+            (Supplier<Object>) ConfigAccess::isCollectFps,
             v -> ConfigAccess.setCollectFps((Boolean) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultCollectFps()),
+            (Supplier<Object>) ConfigAccess::getDefaultCollectFps),
         
         BOOL5("collect_tps", "performtracker.config.collect_tps", true,
-            (Supplier<Object>) () -> ConfigAccess.isCollectTps(),
+            (Supplier<Object>) ConfigAccess::isCollectTps,
             v -> ConfigAccess.setCollectTps((Boolean) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultCollectTps()),
+            (Supplier<Object>) ConfigAccess::getDefaultCollectTps),
         
         BOOL6("collect_mspt", "performtracker.config.collect_mspt", true,
-            (Supplier<Object>) () -> ConfigAccess.isCollectMspt(),
+            (Supplier<Object>) ConfigAccess::isCollectMspt,
             v -> ConfigAccess.setCollectMspt((Boolean) v),
-            (Supplier<Object>) () -> ConfigAccess.getDefaultCollectMspt());
+            (Supplier<Object>) ConfigAccess::getDefaultCollectMspt);
         
         final String key;
         final String translationKey;

@@ -27,8 +27,4 @@ public class PerformTrackerClient implements ClientModInitializer {
 			LOGGER.warn("Cloth Config API NOT detected - config screen will not be available");
 		}
 	}
-
-	public static ClientTickCollector getClientTickCollector() {
-		return clientTickCollector;
-	}
 }

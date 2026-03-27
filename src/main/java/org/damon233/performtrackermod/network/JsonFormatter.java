@@ -1,12 +1,6 @@
 package org.damon233.performtrackermod.network;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 public class JsonFormatter {
-    private static final Gson GSON = new GsonBuilder()
-            .serializeNulls()
-            .create();
     
     public static String formatMetrics(long timestamp, String sessionId,
                                        int sampleNumber,
@@ -36,11 +30,5 @@ public class JsonFormatter {
         sb.append("}}");
         
         return sb.toString();
-    }
-    
-    public static String formatMetrics(long timestamp, String sessionId,
-                                       int sampleNumber,
-                                       double fps, double tps, double mspt) {
-        return formatMetrics(timestamp, sessionId, sampleNumber, true, fps, true, tps, true, mspt);
     }
 }

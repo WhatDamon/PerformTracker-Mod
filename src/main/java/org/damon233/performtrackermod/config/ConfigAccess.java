@@ -91,10 +91,6 @@ public class ConfigAccess {
         return configData != null ? configData.outputIntervalSeconds : DEFAULT_OUTPUT_INTERVAL_SECONDS;
     }
     
-    public static int getOutputIntervalTicks() {
-        return getOutputIntervalSeconds() * 20;
-    }
-    
     public static boolean isChatEnabled() {
         return configData != null ? configData.chatEnabled : DEFAULT_CHAT_ENABLED;
     }

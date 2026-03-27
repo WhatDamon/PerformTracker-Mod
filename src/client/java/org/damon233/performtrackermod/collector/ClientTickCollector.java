@@ -3,8 +3,6 @@ package org.damon233.performtrackermod.collector;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 
-import org.damon233.performtrackermod.utils.ThreadSafeCounter;
-
 public class ClientTickCollector implements IFpsProvider {
     
     private static final int DEFAULT_WINDOW_SIZE = 60;
@@ -12,7 +10,6 @@ public class ClientTickCollector implements IFpsProvider {
     private final int[] fpsWindow;
     private int windowIndex;
     private int sampleCount;
-    private final ThreadSafeCounter fpsCounter;
     private volatile boolean enabled;
     
     public ClientTickCollector() {
@@ -23,7 +20,6 @@ public class ClientTickCollector implements IFpsProvider {
         this.fpsWindow = new int[Math.max(1, windowSize)];
         this.windowIndex = 0;
         this.sampleCount = 0;
-        this.fpsCounter = new ThreadSafeCounter();
         this.enabled = true;
         
         ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
@@ -46,16 +42,6 @@ public class ClientTickCollector implements IFpsProvider {
         if (sampleCount < fpsWindow.length) {
             sampleCount++;
         }
-        
-        fpsCounter.add(currentFps);
-    }
-    
-    public int getFps() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client == null) {
-            return 0;
-        }
-        return client.getCurrentFps();
     }
     
     public double getAverageFps() {
@@ -69,39 +55,13 @@ public class ClientTickCollector implements IFpsProvider {
         }
         return (double) sum / sampleCount;
     }
-    
-    public double getCounterAverageFps() {
-        return fpsCounter.getAverage();
-    }
-    
-    public boolean isEnabled() {
-        return enabled;
-    }
-    
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-    
+
     public void reset() {
         windowIndex = 0;
         sampleCount = 0;
-        fpsCounter.reset();
-        
+
         for (int i = 0; i < fpsWindow.length; i++) {
             fpsWindow[i] = 0;
         }
-    }
-    
-    public int getSampleCount() {
-        return sampleCount;
-    }
-    
-    public int getWindowSize() {
-        return fpsWindow.length;
-    }
-    
-    public void shutdown() {
-        enabled = false;
-        reset();
     }
 }

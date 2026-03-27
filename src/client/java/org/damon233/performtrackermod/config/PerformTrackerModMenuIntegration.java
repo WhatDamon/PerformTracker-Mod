@@ -12,6 +12,6 @@ public class PerformTrackerModMenuIntegration implements ModMenuApi {
     
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> ClothConfigScreen.createConfigScreen(parent);
+        return ClothConfigScreen::createConfigScreen;
     }
 }

@@ -57,14 +57,6 @@ public class ServerTickCollector {
         return 1000.0 / tps;
     }
 
-    public boolean isEnabled() {
-        return enabled.get();
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled.set(enabled);
-    }
-
     public void reset() {
         tickTimes.clear();
     }

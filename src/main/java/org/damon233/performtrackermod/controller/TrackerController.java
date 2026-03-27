@@ -6,13 +6,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.collector.ServerTickCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
@@ -71,10 +69,6 @@ public class TrackerController {
                 LOGGER.error("Failed to stop tracker on server shutdown", e);
             }
         }
-    }
-
-    public static TrackerController getInstance() {
-        return instance;
     }
 
     public synchronized void start() {
@@ -277,10 +271,6 @@ public class TrackerController {
         if (ConfigAccess.isCollectTps()) values[i++] = metrics.tps();
         if (ConfigAccess.isCollectMspt()) values[i++] = metrics.mspt();
         return values;
-    }
-
-    public TrackerState getState() {
-        return state.get();
     }
 
     public PerformanceMetrics getMetrics() {

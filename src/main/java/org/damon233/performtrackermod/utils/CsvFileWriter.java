@@ -24,14 +24,6 @@ public class CsvFileWriter implements AutoCloseable {
         this.writer = Files.newBufferedWriter(this.filePath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
-    public CsvFileWriter(String customFilename) throws IOException {
-        this.filePath = Path.of(customFilename);
-        if (filePath.getParent() != null) {
-            Files.createDirectories(filePath.getParent());
-        }
-        this.writer = Files.newBufferedWriter(this.filePath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    }
-
     public void writeHeader(String... headers) throws IOException {
         if (headerWritten) return;
         
@@ -58,10 +50,6 @@ public class CsvFileWriter implements AutoCloseable {
         }
         writer.write(sb.toString());
         writer.newLine();
-    }
-
-    public void flush() throws IOException {
-        writer.flush();
     }
 
     public Path getFilePath() {
