@@ -198,7 +198,9 @@ public class SystemInfoCollector {
 
         boolean isArm = osArch.contains("arm") || osArch.contains("aarch64");
         if (osName.contains("linux") && isArm) {
-            return classifyArmDevice(getCpuName());
+            String cpuName = getCpuName();
+            String gpuName = getGpuName();
+            return classifyArmDevice(cpuName, gpuName);
         }
 
         if (osName.contains("windows") ||
@@ -209,24 +211,25 @@ public class SystemInfoCollector {
         return DeviceType.PC;
     }
 
-    private static DeviceType classifyArmDevice(String cpuInfo) {
+    private static DeviceType classifyArmDevice(String cpuInfo, String gpuInfo) {
         loadChipRules();
 
         DeviceType result;
-        if (cpuInfo == null || cpuInfo.equals("Unknown")) {
-            result = DeviceType.EMB;
-        } else {
-            String upper = cpuInfo.toUpperCase();
+        String upper = cpuInfo != null ? cpuInfo.toUpperCase() : "";
+        String gpuUpper = gpuInfo != null ? gpuInfo.toUpperCase() : "";
 
-            if (upper.contains("APPLE")) {
-                result = DeviceType.MAC;
-            } else if (matchesAnyChip(upper, phoneChips)) {
-                result = DeviceType.PHONE;
-            } else if (matchesAnyChip(upper, serverChips)) {
-                result = DeviceType.PC;
-            } else {
-                result = DeviceType.EMB;
-            }
+        if (upper.contains("APPLE")) {
+            result = DeviceType.MAC;
+        } else if (gpuUpper.contains("APPLE")) {
+            result = DeviceType.PHONE;
+        } else if (upper.isEmpty() || cpuInfo == null || cpuInfo.equals("Unknown")) {
+            result = DeviceType.EMB;
+        } else if (matchesAnyChip(upper, phoneChips)) {
+            result = DeviceType.PHONE;
+        } else if (matchesAnyChip(upper, serverChips)) {
+            result = DeviceType.PC;
+        } else {
+            result = DeviceType.EMB;
         }
 
         releaseChipRules();
