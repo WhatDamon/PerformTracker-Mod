@@ -33,5 +33,19 @@
   "performtracker.config.value.false": "否",
   "performtracker.config.usage": "用法：/ptracker config <選項> [值]",
   "performtracker.restart": "度數樞機既更，追蹤重啟。",
-  "performtracker.restart.csv": "度數樞機既更，追蹤重啟。新檔：%s"
+  "performtracker.restart.csv": "度數樞機既更，追蹤重啟。新檔：%s",
+  "performtracker.device.type.PC": "桌上機",
+  "performtracker.device.type.MAC": "林檎機",
+  "performtracker.device.type.EMB": "嵌式機",
+  "performtracker.device.type.PHONE": "掌機",
+  "performtracker.device.type.HWM": "鴻蒙機",
+  "performtracker.device.title": "=== 器械錄 ===",
+  "performtracker.device.type": "類：",
+  "performtracker.device.cpu": "算牒：",
+  "performtracker.device.gpu": "圖牒：",
+  "performtracker.device.cpu_cores": "算核：",
+  "performtracker.device.memory": "戲憶：",
+  "performtracker.device.os": "械網：",
+  "performtracker.device.java": "爪哇：",
+  "performtracker.device.unknown": "不明"
 }

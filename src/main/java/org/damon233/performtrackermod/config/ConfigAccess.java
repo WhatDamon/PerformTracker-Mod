@@ -119,6 +119,28 @@ public class ConfigAccess {
         return getNetworkEndpoint() + API_PATH;
     }
     
+    public static String getLocalServerEndpoint() {
+        return getNetworkEndpoint();
+    }
+    
+    public static int getLocalServerPort() {
+        return parsePort(getNetworkEndpoint());
+    }
+    
+    public static int parsePort(String url) {
+        try {
+            int start = url.indexOf("://") + 3;
+            int colon = url.indexOf(":", start);
+            int slash = url.indexOf("/", start);
+            if (colon > 0) {
+                int end = slash > 0 ? slash : url.length();
+                return Integer.parseInt(url.substring(colon + 1, end));
+            }
+        } catch (Exception ignored) {
+        }
+        return 31415;
+    }
+    
     public static boolean isCollectFps() {
         return configData != null ? configData.collectFps : DEFAULT_COLLECT_FPS;
     }

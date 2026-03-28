@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-"""
-Test server for PerformTracker network transmission testing.
-
-Usage:
-    python3 test_server.py                    # Default port 31415
-    python3 test_server.py --port 9000        # Custom port
-    python3 test_server.py --save logs/       # Save to file
-"""
-
 import argparse
 import json
 import os
@@ -23,46 +14,39 @@ class PerformTrackerHandler:
     def handle(cls, client_socket, client_address):
         try:
             client_socket.settimeout(30)
-            
-            while True:
-                try:
-                    header_data = b''
-                    while b'\r\n\r\n' not in header_data:
-                        chunk = client_socket.recv(1)
-                        if not chunk:
-                            return
-                        header_data += chunk
-                    
-                    header_str = header_data.decode('utf-8')
-                    headers = {}
-                    
-                    for line in header_str.split('\r\n'):
-                        if ':' in line:
-                            key, value = line.split(':', 1)
-                            headers[key.strip().lower()] = value.strip()
-                    
-                    content_length = int(headers.get('content-length', 0))
-                    
-                    if content_length > 0:
-                        body = b''
-                        while len(body) < content_length:
-                            chunk = client_socket.recv(content_length - len(body))
-                            if not chunk:
-                                break
-                            body += chunk
-                        
-                        cls.process_body(body)
-                    
-                    keep_alive = headers.get('connection', '').lower() != 'close'
-                    response = cls.build_response(keep_alive)
-                    client_socket.sendall(response)
-                    
-                    if not keep_alive:
-                        return
-                        
-                except socket.timeout:
+            header_data = b''
+            while b'\r\n\r\n' not in header_data:
+                chunk = client_socket.recv(1)
+                if not chunk:
                     return
-                    
+                header_data += chunk
+            
+            header_str = header_data.decode('utf-8')
+            headers = {}
+            request_line = header_str.split('\r\n')[0]
+            method, path, _ = request_line.split(' ', 2)
+            
+            for line in header_str.split('\r\n')[1:]:
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    headers[key.strip().lower()] = value.strip()
+            
+            if method == 'POST' and path == '/api/metrics':
+                content_length = int(headers.get('content-length', 0))
+                if content_length > 0:
+                    body = b''
+                    while len(body) < content_length:
+                        chunk = client_socket.recv(content_length - len(body))
+                        if not chunk:
+                            break
+                        body += chunk
+                    cls.process_body(body)
+                response = cls.build_response('{"status":"ok"}', keep_alive=True)
+                client_socket.sendall(response)
+            else:
+                response = cls.build_response('{"error":"not found"}', keep_alive=False)
+                client_socket.sendall(response)
+                             
         except Exception as e:
             pass
         finally:
@@ -72,19 +56,19 @@ class PerformTrackerHandler:
                 pass
     
     @classmethod
-    def build_response(cls, keep_alive):
-        body = b'{"status":"ok"}'
+    def build_response(cls, body, keep_alive=True):
+        body_bytes = body.encode('utf-8')
         response = (
             b'HTTP/1.1 200 OK\r\n'
             b'Content-Type: application/json\r\n'
-            b'Content-Length: 11\r\n'
+            b'Content-Length: %d\r\n' % len(body_bytes) +
             b'Access-Control-Allow-Origin: *\r\n'
         )
         if keep_alive:
             response += b'Connection: keep-alive\r\n'
         else:
             response += b'Connection: close\r\n'
-        response += b'\r\n' + body
+        response += b'\r\n' + body_bytes
         return response
     
     @classmethod
@@ -185,11 +169,15 @@ def main():
 ║           PerformTracker Test Server                     ║
 ╠══════════════════════════════════════════════════════════╣
 ║  URL:      http://localhost:{args.port}                        ║
-║  Endpoint: POST /api/metrics                            ║
+║  Endpoints:                                           ║
+║    POST /api/metrics    - Receive metrics            ║
 ╠══════════════════════════════════════════════════════════╣
 ║  Config in Mod Menu:                                    ║
 ║    Enable Network Transmission: ✓                       ║
 ║    HTTP Endpoint URL: http://localhost:{args.port}/api/metrics  ║
+╠══════════════════════════════════════════════════════════╣
+║  Commands:                                              ║
+║    /ptracker deviceinfo  - Show local device info      ║
 ╠══════════════════════════════════════════════════════════╣
 ║  Keep-Alive: Enabled                                   ║
 ║  Threading: Enabled (handles concurrent requests)      ║

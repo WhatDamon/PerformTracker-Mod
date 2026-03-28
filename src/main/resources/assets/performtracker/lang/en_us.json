@@ -33,5 +33,19 @@
   "performtracker.config.value.false": "false",
   "performtracker.config.usage": "Usage: /ptracker config <item> [value]",
   "performtracker.restart": "Metrics config changed, tracking restarted.",
-  "performtracker.restart.csv": "Metrics config changed, tracking restarted. New CSV file: %s"
+  "performtracker.restart.csv": "Metrics config changed, tracking restarted. New CSV file: %s",
+  "performtracker.device.type.PC": "Desktop",
+  "performtracker.device.type.MAC": "Mac",
+  "performtracker.device.type.EMB": "Embedded",
+  "performtracker.device.type.PHONE": "Phone",
+  "performtracker.device.type.HWM": "HarmonyOS Device",
+  "performtracker.device.title": "=== Device Info ===",
+  "performtracker.device.type": "Type:",
+  "performtracker.device.cpu": "CPU:",
+  "performtracker.device.gpu": "GPU:",
+  "performtracker.device.cpu_cores": "CPU Cores:",
+  "performtracker.device.memory": "Memory:",
+  "performtracker.device.os": "OS:",
+  "performtracker.device.java": "Java:",
+  "performtracker.device.unknown": "Unknown"
 }

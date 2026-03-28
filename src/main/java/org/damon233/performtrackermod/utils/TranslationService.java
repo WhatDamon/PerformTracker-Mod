@@ -9,7 +9,6 @@ public class TranslationService {
     private static final String GOLD = "\u00A76";
     private static final String GREEN = "\u00A7a";
     private static final String RED = "\u00A7c";
-    private static final String YELLOW = "\u00A7e";
     private static final String AQUA = "\u00A7b";
     private static final String GRAY = "\u00A77";
     

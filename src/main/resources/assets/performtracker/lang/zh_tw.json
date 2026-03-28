@@ -33,5 +33,19 @@
   "performtracker.config.value.false": "關閉",
   "performtracker.config.usage": "用法：/ptracker config <選項> [值]",
   "performtracker.restart": "指標設定已變更，追蹤已重新啟動。",
-  "performtracker.restart.csv": "指標設定已變更，追蹤已重新啟動。新 CSV 檔案：%s"
+  "performtracker.restart.csv": "指標設定已變更，追蹤已重新啟動。新 CSV 檔案：%s",
+  "performtracker.device.type.PC": "桌上型電腦",
+  "performtracker.device.type.MAC": "Mac",
+  "performtracker.device.type.EMB": "嵌入式裝置",
+  "performtracker.device.type.PHONE": "手機",
+  "performtracker.device.type.HWM": "鴻蒙裝置",
+  "performtracker.device.title": "=== 裝置資訊 ===",
+  "performtracker.device.type": "類型：",
+  "performtracker.device.cpu": "處理器：",
+  "performtracker.device.gpu": "顯示卡：",
+  "performtracker.device.cpu_cores": "核心數：",
+  "performtracker.device.memory": "記憶體：",
+  "performtracker.device.os": "系統：",
+  "performtracker.device.java": "Java：",
+  "performtracker.device.unknown": "未知"
 }

@@ -9,8 +9,10 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.damon233.performtrackermod.PerformTracker;
+import org.damon233.performtrackermod.collector.SystemInfoCollector;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.controller.TrackerController;
+import org.damon233.performtrackermod.data.SystemInfo;
 import org.damon233.performtrackermod.utils.TranslationService;
 
 import java.util.function.Consumer;
@@ -190,6 +192,32 @@ public class PtrackerCommand {
                 return 1;
             });
             ptracker.then(config);
+            
+            ptracker.then(CommandManager.literal("deviceinfo").executes(ctx -> {
+                SystemInfo info = SystemInfoCollector.collect();
+                
+                String title = Text.translatable("performtracker.device.title").getString();
+                String unknown = Text.translatable("performtracker.device.unknown").getString();
+                String typeLabel = Text.translatable("performtracker.device.type").getString();
+                String cpuLabel = Text.translatable("performtracker.device.cpu").getString();
+                String gpuLabel = Text.translatable("performtracker.device.gpu").getString();
+                String coresLabel = Text.translatable("performtracker.device.cpu_cores").getString();
+                String memLabel = Text.translatable("performtracker.device.memory").getString();
+                String osLabel = Text.translatable("performtracker.device.os").getString();
+                String javaLabel = Text.translatable("performtracker.device.java").getString();
+                String typeValue = Text.translatable("performtracker.device.type." + info.deviceType().getCode()).getString();
+                
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(title)), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(typeLabel) + TranslationService.colorValue(typeValue)), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(cpuLabel) + TranslationService.colorValue(info.cpuName() != null ? info.cpuName() : unknown)), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(gpuLabel) + TranslationService.colorValue(info.gpuName() != null ? info.gpuName() : unknown)), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(coresLabel) + TranslationService.colorValue(String.valueOf(info.cpuCores()))), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(memLabel) + TranslationService.colorValue(SystemInfo.formatBytes(info.totalMemoryBytes()))), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(osLabel) + TranslationService.colorValue(info.osName() + " " + info.osVersion() + " (" + info.osArch() + ")")), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(javaLabel) + TranslationService.colorValue(info.javaVersion())), false);
+                return 1;
+            }));
+            
             dispatcher.register(ptracker);
         });
     }

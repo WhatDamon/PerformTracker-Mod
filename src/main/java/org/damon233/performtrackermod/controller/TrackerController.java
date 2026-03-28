@@ -1,7 +1,6 @@
 package org.damon233.performtrackermod.controller;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -12,11 +11,12 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 
+import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.collector.ServerMetricsCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
-import org.damon233.performtrackermod.network.HttpSender;
+import org.damon233.performtrackermod.network.HttpService;
 import org.damon233.performtrackermod.network.JsonFormatter;
 import org.damon233.performtrackermod.utils.CsvWriter;
 import org.damon233.performtrackermod.utils.TranslationService;
@@ -33,14 +33,11 @@ public class TrackerController {
     private final AtomicBoolean active;
 
     private CsvWriter csvWriter;
-    private HttpSender httpSender;
     private String sessionId;
     private long lastOutputTime;
     private int sampleCount;
     private MinecraftServer server;
     private int lastCollectConfig;
-
-    private static TrackerController instance;
 
     public TrackerController(ServerMetricsCollector serverCollector, IFpsProvider fpsProvider) {
         this.serverCollector = serverCollector;
@@ -50,11 +47,9 @@ public class TrackerController {
         this.lastOutputTime = 0;
         this.sampleCount = 0;
         this.csvWriter = null;
-        this.httpSender = null;
         this.sessionId = null;
         this.server = null;
         this.lastCollectConfig = 0;
-        instance = this;
 
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
@@ -89,9 +84,10 @@ public class TrackerController {
         }
 
         if (ConfigAccess.isNetworkEnabled()) {
-            httpSender = new HttpSender();
-            httpSender.initialize(ConfigAccess.getNetworkUrl());
-            httpSender.start();
+            HttpService httpService = PerformTracker.getHttpService();
+            if (httpService != null) {
+                httpService.start();
+            }
         }
 
         state.set(TrackerState.RUNNING);
@@ -119,9 +115,9 @@ public class TrackerController {
             csvWriter = null;
         }
 
-        if (httpSender != null) {
-            httpSender.stop();
-            httpSender = null;
+        HttpService httpService = PerformTracker.getHttpService();
+        if (httpService != null) {
+            httpService.stop();
         }
 
         LOGGER.info("Performance tracking stopped, samples: {}", sampleCount);
@@ -161,8 +157,6 @@ public class TrackerController {
     }
     
     private void restartOutputs() {
-        Path oldFilePath = csvWriter != null ? csvWriter.getFilePath() : null;
-        
         if (csvWriter != null) {
             try {
                 csvWriter.close();
@@ -232,13 +226,16 @@ public class TrackerController {
             csvWriter.enqueue(buildCsvRowValues(metrics));
         }
 
-        if (httpSender != null && sessionId != null) {
-            String json = JsonFormatter.formatMetrics(timestamp, sessionId, sampleCount,
-                ConfigAccess.isCollectFps(), metrics.fps(),
-                ConfigAccess.isCollectTps(), metrics.tps(),
-                ConfigAccess.isCollectMspt(), metrics.mspt(),
-                ConfigAccess.isCollectHeap(), metrics.heapUsed(), metrics.heapMax());
-            httpSender.send(json);
+        if (ConfigAccess.isNetworkEnabled() && sessionId != null) {
+            HttpService httpService = PerformTracker.getHttpService();
+            if (httpService != null) {
+                String json = JsonFormatter.formatMetrics(timestamp, sessionId, sampleCount,
+                    ConfigAccess.isCollectFps(), metrics.fps(),
+                    ConfigAccess.isCollectTps(), metrics.tps(),
+                    ConfigAccess.isCollectMspt(), metrics.mspt(),
+                    ConfigAccess.isCollectHeap(), metrics.heapUsed(), metrics.heapMax());
+                httpService.send(json);
+            }
         }
     }
     
@@ -315,5 +312,9 @@ public class TrackerController {
 
     public int getSampleCount() {
         return sampleCount;
+    }
+    
+    public boolean isNetworkEnabled() {
+        return ConfigAccess.isNetworkEnabled();
     }
 }
