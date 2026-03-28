@@ -95,6 +95,14 @@ public class ClothConfigScreen {
                 .setTooltip(Text.translatable("performtracker.config.collect_heap.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCollectHeap)
                 .build());
+
+        metrics.addEntry(entryBuilder.startBooleanToggle(
+                        Text.translatable("performtracker.config.collect_cpu"),
+                        ConfigAccess.isCollectCpu())
+                .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.collect_cpu.tooltip"))
+                .setSaveConsumer(ConfigAccess::setCollectCpu)
+                .build());
         
         ConfigCategory network = builder.getOrCreateCategory(Text.translatable("performtracker.config.category.network"));
         

@@ -7,7 +7,8 @@ public class JsonFormatter {
                                        boolean collectFps, double fps,
                                        boolean collectTps, double tps,
                                        boolean collectMspt, double mspt,
-                                       boolean collectHeap, double heapUsed, double heapMax) {
+                                       boolean collectHeap, double heapUsed, double heapMax,
+                                       boolean collectCpu, double cpuUsage) {
         StringBuilder sb = new StringBuilder(128);
         sb.append("{\"timestamp\":").append(timestamp);
         sb.append(",\"sessionId\":\"").append(sessionId).append('"');
@@ -33,6 +34,11 @@ public class JsonFormatter {
             if (!first) sb.append(',');
             sb.append("\"heapUsed\":").append(heapUsed);
             sb.append(",\"heapMax\":").append(heapMax);
+            first = false;
+        }
+        if (collectCpu) {
+            if (!first) sb.append(',');
+            sb.append("\"cpu\":").append(cpuUsage);
         }
         sb.append("}}");
         

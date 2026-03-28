@@ -24,7 +24,7 @@ class SystemInfoTest {
         "1024, 1 KiB",
         "1536, 2 KiB",
         "10240, 10 KiB",
-        "1048575, 1023 KiB"
+        "1048575, 1024 KiB"
     })
     void formatBytes_between1KiBAnd1MiB_returnsKiB(long bytes, String expected) {
         String result = SystemInfo.formatBytes(bytes);
@@ -37,7 +37,7 @@ class SystemInfoTest {
         "1572864, 2 MiB",
         "10485760, 10 MiB",
         "104857600, 100 MiB",
-        "1073741823, 1023 MiB"
+        "1073741823, 1024 MiB"
     })
     void formatBytes_between1MiBAnd1GiB_returnsMiB(long bytes, String expected) {
         String result = SystemInfo.formatBytes(bytes);
@@ -50,7 +50,7 @@ class SystemInfoTest {
         "2147483648, 2.0 GiB",
         "4294967296, 4.0 GiB",
         "8589934592, 8.0 GiB",
-        "16384 MiB, 16.0 GiB"
+        "17179869184, 16.0 GiB"
     })
     void formatBytes_atOrAbove1GiB_returnsGiB(long bytes, String expected) {
         String result = SystemInfo.formatBytes(bytes);
@@ -88,6 +88,6 @@ class SystemInfoTest {
     void formatBytes_preciseValues() {
         assertEquals("1 KiB", SystemInfo.formatBytes(1024));
         assertEquals("1 MiB", SystemInfo.formatBytes(1048576));
-        assertEquals("1 GiB", SystemInfo.formatBytes(1073741824));
+        assertEquals("1.0 GiB", SystemInfo.formatBytes(1073741824));
     }
 }

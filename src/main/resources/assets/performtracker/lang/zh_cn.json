@@ -36,6 +36,8 @@
   "performtracker.config.collect_mspt.tooltip": "收集服务器平均 Tick 耗时 (毫秒)",
   "performtracker.config.collect_heap": "收集堆内存",
   "performtracker.config.collect_heap.tooltip": "收集 JVM 堆内存使用情况",
+  "performtracker.config.collect_cpu": "收集 CPU 使用率",
+  "performtracker.config.collect_cpu.tooltip": "收集系统 CPU 使用率百分比",
   "performtracker.config.binary_units": "使用二进制单位 (MiB/GiB)",
   "performtracker.config.binary_units.tooltip": "使用二进制 (1024进制) 单位代替十进制 (1000进制) 单位",
   "performtracker.config.info": "%s: %s (默认: %s)",

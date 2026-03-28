@@ -62,7 +62,8 @@ class ConfigAccessTest {
         "http://example.com:31415",
         "http://sub.example.com:31415",
         "http://localhost:8080",
-        "http://127.0.0.1:31415"
+        "http://127.0.0.1:31415",
+        "http://localhost"
     })
     void validateNetworkEndpoint_withValidUrl_returnsNormalizedUrl(String url) {
         String result = ConfigAccess.validateNetworkEndpoint(url);
@@ -101,7 +102,6 @@ class ConfigAccessTest {
         "ftp://localhost:31415",
         "ws://localhost:31415",
         "httpx://localhost:31415",
-        "http://localhost",
         "not-a-url",
         "http://",
         "://localhost:31415"

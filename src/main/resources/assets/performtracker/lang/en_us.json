@@ -36,6 +36,8 @@
   "performtracker.config.collect_mspt.tooltip": "Collect mean server tick time in milliseconds",
   "performtracker.config.collect_heap": "Collect Heap Memory",
   "performtracker.config.collect_heap.tooltip": "Collect JVM heap memory usage",
+  "performtracker.config.collect_cpu": "Collect CPU Usage",
+  "performtracker.config.collect_cpu.tooltip": "Collect system CPU usage percentage",
   "performtracker.config.binary_units": "Use Binary Units (MiB/GiB)",
   "performtracker.config.binary_units.tooltip": "Use binary (1024-based) units instead of decimal (1000-based)",
   "performtracker.config.info": "%s: %s (default: %s)",

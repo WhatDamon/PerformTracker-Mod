@@ -26,6 +26,7 @@ public class ConfigAccess {
     private static final boolean DEFAULT_COLLECT_TPS = true;
     private static final boolean DEFAULT_COLLECT_MSPT = true;
     private static final boolean DEFAULT_COLLECT_HEAP = true;
+    private static final boolean DEFAULT_COLLECT_CPU = true;
     private static final boolean DEFAULT_BINARY_UNITS = true;
     
     private static ConfigData configData;
@@ -43,6 +44,7 @@ public class ConfigAccess {
         boolean collectTps = DEFAULT_COLLECT_TPS;
         boolean collectMspt = DEFAULT_COLLECT_MSPT;
         boolean collectHeap = DEFAULT_COLLECT_HEAP;
+        boolean collectCpu = DEFAULT_COLLECT_CPU;
         boolean binaryUnits = DEFAULT_BINARY_UNITS;
     }
     
@@ -157,6 +159,10 @@ public class ConfigAccess {
         return configData != null ? configData.collectHeap : DEFAULT_COLLECT_HEAP;
     }
     
+    public static boolean isCollectCpu() {
+        return configData != null ? configData.collectCpu : DEFAULT_COLLECT_CPU;
+    }
+    
     public static boolean isBinaryUnits() {
         return configData != null ? configData.binaryUnits : DEFAULT_BINARY_UNITS;
     }
@@ -209,7 +215,7 @@ public class ConfigAccess {
             return null;
         }
         String trimmed = endpoint.trim();
-        if (!trimmed.matches("^https?://[\\w\\-]+(\\.[\\w\\-]+)*(:\\d+)?$")) {
+        if (!trimmed.matches("^https?://[\\w\\-]+(\\.[\\w\\-]+)*(:\\d+)?(/.*)?$")) {
             return null;
         }
         if (!trimmed.endsWith("/")) {
@@ -246,6 +252,13 @@ public class ConfigAccess {
     public static void setCollectHeap(boolean enabled) {
         if (configData != null) {
             configData.collectHeap = enabled;
+            save();
+        }
+    }
+    
+    public static void setCollectCpu(boolean enabled) {
+        if (configData != null) {
+            configData.collectCpu = enabled;
             save();
         }
     }
@@ -299,6 +312,10 @@ public class ConfigAccess {
     
     public static boolean getDefaultCollectHeap() {
         return DEFAULT_COLLECT_HEAP;
+    }
+    
+    public static boolean getDefaultCollectCpu() {
+        return DEFAULT_COLLECT_CPU;
     }
     
     public static boolean getDefaultBinaryUnits() {

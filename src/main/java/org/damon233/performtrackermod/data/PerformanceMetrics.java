@@ -7,9 +7,10 @@ public record PerformanceMetrics(
     double tps,
     double mspt,
     double heapUsed,
-    double heapMax
+    double heapMax,
+    double cpuUsage
 ) {
-    public static final PerformanceMetrics EMPTY = new PerformanceMetrics(0.0, 0.0, 0.0, 0.0, 0.0);
+    public static final PerformanceMetrics EMPTY = new PerformanceMetrics(0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
 
     public PerformanceMetrics {
         fps = Math.max(0.0, fps);
@@ -17,6 +18,7 @@ public record PerformanceMetrics(
         mspt = Math.max(0.0, mspt);
         heapUsed = Math.max(0.0, heapUsed);
         heapMax = Math.max(0.0, heapMax);
+        if (cpuUsage < 0) cpuUsage = -1.0;
     }
 
     public static String formatValue(double value) {

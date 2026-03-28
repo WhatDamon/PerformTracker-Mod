@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +16,8 @@ class JsonFormatterTest {
             true, 60.5,
             true, 20.0,
             true, 45.2,
-            true, 512.0, 1024.0
+            true, 512.0, 1024.0,
+            true, 45.0
         );
 
         assertTrue(result.contains("\"timestamp\":1234567890"));
@@ -28,6 +28,7 @@ class JsonFormatterTest {
         assertTrue(result.contains("\"mspt\":45.2"));
         assertTrue(result.contains("\"heapUsed\":512.0"));
         assertTrue(result.contains("\"heapMax\":1024.0"));
+        assertTrue(result.contains("\"cpu\":45.0"));
     }
 
     @Test
@@ -37,13 +38,15 @@ class JsonFormatterTest {
             true, 60.5,
             false, 0,
             false, 0,
-            false, 0, 0
+            false, 0, 0,
+            false, 0
         );
 
         assertTrue(result.contains("\"fps\":60.5"));
         assertFalse(result.contains("\"tps\""));
         assertFalse(result.contains("\"mspt\""));
         assertFalse(result.contains("\"heapUsed\""));
+        assertFalse(result.contains("\"cpu\""));
     }
 
     @Test
@@ -53,12 +56,14 @@ class JsonFormatterTest {
             false, 0,
             true, 20.0,
             false, 0,
-            false, 0, 0
+            false, 0, 0,
+            false, 0
         );
 
         assertTrue(result.contains("\"tps\":20.0"));
         assertFalse(result.contains("\"fps\""));
         assertFalse(result.contains("\"mspt\""));
+        assertFalse(result.contains("\"cpu\""));
     }
 
     @Test
@@ -68,7 +73,8 @@ class JsonFormatterTest {
             false, 0,
             false, 0,
             false, 0,
-            true, 256.0, 512.0
+            true, 256.0, 512.0,
+            false, 0
         );
 
         assertTrue(result.contains("\"heapUsed\":256.0"));
@@ -76,6 +82,25 @@ class JsonFormatterTest {
         assertFalse(result.contains("\"fps\""));
         assertFalse(result.contains("\"tps\""));
         assertFalse(result.contains("\"mspt\""));
+        assertFalse(result.contains("\"cpu\""));
+    }
+
+    @Test
+    void formatMetrics_withOnlyCpu_containsCpuField() {
+        String result = JsonFormatter.formatMetrics(
+            1234567890L, "session-123", 1,
+            false, 0,
+            false, 0,
+            false, 0,
+            false, 0, 0,
+            true, 75.5
+        );
+
+        assertTrue(result.contains("\"cpu\":75.5"));
+        assertFalse(result.contains("\"fps\""));
+        assertFalse(result.contains("\"tps\""));
+        assertFalse(result.contains("\"mspt\""));
+        assertFalse(result.contains("\"heapUsed\""));
     }
 
     @Test
@@ -85,7 +110,8 @@ class JsonFormatterTest {
             false, 0,
             false, 0,
             false, 0,
-            false, 0, 0
+            false, 0, 0,
+            false, 0
         );
 
         assertTrue(result.contains("\"timestamp\":1234567890"));
@@ -95,6 +121,7 @@ class JsonFormatterTest {
         assertFalse(result.contains("\"tps\""));
         assertFalse(result.contains("\"mspt\""));
         assertFalse(result.contains("\"heapUsed\""));
+        assertFalse(result.contains("\"cpu\""));
     }
 
     @Test
@@ -104,7 +131,8 @@ class JsonFormatterTest {
             true, 120.0,
             true, 20.0,
             true, 50.5,
-            true, 1024.0, 2048.0
+            true, 1024.0, 2048.0,
+            true, 60.0
         );
 
         assertTrue(result.startsWith("{"));
@@ -171,8 +199,7 @@ class JsonFormatterTest {
     @ParameterizedTest
     @CsvSource({
         "hello, hello",
-        "test value, test value",
-        'a' + ", a"
+        "test value, test value"
     })
     void escapeJson_withSimpleStrings_unchanged(String input, String expected) {
         String result = JsonFormatter.escapeJson(input);

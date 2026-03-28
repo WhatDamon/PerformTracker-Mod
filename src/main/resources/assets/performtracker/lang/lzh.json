@@ -36,6 +36,8 @@
   "performtracker.config.collect_mspt.tooltip": "稽伺器每刻均耗 (毫秒)",
   "performtracker.config.collect_heap": "稽察堆區之存",
   "performtracker.config.collect_heap.tooltip": "稽 JVM 堆區之存用",
+  "performtracker.config.collect_cpu": "稽察算牒之用",
+  "performtracker.config.collect_cpu.tooltip": "稽伺器算牒用百分之率",
   "performtracker.config.binary_units": "採二冪之度 (MiB/GiB)",
   "performtracker.config.binary_units.tooltip": "以二冪之度 (一零二四進) 代十冪之度 (一零零零進)",
   "performtracker.config.info": "%s: %s (常設: %s)",

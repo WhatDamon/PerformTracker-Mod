@@ -111,6 +111,12 @@ class PerformTrackerHandler:
                 heap_used = d.get('heapUsed', 0)
                 heap_max = d.get('heapMax', 0)
                 print(f"  Heap:  {cls.format_memory(heap_used)} / {cls.format_memory(heap_max)}")
+            if 'cpu' in d:
+                cpu = d.get('cpu', -1)
+                if cpu >= 0:
+                    print(f"  CPU:   {cpu:.1f}%")
+                else:
+                    print(f"  CPU:   N/A")
         
         print("=" * 60)
     
