@@ -26,6 +26,7 @@ public class ClothConfigScreen {
                 .setDefaultValue(5)
                 .setMin(1)
                 .setMax(3600)
+                .setTooltip(Text.translatable("performtracker.config.output_interval.tooltip"))
                 .setSaveConsumer(ConfigAccess::setOutputIntervalSeconds)
                 .build());
         
@@ -33,6 +34,7 @@ public class ClothConfigScreen {
                 Text.translatable("performtracker.config.chat_enabled"),
                 ConfigAccess.isChatEnabled())
                 .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.chat_enabled.tooltip"))
                 .setSaveConsumer(ConfigAccess::setChatEnabled)
                 .build());
         
@@ -40,6 +42,7 @@ public class ClothConfigScreen {
                 Text.translatable("performtracker.config.csv_enabled"),
                 ConfigAccess.isCsvEnabled())
                 .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.csv_enabled.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCsvEnabled)
                 .build());
         
@@ -47,6 +50,7 @@ public class ClothConfigScreen {
                 Text.translatable("performtracker.config.csv_directory"),
                 ConfigAccess.getCsvDirectory())
                 .setDefaultValue("performance_data")
+                .setTooltip(Text.translatable("performtracker.config.csv_directory.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCsvDirectory)
                 .build());
 
@@ -54,6 +58,7 @@ public class ClothConfigScreen {
                         Text.translatable("performtracker.config.binary_units"),
                         ConfigAccess.isBinaryUnits())
                 .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.binary_units.tooltip"))
                 .setSaveConsumer(ConfigAccess::setBinaryUnits)
                 .build());
 
@@ -63,6 +68,7 @@ public class ClothConfigScreen {
                         Text.translatable("performtracker.config.collect_fps"),
                         ConfigAccess.isCollectFps())
                 .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.collect_fps.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCollectFps)
                 .build());
 
@@ -70,6 +76,7 @@ public class ClothConfigScreen {
                         Text.translatable("performtracker.config.collect_tps"),
                         ConfigAccess.isCollectTps())
                 .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.collect_tps.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCollectTps)
                 .build());
 
@@ -77,6 +84,7 @@ public class ClothConfigScreen {
                         Text.translatable("performtracker.config.collect_mspt"),
                         ConfigAccess.isCollectMspt())
                 .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.collect_mspt.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCollectMspt)
                 .build());
 
@@ -84,6 +92,7 @@ public class ClothConfigScreen {
                         Text.translatable("performtracker.config.collect_heap"),
                         ConfigAccess.isCollectHeap())
                 .setDefaultValue(true)
+                .setTooltip(Text.translatable("performtracker.config.collect_heap.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCollectHeap)
                 .build());
         
@@ -93,6 +102,7 @@ public class ClothConfigScreen {
                 Text.translatable("performtracker.config.network_enabled"),
                 ConfigAccess.isNetworkEnabled())
                 .setDefaultValue(false)
+                .setTooltip(Text.translatable("performtracker.config.network_enabled.tooltip"))
                 .setSaveConsumer(ConfigAccess::setNetworkEnabled)
                 .build());
         
@@ -100,6 +110,7 @@ public class ClothConfigScreen {
                 Text.translatable("performtracker.config.network_endpoint"),
                 ConfigAccess.getNetworkEndpoint())
                 .setDefaultValue("http://localhost:31415")
+                .setTooltip(Text.translatable("performtracker.config.network_endpoint.tooltip"))
                 .setSaveConsumer(newValue -> {
                     if (ConfigAccess.isValidNetworkEndpoint(newValue)) {
                         ConfigAccess.setNetworkEndpoint(newValue);
