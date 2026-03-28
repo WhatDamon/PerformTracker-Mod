@@ -1,0 +1,31 @@
+# =============================================================================
+# ARM Server Classification Rules
+# Last update: 2026/03/29
+# =============================================================================
+# DO NOT MODIFY THIS FILE! IF YOU ARE A REGULAR USER
+# Modifying this file will render the results unreliable.
+# =============================================================================
+
+# AWS Graviton
+GRAVITON
+
+# ARM Neoverse Architecture
+NEOVERSE
+
+# Ampere Computing
+AMPERE
+ALTRA
+COBALT
+
+# Marvell
+THUNDERX
+OCTEON
+
+# Huawei HiSilicon
+KUNPENG
+HI16
+
+# Phytium
+PHYTIUM
+FT2000
+FT2500

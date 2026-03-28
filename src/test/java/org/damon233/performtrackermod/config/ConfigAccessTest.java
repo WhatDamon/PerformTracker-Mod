@@ -166,4 +166,15 @@ class ConfigAccessTest {
         String result = ConfigAccess.validateNetworkEndpoint(url);
         assertNotNull(result);
     }
+
+    @Test
+    void getDefaultCollectCpu_returnsTrue() {
+        assertTrue(ConfigAccess.getDefaultCollectCpu(),
+            "Default collectCpu should be true");
+    }
+
+    @Test
+    void getDefaultCollectCpu_returnsExpectedValue() {
+        assertEquals(true, ConfigAccess.getDefaultCollectCpu());
+    }
 }

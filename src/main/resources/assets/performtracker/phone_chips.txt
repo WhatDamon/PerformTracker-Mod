@@ -1,0 +1,38 @@
+# =============================================================================
+# ARM Phone Classification Rules
+# Last update: 2026/03/29
+# =============================================================================
+# DO NOT MODIFY THIS FILE! IF YOU ARE A REGULAR USER
+# Modifying this file will render the results unreliable.
+# =============================================================================
+
+# Qualcomm Snapdragon
+SM8
+SM7
+SM6
+SM4
+SDM8
+SDM7
+SDM6
+SNAPDRAGON 8
+SNAPDRAGON 7
+SNAPDRAGON 6
+
+# MediaTek
+MT67
+MT68
+MT69
+DIMENSITY
+HELIO
+
+# Samsung Exynos
+EXYNOS
+
+# Huawei HiSilicon
+KIRIN
+
+# Google Tensor
+TENSOR
+
+# Unisoc
+UNISOC
