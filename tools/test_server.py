@@ -169,20 +169,20 @@ def main():
 ║           PerformTracker Test Server                     ║
 ╠══════════════════════════════════════════════════════════╣
 ║  URL:      http://localhost:{args.port}                        ║
-║  Endpoints:                                           ║
-║    POST /api/metrics    - Receive metrics            ║
+║  Endpoints:                                              ║
+║    POST /api/metrics    - Receive metrics                ║
 ╠══════════════════════════════════════════════════════════╣
-║  Config in Mod Menu:                                    ║
-║    Enable Network Transmission: ✓                       ║
-║    HTTP Endpoint URL: http://localhost:{args.port}/api/metrics  ║
+║  Config in Mod Menu:                                     ║
+║    Enable Network Transmission: ✓                        ║
+║    HTTP Endpoint URL: http://localhost:{args.port}             ║
 ╠══════════════════════════════════════════════════════════╣
-║  Commands:                                              ║
-║    /ptracker deviceinfo  - Show local device info      ║
+║  Commands:                                               ║
+║    /ptracker deviceinfo  - Show local device info        ║
 ╠══════════════════════════════════════════════════════════╣
-║  Keep-Alive: Enabled                                   ║
-║  Threading: Enabled (handles concurrent requests)      ║
+║  Keep-Alive: Enabled                                     ║
+║  Threading: Enabled (handles concurrent requests)        ║
 ╠══════════════════════════════════════════════════════════╣
-║  Press Ctrl+C to stop                                   ║
+║  Press Ctrl+C to stop                                    ║
 ╚══════════════════════════════════════════════════════════╝
 """)
     
