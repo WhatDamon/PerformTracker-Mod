@@ -70,6 +70,10 @@ public class TrackerController {
         if (state.get() == TrackerState.RUNNING) {
             throw new IllegalStateException("error.already_running");
         }
+        
+        if (!hasAnyMetricEnabled()) {
+            throw new IllegalStateException("error.no_metrics_enabled");
+        }
 
         this.sessionId = generateSessionId();
 
@@ -97,6 +101,14 @@ public class TrackerController {
         serverCollector.reset();
         
         LOGGER.info("Performance tracking started, sessionId: {}", sessionId);
+    }
+
+    private boolean hasAnyMetricEnabled() {
+        return ConfigAccess.isCollectFps() ||
+                ConfigAccess.isCollectTps() ||
+                ConfigAccess.isCollectMspt() ||
+                ConfigAccess.isCollectHeap() ||
+                ConfigAccess.isCollectCpu();
     }
 
     public synchronized void stop() {

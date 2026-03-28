@@ -3,7 +3,7 @@
   "modmenu.summaryTranslation.performtracker": "稽察遊藝效能之度數",
   "performtracker.start.success": "效能追蹤既啟, 錄文存於: %s",
   "performtracker.stop.success": "效能追蹤既訖, 凡集樣 %d 枚。",
-  "performtracker.error.not_initialized": "追蹤器未始",
+  "performtracker.error.not_initialized": "追蹤器未始\n恐未啟度數, 望君於置設啟其一。",
   "performtracker.error.already_running": "追蹤器方行中",
   "performtracker.error.not_running": "追蹤器未運",
   "performtracker.command.start": "啟",

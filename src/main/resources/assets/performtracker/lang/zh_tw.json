@@ -3,7 +3,7 @@
   "modmenu.summaryTranslation.performtracker": "追蹤遊戲效能指標",
   "performtracker.start.success": "效能追蹤已啟動。輸出已儲存至: %s",
   "performtracker.stop.success": "效能追蹤已停止。共收集 %d 筆樣本。",
-  "performtracker.error.not_initialized": "追蹤器未初始化",
+  "performtracker.error.not_initialized": "追蹤器未初始化\n或因为未啟用任何指標。請在設定中至少啟用一項指標。",
   "performtracker.error.already_running": "追蹤器已在執行中",
   "performtracker.error.not_running": "追蹤器未在執行",
   "performtracker.command.start": "啟動",
