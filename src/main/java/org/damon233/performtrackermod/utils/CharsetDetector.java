@@ -77,7 +77,7 @@ public class CharsetDetector {
         return parseLocaleToCharset(locale);
     }
     
-    private static Charset parseLocaleToCharset(String locale) {
+    static Charset parseLocaleToCharset(String locale) {
         if (locale == null) return null;
         
         locale = locale.trim().toUpperCase();
@@ -100,7 +100,7 @@ public class CharsetDetector {
         return null;
     }
     
-    private static Charset codepageToCharset(int codepage) {
+    static Charset codepageToCharset(int codepage) {
         return switch (codepage) {
             case 65001 -> StandardCharsets.UTF_8;
             case 936 -> Charset.forName("GBK");

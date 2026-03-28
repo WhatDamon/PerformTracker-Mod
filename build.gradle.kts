@@ -51,6 +51,10 @@ dependencies {
 	
 	// Mod Menu API (compile-only - for config screen integration)
 	modCompileOnly("com.terraformersmc:modmenu:${providers.gradleProperty("modmenu_version").get()}")
+
+	// JUnit 5 for testing
+	testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.processResources {
@@ -81,6 +85,10 @@ tasks.jar {
 	from("LICENSE") {
 		rename { "${it}_${base.archivesName.get()}" }
 	}
+}
+
+tasks.test {
+	useJUnitPlatform()
 }
 
 // configure the maven publication
