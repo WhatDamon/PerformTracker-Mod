@@ -309,7 +309,7 @@ public class TrackerController {
     }
 
     public PerformanceMetrics getMetrics() {
-        double fps = ConfigAccess.isCollectFps() ? fpsProvider.getAverageFps() : 0;
+        double fps = (fpsProvider != null && ConfigAccess.isCollectFps()) ? fpsProvider.getAverageFps() : 0;
         double tps = ConfigAccess.isCollectTps() ? serverCollector.getTps() : 0;
         double mspt = ConfigAccess.isCollectMspt() ? serverCollector.getMspt() : 0;
         double heapUsed = ConfigAccess.isCollectHeap() ? serverCollector.getHeapUsedMB() : 0;
