@@ -21,6 +21,10 @@ public class SystemInfoCollector {
     private static List<String> phoneChips;
     private static List<String> serverChips;
 
+    // Permanent caches - CPU info and memory never change at runtime
+    private static String cachedCpuName;
+    private static long cachedPhysicalMemory = -1;
+
     public static SystemInfo collect() {
         if (cachedInfo != null) {
             return cachedInfo;
@@ -71,18 +75,23 @@ public class SystemInfoCollector {
     }
 
     private static String getCpuName() {
+        if (cachedCpuName != null) {
+            return cachedCpuName;
+        }
+
         String osName = System.getProperty("os.name").toLowerCase();
 
         if (osName.contains("windows")) {
-            return getWindowsCpuName();
+            cachedCpuName = getWindowsCpuName();
+        } else if (osName.contains("linux")) {
+            cachedCpuName = getLinuxCpuName();
+        } else if (osName.contains("mac") || osName.contains("darwin")) {
+            cachedCpuName = getMacCpuName();
+        } else {
+            cachedCpuName = System.getProperty("os.arch");
         }
-        if (osName.contains("linux")) {
-            return getLinuxCpuName();
-        }
-        if (osName.contains("mac") || osName.contains("darwin")) {
-            return getMacCpuName();
-        }
-        return System.getProperty("os.arch");
+
+        return cachedCpuName;
     }
 
     private static String getWindowsCpuName() {
@@ -156,6 +165,10 @@ public class SystemInfoCollector {
     }
 
     private static long getPhysicalMemory() {
+        if (cachedPhysicalMemory > 0) {
+            return cachedPhysicalMemory;
+        }
+
         String osName = System.getProperty("os.name").toLowerCase();
 
         if (osName.contains("linux")) {
@@ -166,7 +179,8 @@ public class SystemInfoCollector {
                         String[] parts = line.split("\\s+");
                         if (parts.length >= 2) {
                             try {
-                                return Long.parseLong(parts[1]) * 1024;
+                                cachedPhysicalMemory = Long.parseLong(parts[1]) * 1024;
+                                return cachedPhysicalMemory;
                             } catch (NumberFormatException ignored) {
                             }
                         }
@@ -180,12 +194,14 @@ public class SystemInfoCollector {
             java.lang.reflect.Method method = osBean.getClass().getMethod("getTotalMemorySize");
             Object result = method.invoke(osBean);
             if (result instanceof Number num && num.longValue() > 0) {
-                return num.longValue();
+                cachedPhysicalMemory = num.longValue();
+                return cachedPhysicalMemory;
             }
         } catch (Exception ignored) {
         }
 
-        return Runtime.getRuntime().maxMemory();
+        cachedPhysicalMemory = Runtime.getRuntime().maxMemory();
+        return cachedPhysicalMemory;
     }
 
     private static DeviceType classifyDevice() {
@@ -214,9 +230,9 @@ public class SystemInfoCollector {
     private static DeviceType classifyArmDevice(String cpuInfo, String gpuInfo) {
         loadChipRules();
 
-        DeviceType result;
         String upper = cpuInfo != null ? cpuInfo.toUpperCase() : "";
         String gpuUpper = gpuInfo != null ? gpuInfo.toUpperCase() : "";
+        DeviceType result;
 
         if (upper.contains("APPLE")) {
             result = DeviceType.MAC;
