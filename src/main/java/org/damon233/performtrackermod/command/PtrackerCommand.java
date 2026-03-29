@@ -132,7 +132,7 @@ public class PtrackerCommand {
                     return 0;
                 }
                 try {
-                    c.start();
+                    c.start(ctx.getSource().getServer());
                     ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.start.success", c.getCsvFilePath()), false);
                     return 1;
                 } catch (IllegalStateException e) {

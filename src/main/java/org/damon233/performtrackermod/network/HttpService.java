@@ -72,10 +72,34 @@ public class HttpService {
     public synchronized void start() {
         startSender();
     }
-    
+
+    public synchronized boolean tryStartServer() {
+        if (serverRunning.get()) {
+            return true;
+        }
+        return startServerInternal();
+    }
+
     public synchronized void startServer() {
         if (!serverRunning.get()) {
             startServerInternal();
+        }
+    }
+
+    private boolean startServerInternal() {
+        try {
+            server = HttpServer.create(new InetSocketAddress(localPort), 0);
+            server.setExecutor(serverExecutor);
+
+            server.createContext("/api/deviceinfo", new DeviceInfoHandler());
+
+            server.start();
+            serverRunning.set(true);
+            LOGGER.info("HttpService server started on port {}", localPort);
+            return true;
+        } catch (IOException e) {
+            LOGGER.error("Failed to start HttpService server: {}", e.getMessage());
+            return false;
         }
     }
     
@@ -85,26 +109,11 @@ public class HttpService {
             senderExecutor.execute(this::sendLoop);
         }
     }
-    
-    private void startServerInternal() {
-        try {
-            server = HttpServer.create(new InetSocketAddress(localPort), 0);
-            server.setExecutor(serverExecutor);
-            
-            server.createContext("/api/deviceinfo", new DeviceInfoHandler());
-            
-            server.start();
-            serverRunning.set(true);
-            LOGGER.info("HttpService server started on port {}", localPort);
-        } catch (IOException e) {
-            LOGGER.error("Failed to start HttpService server", e);
-        }
-    }
-    
+
     public synchronized void stop() {
         stopSender();
     }
-    
+
     public synchronized void stopServer() {
         if (server != null && serverRunning.compareAndSet(true, false)) {
             server.stop(0);

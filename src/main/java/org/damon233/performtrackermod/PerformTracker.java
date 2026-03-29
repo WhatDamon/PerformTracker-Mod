@@ -35,7 +35,6 @@ public class PerformTracker implements ModInitializer {
 		if (ConfigAccess.isNetworkEnabled()) {
 			httpService = new HttpService();
 			httpService.initialize(ConfigAccess.getNetworkUrl());
-			httpService.startServer();
 		}
 		
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {

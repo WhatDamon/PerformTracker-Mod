@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.collector.ServerMetricsCollector;
@@ -66,16 +67,17 @@ public class TrackerController {
         }
     }
 
-    public synchronized void start() {
+    public synchronized void start(MinecraftServer server) {
         if (state.get() == TrackerState.RUNNING) {
             throw new IllegalStateException("error.already_running");
         }
-        
+
         if (!hasAnyMetricEnabled()) {
             throw new IllegalStateException("error.no_metrics_enabled");
         }
 
         this.sessionId = generateSessionId();
+        this.server = server;
 
         if (ConfigAccess.isCsvEnabled()) {
             try {
@@ -89,17 +91,20 @@ public class TrackerController {
 
         if (ConfigAccess.isNetworkEnabled()) {
             HttpService httpService = PerformTracker.getHttpService();
-            if (httpService != null) {
-                httpService.start();
+            if (httpService != null && !httpService.tryStartServer()) {
+                server.getPlayerManager().getPlayerList().forEach(player ->
+                    player.sendMessage(TranslationService.chatError("performtracker.error.http_server_failed", ConfigAccess.getLocalServerPort()))
+                );
             }
+            httpService.start();
         }
 
         state.set(TrackerState.RUNNING);
         active.set(true);
         lastCollectConfig = getCollectConfigHash();
-        
+
         serverCollector.reset();
-        
+
         LOGGER.info("Performance tracking started, sessionId: {}", sessionId);
     }
 
