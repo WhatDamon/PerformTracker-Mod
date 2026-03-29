@@ -160,11 +160,25 @@ class ConfigAccessTest {
         "http://localhost:443",
         "http://localhost:8080",
         "http://localhost:3000",
-        "http://localhost:9000"
+        "http://localhost:9000",
+        "http://localhost:1",
+        "http://localhost:65535"
     })
     void validateNetworkEndpoint_variousPorts_accepted(String url) {
         String result = ConfigAccess.validateNetworkEndpoint(url);
         assertNotNull(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "http://localhost:0",
+        "http://localhost:65536",
+        "http://localhost:-1",
+        "http://localhost:100000"
+    })
+    void validateNetworkEndpoint_invalidPortRange_returnsNull(String url) {
+        String result = ConfigAccess.validateNetworkEndpoint(url);
+        assertNull(result);
     }
 
     @Test

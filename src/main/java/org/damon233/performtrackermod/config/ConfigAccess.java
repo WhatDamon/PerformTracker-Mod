@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ConfigAccess {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
@@ -28,6 +30,8 @@ public class ConfigAccess {
     private static final boolean DEFAULT_COLLECT_HEAP = true;
     private static final boolean DEFAULT_COLLECT_CPU = true;
     private static final boolean DEFAULT_BINARY_UNITS = true;
+
+    private static final Pattern HTTP_PATTERN = Pattern.compile("^https?://[\\w\\-]+(\\.[\\w\\-]+)*(:\\d+)?(/.*)?$");
     
     private static ConfigData configData;
     private static boolean initialized = false;
@@ -209,13 +213,18 @@ public class ConfigAccess {
             save();
         }
     }
-    
+
     public static String validateNetworkEndpoint(String endpoint) {
         if (endpoint == null || endpoint.isBlank()) {
             return null;
         }
         String trimmed = endpoint.trim();
-        if (!trimmed.matches("^https?://[\\w\\-]+(\\.[\\w\\-]+)*(:\\d+)?(/.*)?$")) {
+        Matcher matcher = HTTP_PATTERN.matcher(trimmed);
+        if (!matcher.matches()) {
+            return null;
+        }
+        int port = parsePort(trimmed);
+        if (port < 1 || port > 65535) {
             return null;
         }
         if (!trimmed.endsWith("/")) {
