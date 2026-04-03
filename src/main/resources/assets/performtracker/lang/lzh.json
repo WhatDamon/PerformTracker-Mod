@@ -47,8 +47,6 @@
   "performtracker.config.value.true": "然",
   "performtracker.config.value.false": "否",
   "performtracker.config.usage": "用法: /ptracker config <選項> [值]",
-  "performtracker.restart": "度數樞機既更，追蹤重啟。",
-  "performtracker.restart.csv": "度數樞機既更，追蹤重啟。新檔: %s",
   "performtracker.device.type.PC": "桌上機",
   "performtracker.device.type.MAC": "林檎機",
   "performtracker.device.type.EMB": "嵌式機",

@@ -47,8 +47,6 @@
   "performtracker.config.value.true": "true",
   "performtracker.config.value.false": "false",
   "performtracker.config.usage": "Usage: /ptracker config <item> [value]",
-  "performtracker.restart": "Metrics config changed, tracking restarted.",
-  "performtracker.restart.csv": "Metrics config changed, tracking restarted. New CSV file: %s",
   "performtracker.device.type.PC": "Desktop",
   "performtracker.device.type.MAC": "Mac",
   "performtracker.device.type.EMB": "Embedded",

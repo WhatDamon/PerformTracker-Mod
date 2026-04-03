@@ -106,8 +106,8 @@ public class CsvWriter implements AutoCloseable {
         sb.append(Instant.now().toEpochMilli());
         for (Object v : values) {
             sb.append(",");
-            if (v != null) {
-                String str = v instanceof Double d && Double.isInfinite(d) ? "infinite" : v.toString();
+            if (v != null && !(v instanceof Double d && Double.isNaN(d))) {
+                String str = v instanceof Double dd && Double.isInfinite(dd) ? "infinite" : v.toString();
                 if (str.contains(",") || str.contains("\"") || str.contains("\n")) {
                     sb.append("\"").append(str.replace("\"", "\"\"")).append("\"");
                 } else {

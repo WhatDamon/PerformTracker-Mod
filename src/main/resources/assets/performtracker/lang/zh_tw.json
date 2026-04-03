@@ -47,8 +47,6 @@
   "performtracker.config.value.true": "開啟",
   "performtracker.config.value.false": "關閉",
   "performtracker.config.usage": "用法: /ptracker config <選項> [值]",
-  "performtracker.restart": "指標設定已變更，追蹤已重新啟動。",
-  "performtracker.restart.csv": "指標設定已變更, 追蹤已重新啟動。新 CSV 檔案: %s",
   "performtracker.device.type.PC": "桌上型電腦",
   "performtracker.device.type.MAC": "Mac",
   "performtracker.device.type.EMB": "嵌入式裝置",

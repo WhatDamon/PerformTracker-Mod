@@ -162,49 +162,11 @@ public class TrackerController {
                (ConfigAccess.isCollectTps() ? 2 : 0) |
                (ConfigAccess.isCollectMspt() ? 4 : 0) |
                (ConfigAccess.isCollectHeap() ? 8 : 0) |
-               (ConfigAccess.isCollectCpu() ? 16 : 0);
+                (ConfigAccess.isCollectCpu() ? 16 : 0);
     }
-    
+
     private String[] buildCsvHeaders() {
-        StringBuilder sb = new StringBuilder();
-        if (ConfigAccess.isCollectFps()) sb.append("fps,");
-        if (ConfigAccess.isCollectTps()) sb.append("tps,");
-        if (ConfigAccess.isCollectMspt()) sb.append("mspt,");
-        if (ConfigAccess.isCollectHeap()) sb.append("heap_used,heap_max,");
-        if (ConfigAccess.isCollectCpu()) sb.append("cpu,");
-        if (sb.length() > 0) sb.setLength(sb.length() - 1);
-        return sb.toString().split(",");
-    }
-    
-    private void restartOutputs() {
-        if (csvWriter != null) {
-            try {
-                csvWriter.close();
-            } catch (IOException ignored) {
-            }
-            csvWriter = null;
-        }
-        
-        boolean csvEnabled = ConfigAccess.isCsvEnabled();
-        if (csvEnabled) {
-            try {
-                csvWriter = new CsvWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
-                csvWriter.writeHeader(buildCsvHeaders());
-                csvWriter.start();
-            } catch (IOException e) {
-                LOGGER.error("Failed to restart CSV writer", e);
-            }
-        }
-        
-        sampleCount = 0;
-        
-        if (ConfigAccess.isChatEnabled() && server != null) {
-            String key = csvEnabled ? "restart.csv" : "restart";
-            Object[] args = csvEnabled ? new Object[]{csvWriter.getFilePath().toString()} : new Object[]{};
-            server.getPlayerManager().getPlayerList().forEach(player -> 
-                player.sendMessage(TranslationService.chat(key, args))
-            );
-        }
+        return new String[]{"fps", "tps", "mspt", "heap_used", "heap_max", "cpu"};
     }
 
     private void onServerTick(MinecraftServer server) {
@@ -212,13 +174,6 @@ public class TrackerController {
 
         if (!active.get()) {
             return;
-        }
-
-        int currentConfig = getCollectConfigHash();
-        if (currentConfig != lastCollectConfig) {
-            LOGGER.info("Collect config changed, restarting tracking");
-            lastCollectConfig = currentConfig;
-            restartOutputs();
         }
 
         long currentTime = System.currentTimeMillis();
@@ -294,24 +249,14 @@ public class TrackerController {
     }
     
     private Object[] buildCsvRowValues(PerformanceMetrics metrics) {
-        int count = 0;
-        if (ConfigAccess.isCollectFps()) count++;
-        if (ConfigAccess.isCollectTps()) count++;
-        if (ConfigAccess.isCollectMspt()) count++;
-        if (ConfigAccess.isCollectHeap()) count += 2;
-        if (ConfigAccess.isCollectCpu()) count++;
-        
-        Object[] values = new Object[count];
-        int i = 0;
-        if (ConfigAccess.isCollectFps()) values[i++] = metrics.fps();
-        if (ConfigAccess.isCollectTps()) values[i++] = metrics.tps();
-        if (ConfigAccess.isCollectMspt()) values[i++] = metrics.mspt();
-        if (ConfigAccess.isCollectHeap()) {
-            values[i++] = metrics.heapUsed();
-            values[i++] = metrics.heapMax();
-        }
-        if (ConfigAccess.isCollectCpu()) values[i++] = metrics.cpuUsage();
-        return values;
+        return new Object[]{
+            ConfigAccess.isCollectFps() ? metrics.fps() : Double.NaN,
+            ConfigAccess.isCollectTps() ? metrics.tps() : Double.NaN,
+            ConfigAccess.isCollectMspt() ? metrics.mspt() : Double.NaN,
+            ConfigAccess.isCollectHeap() ? metrics.heapUsed() : Double.NaN,
+            ConfigAccess.isCollectHeap() ? metrics.heapMax() : Double.NaN,
+            ConfigAccess.isCollectCpu() ? metrics.cpuUsage() : Double.NaN
+        };
     }
 
     public PerformanceMetrics getMetrics() {
