@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.PerformTracker;
@@ -44,7 +45,8 @@ public class TrackerController {
     private String currentOutputFormat;
 
     private final Object[] rowValuesBuffer = new Object[6];
-    private final StringBuilder chatMessageBuilder = new StringBuilder(256);
+    private final MutableText[] chatMessageParts = new MutableText[10];
+    private int chatMessagePartCount;
 
     public TrackerController(ServerMetricsCollector serverCollector, IFpsProvider fpsProvider) {
         this.serverCollector = serverCollector;
@@ -199,9 +201,9 @@ public class TrackerController {
         long timestamp = System.currentTimeMillis();
 
         if (ConfigAccess.isChatEnabled() && server != null) {
-            String chatMsg = buildChatMessage(metrics);
+            MutableText chatMsg = TranslationService.chatWithMetrics(buildChatMessage(metrics));
             server.getPlayerManager().getPlayerList().forEach(player -> 
-                player.sendMessage(TranslationService.chatWithMetrics(chatMsg))
+                player.sendMessage(chatMsg)
             );
         }
 
@@ -223,37 +225,35 @@ public class TrackerController {
         }
     }
     
-    private String buildChatMessage(PerformanceMetrics metrics) {
-        chatMessageBuilder.setLength(0);
-        boolean first = true;
+    private MutableText buildChatMessage(PerformanceMetrics metrics) {
+        chatMessagePartCount = 0;
         if (ConfigAccess.isCollectFps()) {
-            if (!first) chatMessageBuilder.append(" | ");
-            chatMessageBuilder.append(TranslationService.colorLabel("FPS: ")).append(TranslationService.colorValue(String.format("%.1f", metrics.fps())));
-            first = false;
+            addChatPart("FPS: ", String.format("%.1f", metrics.fps()));
         }
         if (ConfigAccess.isCollectTps()) {
-            if (!first) chatMessageBuilder.append(" | ");
-            chatMessageBuilder.append(TranslationService.colorLabel("TPS: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.tps())));
-            first = false;
+            addChatPart("TPS: ", PerformanceMetrics.formatValue(metrics.tps()));
         }
         if (ConfigAccess.isCollectMspt()) {
-            if (!first) chatMessageBuilder.append(" | ");
-            chatMessageBuilder.append(TranslationService.colorLabel("MSPT: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.mspt())));
-            first = false;
+            addChatPart("MSPT: ", PerformanceMetrics.formatValue(metrics.mspt()));
         }
         if (ConfigAccess.isCollectHeap()) {
-            if (!first) chatMessageBuilder.append(" | ");
-            chatMessageBuilder.append(TranslationService.colorLabel("Heap: "))
-              .append(TranslationService.colorValue(PerformanceMetrics.formatMemoryMB(metrics.heapUsed())))
-              .append(" / ")
-              .append(TranslationService.colorValue(PerformanceMetrics.formatMemoryMB(metrics.heapMax())));
+            addChatPart("Heap: ", PerformanceMetrics.formatMemoryMB(metrics.heapUsed()) + " / " + PerformanceMetrics.formatMemoryMB(metrics.heapMax()));
         }
         if (ConfigAccess.isCollectCpu()) {
-            if (!first) chatMessageBuilder.append(" | ");
-            chatMessageBuilder.append(TranslationService.colorLabel("CPU: "))
-              .append(TranslationService.colorValue(String.format("%.1f%%", metrics.cpuUsage())));
+            addChatPart("CPU: ", String.format("%.1f%%", metrics.cpuUsage()));
         }
-        return chatMessageBuilder.toString();
+
+        MutableText result = Text.empty();
+        for (int i = 0; i < chatMessagePartCount; i++) {
+            if (i > 0) result = result.append(Text.literal(" | ").withColor(0x888888));
+            result = result.append(chatMessageParts[i]);
+        }
+        return result;
+    }
+
+    private void addChatPart(String label, String value) {
+        if (chatMessagePartCount >= chatMessageParts.length) return;
+        chatMessageParts[chatMessagePartCount++] = Text.literal(label).withColor(0x888888).append(TranslationService.colorValue(value));
     }
 
     private Object[] buildRowValues(PerformanceMetrics metrics) {
