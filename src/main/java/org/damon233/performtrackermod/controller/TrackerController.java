@@ -14,6 +14,7 @@ import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.collector.ServerMetricsCollector;
+import org.damon233.performtrackermod.collector.SystemInfoCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;

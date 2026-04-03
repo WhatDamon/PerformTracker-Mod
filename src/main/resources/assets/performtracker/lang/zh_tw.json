@@ -7,6 +7,7 @@
   "performtracker.error.already_running": "追蹤器已在執行中",
 	"performtracker.error.not_running": "追蹤器未在執行",
 	"performtracker.error.http_server_failed": "HTTP 伺服器在連接埠 %d 啟動失敗。網路功能將被停用。",
+	"performtracker.error.chip_rules_modified": "晶片分類規則已遭修改。設備偵測可能不可靠。",
   "performtracker.command.start": "啟動",
   "performtracker.command.stop": "停止",
   "performtracker.command.description": "效能追蹤指令",

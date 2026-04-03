@@ -215,6 +215,10 @@ public class PtrackerCommand {
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(memLabel) + TranslationService.colorValue(SystemInfo.formatBytes(info.totalMemoryBytes()))), false);
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(osLabel) + TranslationService.colorValue(info.osName() + " " + info.osVersion() + " (" + info.osArch() + ")")), false);
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(javaLabel) + TranslationService.colorValue(info.javaVersion())), false);
+
+                if (!SystemInfoCollector.isChipRulesValid()) {
+                    ctx.getSource().sendFeedback(() -> TranslationService.chatError("performtracker.error.chip_rules_modified"), false);
+                }
                 return 1;
             }));
             

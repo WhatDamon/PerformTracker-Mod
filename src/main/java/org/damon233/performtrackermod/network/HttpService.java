@@ -198,10 +198,12 @@ public class HttpService {
             }
             
             SystemInfo info = SystemInfoCollector.collect();
+            boolean chipRulesTrusted = SystemInfoCollector.isChipRulesValid();
             String json = String.format(
                 "{\"deviceType\":\"%s\",\"cpuName\":\"%s\",\"gpuName\":\"%s\",\"cpuCores\":%d,\"memory\":%d," +
                 "\"os\":\"%s\",\"osVersion\":\"%s\",\"osArch\":\"%s\"," +
-                "\"javaVersion\":\"%s\",\"minecraftVersion\":\"%s\",\"modVersion\":\"%s\"}",
+                "\"javaVersion\":\"%s\",\"minecraftVersion\":\"%s\",\"modVersion\":\"%s\"," +
+                "\"chipRulesTrusted\":%b}",
                 JsonFormatter.escapeJson(info.deviceType().getCode()),
                 JsonFormatter.escapeJson(info.cpuName() != null ? info.cpuName() : "Unknown"),
                 JsonFormatter.escapeJson(info.gpuName() != null ? info.gpuName() : "Unknown"),
@@ -212,7 +214,8 @@ public class HttpService {
                 JsonFormatter.escapeJson(info.osArch()),
                 JsonFormatter.escapeJson(info.javaVersion()),
                 JsonFormatter.escapeJson(info.minecraftVersion()),
-                JsonFormatter.escapeJson(info.modVersion())
+                JsonFormatter.escapeJson(info.modVersion()),
+                chipRulesTrusted
             );
             
             sendResponse(exchange, 200, json);

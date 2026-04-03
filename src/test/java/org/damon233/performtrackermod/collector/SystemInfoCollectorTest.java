@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SystemInfoCollectorTest {
 
+    private static final String DUMMY_SHA = "0000000000000000000000000000000000000000000000000000000000000000";
+
     @BeforeEach
     void setUp() {
         SystemInfoCollector.releaseChipRules();
@@ -26,8 +28,8 @@ class SystemInfoCollectorTest {
 
     @Test
     void loadChipRules_loadsPhoneAndServerChips() {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
-        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt");
+        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
 
         assertFalse(phoneChips.isEmpty(), "Phone chips list should not be empty");
         assertFalse(serverChips.isEmpty(), "Server chips list should not be empty");
@@ -35,7 +37,7 @@ class SystemInfoCollectorTest {
 
     @Test
     void loadChipList_ignoresCommentsAndEmptyLines() {
-        List<String> chips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
+        List<String> chips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
         assertFalse(chips.stream().anyMatch(c -> c.startsWith("#")), "Should not contain comments");
         assertFalse(chips.contains(""), "Should not contain empty strings");
@@ -43,7 +45,7 @@ class SystemInfoCollectorTest {
 
     @Test
     void loadChipList_convertsToUpperCase() {
-        List<String> chips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
+        List<String> chips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
         assertTrue(chips.stream().allMatch(c -> c.equals(c.toUpperCase())), "All chips should be uppercase");
     }
@@ -59,7 +61,7 @@ class SystemInfoCollectorTest {
         "TENSOR, true"
     })
     void matchesAnyChip_phoneChips_matchesCorrectly(String cpuName, boolean expected) {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
+        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
         assertEquals(expected, SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), phoneChips),
             "Should match phone chip: " + cpuName);
@@ -76,7 +78,7 @@ class SystemInfoCollectorTest {
         "FT2000, true"
     })
     void matchesAnyChip_serverChips_matchesCorrectly(String cpuName, boolean expected) {
-        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt");
+        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
 
         assertEquals(expected, SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), serverChips),
             "Should match server chip: " + cpuName);
@@ -89,8 +91,8 @@ class SystemInfoCollectorTest {
         "Generic Chipset, false"
     })
     void matchesAnyChip_noMatch_returnsFalse(String cpuName, boolean expected) {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
-        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt");
+        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
 
         boolean result = SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), phoneChips) ||
                         SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), serverChips);
@@ -99,7 +101,7 @@ class SystemInfoCollectorTest {
 
     @Test
     void matchesAnyChip_partialMatch_works() {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
+        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
         assertTrue(SystemInfoCollector.matchesAnyChip("Qualcomm SNAPDRAGON 8 Gen 3", phoneChips));
         assertTrue(SystemInfoCollector.matchesAnyChip("MT6800", phoneChips));
@@ -107,19 +109,26 @@ class SystemInfoCollectorTest {
 
     @Test
     void releaseChipRules_clearsChips() {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
+        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
         assertFalse(phoneChips.isEmpty());
 
         SystemInfoCollector.releaseChipRules();
 
         SystemInfoCollector.loadChipRules();
-        List<String> newPhoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt");
+        List<String> newPhoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
         assertFalse(newPhoneChips.isEmpty());
     }
 
     @Test
     void loadChipList_nonexistentPath_returnsEmptyList() {
-        List<String> chips = SystemInfoCollector.loadChipList("/nonexistent/chips.txt");
+        List<String> chips = SystemInfoCollector.loadChipList("/nonexistent/chips.txt", DUMMY_SHA);
         assertTrue(chips.isEmpty());
+    }
+
+    @Test
+    void isChipRulesValid_withValidSha_returnsTrue() {
+        SystemInfoCollector.releaseChipRules();
+        SystemInfoCollector.loadChipRules();
+        assertTrue(SystemInfoCollector.isChipRulesValid());
     }
 }

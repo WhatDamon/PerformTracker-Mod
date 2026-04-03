@@ -7,6 +7,7 @@
   "performtracker.error.already_running": "追蹤器方行中",
 	"performtracker.error.not_running": "追蹤器未運",
 	"performtracker.error.http_server_failed": "HTTP 伺器之端口 %d 敗於啟。網傳之術止矣。",
+	"performtracker.error.chip_rules_modified": "算牒分類之法已改。器械鑒定恐失其準。",
   "performtracker.command.start": "啟",
   "performtracker.command.stop": "止",
   "performtracker.command.description": "效能追蹤令",

@@ -40,4 +40,7 @@ replay_*.log
 *.jfr
 
 # Log file
+
+logs/
 *.log
+*.log.gz
