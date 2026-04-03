@@ -31,15 +31,15 @@ public class PtrackerCommand {
             v -> ConfigAccess.setChatEnabled((Boolean) v),
             (Supplier<Object>) ConfigAccess::getDefaultChatEnabled),
         
-        BOOL2("csv_enabled", "performtracker.config.csv_enabled", true,
-            (Supplier<Object>) ConfigAccess::isCsvEnabled,
-            v -> ConfigAccess.setCsvEnabled((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCsvEnabled),
-        
-        STRING("csv_directory", "performtracker.config.csv_directory", "performance_data",
-            (Supplier<Object>) ConfigAccess::getCsvDirectory,
-            v -> ConfigAccess.setCsvDirectory((String) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCsvDirectory),
+        BOOL2("export_enabled", "performtracker.config.export_enabled", true,
+            (Supplier<Object>) ConfigAccess::isExportEnabled,
+            v -> ConfigAccess.setExportEnabled((Boolean) v),
+            (Supplier<Object>) ConfigAccess::getDefaultExportEnabled),
+
+        STRING("export_directory", "performtracker.config.export_directory", "performance_data",
+            (Supplier<Object>) ConfigAccess::getExportDirectory,
+            v -> ConfigAccess.setExportDirectory((String) v),
+            (Supplier<Object>) ConfigAccess::getDefaultExportDirectory),
         
         BOOL3("network_enabled", "performtracker.config.network_enabled", false,
             (Supplier<Object>) ConfigAccess::isNetworkEnabled,
@@ -50,7 +50,12 @@ public class PtrackerCommand {
             (Supplier<Object>) ConfigAccess::getNetworkEndpoint,
             v -> ConfigAccess.setNetworkEndpoint((String) v),
             (Supplier<Object>) ConfigAccess::getDefaultNetworkEndpoint),
-        
+
+        STRING3("output_format", "performtracker.config.output_format", "csv",
+            (Supplier<Object>) ConfigAccess::getOutputFormat,
+            v -> ConfigAccess.setOutputFormat((String) v),
+            (Supplier<Object>) ConfigAccess::getDefaultOutputFormat),
+
         BOOL4("collect_fps", "performtracker.config.collect_fps", true,
             (Supplier<Object>) ConfigAccess::isCollectFps,
             v -> ConfigAccess.setCollectFps((Boolean) v),
@@ -133,7 +138,7 @@ public class PtrackerCommand {
                 }
                 try {
                     c.start(ctx.getSource().getServer());
-                    ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.start.success", c.getCsvFilePath()), false);
+                    ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.start.success", c.getExportFilePath()), false);
                     return 1;
                 } catch (IllegalStateException e) {
                     ctx.getSource().sendFeedback(() -> Text.translatable(e.getMessage().contains("already") ? "performtracker.error.already_running" : "performtracker.error.not_initialized"), false);
@@ -175,6 +180,10 @@ public class PtrackerCommand {
                             String val = StringArgumentType.getString(ctx, "value");
                             if (cfg == ConfigType.STRING2 && !ConfigAccess.isValidNetworkEndpoint(val)) {
                                 ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.config.network_endpoint.error"), false);
+                                return 0;
+                            }
+                            if (cfg == ConfigType.STRING3 && !ConfigAccess.isValidOutputFormat(val)) {
+                                ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.config.output_format.error"), false);
                                 return 0;
                             }
                             cfg.setter.accept(val);

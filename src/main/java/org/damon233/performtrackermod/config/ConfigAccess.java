@@ -21,8 +21,9 @@ public class ConfigAccess {
     
     private static final int DEFAULT_OUTPUT_INTERVAL_SECONDS = 5;
     private static final boolean DEFAULT_CHAT_ENABLED = true;
-    private static final boolean DEFAULT_CSV_ENABLED = true;
-    private static final String DEFAULT_CSV_DIRECTORY = "performance_data";
+    private static final boolean DEFAULT_EXPORT_ENABLED = true;
+    private static final String DEFAULT_EXPORT_DIRECTORY = "performance_data";
+    private static final String DEFAULT_OUTPUT_FORMAT = "csv";
     private static final boolean DEFAULT_NETWORK_ENABLED = false;
     private static final String DEFAULT_NETWORK_ENDPOINT = "http://localhost:31415";
     private static final String API_PATH = "/api/metrics";
@@ -42,8 +43,9 @@ public class ConfigAccess {
     private static class ConfigData {
         int outputIntervalSeconds = DEFAULT_OUTPUT_INTERVAL_SECONDS;
         boolean chatEnabled = DEFAULT_CHAT_ENABLED;
-        boolean csvEnabled = DEFAULT_CSV_ENABLED;
-        String csvDirectory = DEFAULT_CSV_DIRECTORY;
+        boolean exportEnabled = DEFAULT_EXPORT_ENABLED;
+        String exportDirectory = DEFAULT_EXPORT_DIRECTORY;
+        String outputFormat = DEFAULT_OUTPUT_FORMAT;
         boolean networkEnabled = DEFAULT_NETWORK_ENABLED;
         String networkEndpoint = DEFAULT_NETWORK_ENDPOINT;
         boolean collectFps = DEFAULT_COLLECT_FPS;
@@ -71,11 +73,16 @@ public class ConfigAccess {
                     if (configData.networkEndpoint == null) {
                         configData.networkEndpoint = DEFAULT_NETWORK_ENDPOINT;
                     }
+                    if (!isValidOutputFormat(configData.outputFormat)) {
+                        LOGGER.warn("Invalid outputFormat '{}' in config, falling back to csv", configData.outputFormat);
+                        configData.outputFormat = DEFAULT_OUTPUT_FORMAT;
+                        save();
+                    }
                     LOGGER.info("Loaded config from {}", configFilePath);
                     return;
                 }
-            } catch (IOException e) {
-                LOGGER.error("Failed to read config file", e);
+            } catch (Exception e) {
+                LOGGER.error("Failed to read or parse config file, falling back to defaults", e);
             }
         }
         
@@ -107,12 +114,12 @@ public class ConfigAccess {
         return configData != null ? configData.chatEnabled : DEFAULT_CHAT_ENABLED;
     }
     
-    public static boolean isCsvEnabled() {
-        return configData != null ? configData.csvEnabled : DEFAULT_CSV_ENABLED;
+    public static boolean isExportEnabled() {
+        return configData != null ? configData.exportEnabled : DEFAULT_EXPORT_ENABLED;
     }
     
-    public static String getCsvDirectory() {
-        return configData != null ? configData.csvDirectory : DEFAULT_CSV_DIRECTORY;
+    public static String getExportDirectory() {
+        return configData != null ? configData.exportDirectory : DEFAULT_EXPORT_DIRECTORY;
     }
     
     public static boolean isNetworkEnabled() {
@@ -181,20 +188,45 @@ public class ConfigAccess {
         }
     }
     
-    public static void setCsvEnabled(boolean enabled) {
+    public static void setExportEnabled(boolean enabled) {
         if (configData != null) {
-            configData.csvEnabled = enabled;
+            configData.exportEnabled = enabled;
             save();
         }
     }
     
-    public static void setCsvDirectory(String directory) {
+    public static void setExportDirectory(String directory) {
         if (configData != null) {
-            configData.csvDirectory = (directory != null && !directory.isBlank()) ? directory : DEFAULT_CSV_DIRECTORY;
+            configData.exportDirectory = (directory != null && !directory.isBlank()) ? directory : DEFAULT_EXPORT_DIRECTORY;
             save();
         }
     }
-    
+
+    public static String getOutputFormat() {
+        return configData != null ? configData.outputFormat : DEFAULT_OUTPUT_FORMAT;
+    }
+
+    public static void setOutputFormat(String format) {
+        if (configData != null) {
+            String normalized = normalizeOutputFormat(format);
+            configData.outputFormat = normalized != null ? normalized : DEFAULT_OUTPUT_FORMAT;
+            save();
+        }
+    }
+
+    private static String normalizeOutputFormat(String format) {
+        if (format == null) return null;
+        String lower = format.toLowerCase().trim();
+        if (lower.equals("csv") || lower.equals("json") || lower.equals("yaml")) {
+            return lower;
+        }
+        return null;
+    }
+
+    public static boolean isValidOutputFormat(String format) {
+        return normalizeOutputFormat(format) != null;
+    }
+
     public static void setNetworkEnabled(boolean enabled) {
         if (configData != null) {
             configData.networkEnabled = enabled;
@@ -300,14 +332,18 @@ public class ConfigAccess {
         return DEFAULT_CHAT_ENABLED;
     }
     
-    public static boolean getDefaultCsvEnabled() {
-        return DEFAULT_CSV_ENABLED;
+    public static boolean getDefaultExportEnabled() {
+        return DEFAULT_EXPORT_ENABLED;
     }
-    
-    public static String getDefaultCsvDirectory() {
-        return DEFAULT_CSV_DIRECTORY;
+
+    public static String getDefaultExportDirectory() {
+        return DEFAULT_EXPORT_DIRECTORY;
     }
-    
+
+    public static String getDefaultOutputFormat() {
+        return DEFAULT_OUTPUT_FORMAT;
+    }
+
     public static boolean getDefaultNetworkEnabled() {
         return DEFAULT_NETWORK_ENABLED;
     }

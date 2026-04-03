@@ -20,26 +20,29 @@ import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
 import org.damon233.performtrackermod.network.HttpService;
 import org.damon233.performtrackermod.network.JsonFormatter;
-import org.damon233.performtrackermod.utils.CsvWriter;
 import org.damon233.performtrackermod.utils.TranslationService;
+import org.damon233.performtrackermod.writer.CsvWriter;
+import org.damon233.performtrackermod.writer.JsonWriter;
+import org.damon233.performtrackermod.writer.MetricsWriter;
+import org.damon233.performtrackermod.writer.YamlWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TrackerController {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
-    private static final String CSV_BASENAME = "performance";
+    private static final String EXPORT_BASENAME = "performance";
 
     private final ServerMetricsCollector serverCollector;
     private IFpsProvider fpsProvider;
     private final AtomicReference<TrackerState> state;
     private final AtomicBoolean active;
 
-    private CsvWriter csvWriter;
+    private MetricsWriter metricsWriter;
     private String sessionId;
     private long lastOutputTime;
     private int sampleCount;
     private MinecraftServer server;
-    private int lastCollectConfig;
+    private String currentOutputFormat;
 
     public TrackerController(ServerMetricsCollector serverCollector, IFpsProvider fpsProvider) {
         this.serverCollector = serverCollector;
@@ -48,10 +51,9 @@ public class TrackerController {
         this.active = new AtomicBoolean(false);
         this.lastOutputTime = 0;
         this.sampleCount = 0;
-        this.csvWriter = null;
+        this.metricsWriter = null;
         this.sessionId = null;
         this.server = null;
-        this.lastCollectConfig = 0;
 
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
@@ -80,13 +82,14 @@ public class TrackerController {
         this.sessionId = generateSessionId();
         this.server = server;
 
-        if (ConfigAccess.isCsvEnabled()) {
+        if (ConfigAccess.isExportEnabled()) {
             try {
-                csvWriter = new CsvWriter(ConfigAccess.getCsvDirectory(), CSV_BASENAME);
-                csvWriter.writeHeader(buildCsvHeaders());
-                csvWriter.start();
+                metricsWriter = createMetricsWriter();
+                metricsWriter.writeHeader(buildHeaders());
+                metricsWriter.start();
+                currentOutputFormat = ConfigAccess.getOutputFormat();
             } catch (IOException e) {
-                throw new RuntimeException("Failed to create CSV file", e);
+                throw new RuntimeException("Failed to create output file", e);
             }
         }
 
@@ -102,7 +105,6 @@ public class TrackerController {
 
         state.set(TrackerState.RUNNING);
         active.set(true);
-        lastCollectConfig = getCollectConfigHash();
 
         serverCollector.reset();
 
@@ -124,13 +126,9 @@ public class TrackerController {
 
         active.set(false);
 
-        if (csvWriter != null) {
-            try {
-                csvWriter.close();
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to close CSV file", e);
-            }
-            csvWriter = null;
+        if (metricsWriter != null) {
+            metricsWriter.close();
+            metricsWriter = null;
         }
 
         HttpService httpService = PerformTracker.getHttpService();
@@ -156,16 +154,8 @@ public class TrackerController {
         String uuid = UUID.randomUUID().toString().substring(0, 6);
         return timestamp + "_" + uuid;
     }
-    
-    private int getCollectConfigHash() {
-        return (ConfigAccess.isCollectFps() ? 1 : 0) |
-               (ConfigAccess.isCollectTps() ? 2 : 0) |
-               (ConfigAccess.isCollectMspt() ? 4 : 0) |
-               (ConfigAccess.isCollectHeap() ? 8 : 0) |
-                (ConfigAccess.isCollectCpu() ? 16 : 0);
-    }
 
-    private String[] buildCsvHeaders() {
+    private String[] buildHeaders() {
         return new String[]{"fps", "tps", "mspt", "heap_used", "heap_max", "cpu"};
     }
 
@@ -174,6 +164,22 @@ public class TrackerController {
 
         if (!active.get()) {
             return;
+        }
+
+        if (ConfigAccess.isExportEnabled() && metricsWriter != null) {
+            String newFormat = ConfigAccess.getOutputFormat();
+            if (!newFormat.equals(currentOutputFormat)) {
+                LOGGER.info("Output format changed from {} to {}, creating new file", currentOutputFormat, newFormat);
+                try {
+                    metricsWriter.close();
+                    metricsWriter = createMetricsWriter();
+                    metricsWriter.writeHeader(buildHeaders());
+                    metricsWriter.start();
+                    currentOutputFormat = newFormat;
+                } catch (IOException e) {
+                    LOGGER.error("Failed to create new output file after format change", e);
+                }
+            }
         }
 
         long currentTime = System.currentTimeMillis();
@@ -197,8 +203,8 @@ public class TrackerController {
             );
         }
 
-        if (csvWriter != null) {
-            csvWriter.enqueue(buildCsvRowValues(metrics));
+        if (metricsWriter != null) {
+            metricsWriter.enqueue(buildRowValues(metrics));
         }
 
         if (ConfigAccess.isNetworkEnabled() && sessionId != null) {
@@ -248,7 +254,7 @@ public class TrackerController {
         return sb.toString();
     }
     
-    private Object[] buildCsvRowValues(PerformanceMetrics metrics) {
+    private Object[] buildRowValues(PerformanceMetrics metrics) {
         return new Object[]{
             ConfigAccess.isCollectFps() ? metrics.fps() : Double.NaN,
             ConfigAccess.isCollectTps() ? metrics.tps() : Double.NaN,
@@ -277,9 +283,9 @@ public class TrackerController {
         this.fpsProvider = fpsProvider;
     }
 
-    public String getCsvFilePath() {
-        if (csvWriter != null) {
-            return csvWriter.getFilePath().toString();
+    public String getExportFilePath() {
+        if (metricsWriter != null) {
+            return metricsWriter.getFilePath().toString();
         }
         return "N/A";
     }
@@ -287,8 +293,18 @@ public class TrackerController {
     public int getSampleCount() {
         return sampleCount;
     }
-    
+
     public boolean isNetworkEnabled() {
         return ConfigAccess.isNetworkEnabled();
+    }
+
+    private MetricsWriter createMetricsWriter() throws IOException {
+        String format = ConfigAccess.getOutputFormat();
+        String directory = ConfigAccess.getExportDirectory();
+        return switch (format) {
+            case "json" -> new JsonWriter(directory, EXPORT_BASENAME);
+            case "yaml" -> new YamlWriter(directory, EXPORT_BASENAME);
+            default -> new CsvWriter(directory, EXPORT_BASENAME);
+        };
     }
 }

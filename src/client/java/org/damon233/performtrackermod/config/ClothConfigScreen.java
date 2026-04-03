@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import java.util.List;
 import java.util.Optional;
 
 public class ClothConfigScreen {
@@ -39,19 +40,28 @@ public class ClothConfigScreen {
                 .build());
         
         general.addEntry(entryBuilder.startBooleanToggle(
-                Text.translatable("performtracker.config.csv_enabled"),
-                ConfigAccess.isCsvEnabled())
+                Text.translatable("performtracker.config.export_enabled"),
+                ConfigAccess.isExportEnabled())
                 .setDefaultValue(true)
-                .setTooltip(Text.translatable("performtracker.config.csv_enabled.tooltip"))
-                .setSaveConsumer(ConfigAccess::setCsvEnabled)
+                .setTooltip(Text.translatable("performtracker.config.export_enabled.tooltip"))
+                .setSaveConsumer(ConfigAccess::setExportEnabled)
+                .build());
+
+        general.addEntry(entryBuilder.startSelector(
+                        Text.translatable("performtracker.config.output_format"),
+                        new String[]{"csv", "json", "yaml"},
+                        ConfigAccess.getOutputFormat())
+                .setDefaultValue("csv")
+                .setTooltip(Text.translatable("performtracker.config.output_format.tooltip"))
+                .setSaveConsumer(ConfigAccess::setOutputFormat)
                 .build());
         
         general.addEntry(entryBuilder.startTextField(
-                Text.translatable("performtracker.config.csv_directory"),
-                ConfigAccess.getCsvDirectory())
+                Text.translatable("performtracker.config.export_directory"),
+                ConfigAccess.getExportDirectory())
                 .setDefaultValue("performance_data")
-                .setTooltip(Text.translatable("performtracker.config.csv_directory.tooltip"))
-                .setSaveConsumer(ConfigAccess::setCsvDirectory)
+                .setTooltip(Text.translatable("performtracker.config.export_directory.tooltip"))
+                .setSaveConsumer(ConfigAccess::setExportDirectory)
                 .build());
 
         general.addEntry(entryBuilder.startBooleanToggle(
