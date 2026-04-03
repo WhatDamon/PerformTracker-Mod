@@ -1,7 +1,8 @@
 plugins {
-	id("net.fabricmc.fabric-loom-remap")
-	`maven-publish`
-}
+ 	id("net.fabricmc.fabric-loom-remap")
+ 	`maven-publish`
+ 	checkstyle
+ }
 
 version = providers.gradleProperty("mod_version").get()
 group = providers.gradleProperty("maven_group").get()
@@ -88,8 +89,27 @@ tasks.jar {
 }
 
 tasks.test {
-	useJUnitPlatform()
-}
+ 	useJUnitPlatform()
+ }
+
+checkstyle {
+ 	toolVersion = "10.17.0"
+ 	configFile = file("checkstyle.xml")
+ }
+
+tasks.checkstyleMain {
+ 	reports {
+ 		xml.required = true
+ 		html.required = true
+ 	}
+ }
+
+tasks.checkstyleTest {
+ 	reports {
+ 		xml.required = true
+ 		html.required = true
+ 	}
+ }
 
 // configure the maven publication
 publishing {
