@@ -36,7 +36,7 @@ import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
 import org.damon233.performtrackermod.network.HttpService;
 import org.damon233.performtrackermod.network.JsonFormatter;
-import org.damon233.performtrackermod.utils.TranslationService;
+import org.damon233.performtrackermod.utils.FormattingService;
 import org.damon233.performtrackermod.writer.CsvWriter;
 import org.damon233.performtrackermod.writer.JsonWriter;
 import org.damon233.performtrackermod.writer.MetricsWriter;
@@ -117,7 +117,7 @@ public class TrackerController {
             HttpService httpService = PerformTracker.getHttpService();
             if (httpService != null && !httpService.tryStartServer()) {
                 server.getPlayerManager().getPlayerList().forEach(player ->
-                    player.sendMessage(TranslationService.chatError("performtracker.error.http_server_failed", ConfigAccess.getLocalServerPort()))
+                    player.sendMessage(FormattingService.chatError("performtracker.error.http_server_failed", ConfigAccess.getLocalServerPort()))
                 );
             }
             httpService.start();
@@ -217,7 +217,7 @@ public class TrackerController {
         long timestamp = System.currentTimeMillis();
 
         if (ConfigAccess.isChatEnabled() && server != null) {
-            MutableText chatMsg = TranslationService.chatWithMetrics(buildChatMessage(metrics));
+            MutableText chatMsg = FormattingService.chatWithMetrics(buildChatMessage(metrics));
             server.getPlayerManager().getPlayerList().forEach(player -> 
                 player.sendMessage(chatMsg)
             );
@@ -273,7 +273,7 @@ public class TrackerController {
         if (chatMessagePartCount >= chatMessageParts.length) {
             return;
         }
-        chatMessageParts[chatMessagePartCount++] = Text.literal(label).withColor(0x888888).append(TranslationService.colorValue(value));
+        chatMessageParts[chatMessagePartCount++] = Text.literal(label).withColor(0x888888).append(FormattingService.colorValue(value));
     }
 
     private Object[] buildRowValues(PerformanceMetrics metrics) {

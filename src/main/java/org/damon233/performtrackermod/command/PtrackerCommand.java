@@ -30,7 +30,7 @@ import org.damon233.performtrackermod.collector.SystemInfoCollector;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.controller.TrackerController;
 import org.damon233.performtrackermod.data.SystemInfo;
-import org.damon233.performtrackermod.utils.TranslationService;
+import org.damon233.performtrackermod.utils.FormattingService;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -129,22 +129,22 @@ public class PtrackerCommand {
             Text name = Text.translatable(translationKey);
             Text val = value instanceof Boolean ? 
                 Text.translatable(Boolean.TRUE.equals(value) ? "performtracker.config.value.true" : "performtracker.config.value.false") :
-                TranslationService.colorValue(String.valueOf(value));
+                FormattingService.colorValue(String.valueOf(value));
             source.sendFeedback(() -> Text.translatable("performtracker.config.set.success", 
-                TranslationService.colorLabel(name.getString()), val), false);
+                FormattingService.colorLabel(name.getString()), val), false);
         }
         
         void sendInfo(ServerCommandSource source) {
             source.sendFeedback(() -> Text.translatable("performtracker.config.info",
-                TranslationService.colorLabel(Text.translatable(translationKey).getString()), 
-                TranslationService.colorValue(String.valueOf(getter.get())), 
-                TranslationService.colorValue(String.valueOf(defaultGetter.get()))), false);
+                FormattingService.colorLabel(Text.translatable(translationKey).getString()), 
+                FormattingService.colorValue(String.valueOf(getter.get())), 
+                FormattingService.colorValue(String.valueOf(defaultGetter.get()))), false);
         }
         
         void sendLine(ServerCommandSource source) {
-            MutableText current = TranslationService.colorValue(
+            MutableText current = FormattingService.colorValue(
                 Boolean.TRUE.equals(getter.get()) ? "true" : "false");
-            MutableText def = TranslationService.colorValue(
+            MutableText def = FormattingService.colorValue(
                 Boolean.TRUE.equals(defaultGetter.get()) ? "true" : "false");
             source.sendFeedback(() -> Text.translatable(translationKey).append(": ").append(current).append(" (default: ").append(def).append(")"), false);
         }
@@ -243,30 +243,30 @@ public class PtrackerCommand {
             ptracker.then(CommandManager.literal("deviceinfo").executes(ctx -> {
                 SystemInfo info = SystemInfoCollector.collect();
 
-                MutableText title = TranslationService.colorLabel(Text.translatable("performtracker.device.title").getString());
+                MutableText title = FormattingService.colorLabel(Text.translatable("performtracker.device.title").getString());
                 String unknown = Text.translatable("performtracker.device.unknown").getString();
-                MutableText typeLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.type").getString());
-                MutableText modelLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.model").getString());
-                MutableText cpuLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.cpu").getString());
-                MutableText gpuLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.gpu").getString());
-                MutableText coresLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.cpu_cores").getString());
-                MutableText memLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.memory").getString());
-                MutableText osLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.os").getString());
-                MutableText javaLabel = TranslationService.colorLabel(Text.translatable("performtracker.device.java").getString());
+                MutableText typeLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.type").getString());
+                MutableText modelLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.model").getString());
+                MutableText cpuLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.cpu").getString());
+                MutableText gpuLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.gpu").getString());
+                MutableText coresLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.cpu_cores").getString());
+                MutableText memLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.memory").getString());
+                MutableText osLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.os").getString());
+                MutableText javaLabel = FormattingService.colorLabel(Text.translatable("performtracker.device.java").getString());
                 String typeValue = Text.translatable("performtracker.device.type." + info.deviceType().getCode()).getString();
 
                 ctx.getSource().sendFeedback(() -> title, false);
-                ctx.getSource().sendFeedback(() -> typeLabel.append(TranslationService.colorValue(typeValue)), false);
-                ctx.getSource().sendFeedback(() -> modelLabel.append(TranslationService.colorValue(info.deviceModel() != null ? info.deviceModel() : unknown)), false);
-                ctx.getSource().sendFeedback(() -> cpuLabel.append(TranslationService.colorValue(info.cpuName() != null ? info.cpuName() : unknown)), false);
-                ctx.getSource().sendFeedback(() -> gpuLabel.append(TranslationService.colorValue(info.gpuName() != null ? info.gpuName() : unknown)), false);
-                ctx.getSource().sendFeedback(() -> coresLabel.append(TranslationService.colorValue(String.valueOf(info.cpuCores()))), false);
-                ctx.getSource().sendFeedback(() -> memLabel.append(TranslationService.colorValue(SystemInfo.formatBytes(info.totalMemoryBytes()))), false);
-                ctx.getSource().sendFeedback(() -> osLabel.append(TranslationService.colorValue(info.osName() + " " + info.osVersion() + " (" + info.osArch() + ")")), false);
-                ctx.getSource().sendFeedback(() -> javaLabel.append(TranslationService.colorValue(info.javaVersion())), false);
+                ctx.getSource().sendFeedback(() -> typeLabel.append(FormattingService.colorValue(typeValue)), false);
+                ctx.getSource().sendFeedback(() -> modelLabel.append(FormattingService.colorValue(info.deviceModel() != null ? info.deviceModel() : unknown)), false);
+                ctx.getSource().sendFeedback(() -> cpuLabel.append(FormattingService.colorValue(info.cpuName() != null ? info.cpuName() : unknown)), false);
+                ctx.getSource().sendFeedback(() -> gpuLabel.append(FormattingService.colorValue(info.gpuName() != null ? info.gpuName() : unknown)), false);
+                ctx.getSource().sendFeedback(() -> coresLabel.append(FormattingService.colorValue(String.valueOf(info.cpuCores()))), false);
+                ctx.getSource().sendFeedback(() -> memLabel.append(FormattingService.colorValue(SystemInfo.formatBytes(info.totalMemoryBytes()))), false);
+                ctx.getSource().sendFeedback(() -> osLabel.append(FormattingService.colorValue(info.osName() + " " + info.osVersion() + " (" + info.osArch() + ")")), false);
+                ctx.getSource().sendFeedback(() -> javaLabel.append(FormattingService.colorValue(info.javaVersion())), false);
 
                 if (!SystemInfoCollector.isChipRulesValid()) {
-                    ctx.getSource().sendFeedback(() -> TranslationService.chatError("performtracker.error.chip_rules_modified"), false);
+                    ctx.getSource().sendFeedback(() -> FormattingService.chatError("performtracker.error.chip_rules_modified"), false);
                 }
                 return 1;
             }));

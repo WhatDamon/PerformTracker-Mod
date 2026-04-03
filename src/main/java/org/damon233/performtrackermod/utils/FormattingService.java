@@ -20,7 +20,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-public class TranslationService {
+public class FormattingService {
     private static final String PREFIX = "performtracker.";
 
     private static final MutableText PREFIX_TEXT = Text.literal("[").withColor(getColorValue(Formatting.DARK_GRAY))
