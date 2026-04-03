@@ -34,7 +34,9 @@ public record PerformanceMetrics(
         mspt = Math.max(0.0, mspt);
         heapUsed = Math.max(0.0, heapUsed);
         heapMax = Math.max(0.0, heapMax);
-        if (cpuUsage < 0) cpuUsage = -1.0;
+        if (cpuUsage < 0) {
+            cpuUsage = -1.0;
+        }
     }
 
     public static String formatValue(double value) {

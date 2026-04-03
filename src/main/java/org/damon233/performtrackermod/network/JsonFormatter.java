@@ -37,23 +37,31 @@ public class JsonFormatter {
             first = false;
         }
         if (collectTps) {
-            if (!first) sb.append(',');
+            if (!first) {
+                sb.append(',');
+            }
             sb.append("\"tps\":").append(tps);
             first = false;
         }
         if (collectMspt) {
-            if (!first) sb.append(',');
+            if (!first) {
+                sb.append(',');
+            }
             sb.append("\"mspt\":").append(mspt);
             first = false;
         }
         if (collectHeap) {
-            if (!first) sb.append(',');
+            if (!first) {
+                sb.append(',');
+            }
             sb.append("\"heapUsed\":").append(heapUsed);
             sb.append(",\"heapMax\":").append(heapMax);
             first = false;
         }
         if (collectCpu) {
-            if (!first) sb.append(',');
+            if (!first) {
+                sb.append(',');
+            }
             sb.append("\"cpu\":").append(cpuUsage);
         }
         sb.append("}}");
@@ -62,7 +70,9 @@ public class JsonFormatter {
     }
     
     public static String escapeJson(String s) {
-        if (s == null) return "";
+        if (s == null) {
+            return "";
+        }
         return s.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n")

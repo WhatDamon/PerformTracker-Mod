@@ -23,3 +23,26 @@ jobs:
         with:
           name: Artifacts
           path: build/libs/
+
+  checkstyle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x ./gradlew
+      - name: Run Checkstyle
+        run: ./gradlew check
+      - name: Upload Checkstyle Report
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: checkstyle-report
+          path: build/reports/checkstyle/

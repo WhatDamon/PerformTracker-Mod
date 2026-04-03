@@ -74,14 +74,20 @@ public class YamlWriter extends MetricsWriter {
 
     private String formatValue(Object v) {
         if (v instanceof Double d) {
-            if (Double.isNaN(d)) return "null";
-            if (Double.isInfinite(d)) return ".inf";
+            if (Double.isNaN(d)) {
+                return "null";
+            }
+            if (Double.isInfinite(d)) {
+                return ".inf";
+            }
             if (d == Math.floor(d) && !Double.isInfinite(d)) {
                 return String.valueOf(d.longValue());
             }
             return String.valueOf(d);
         }
-        if (v == null) return "null";
+        if (v == null) {
+            return "null";
+        }
         String str = v.toString();
         if (str.contains(":") || str.contains("#") || str.contains("\n") ||
             str.contains("'") || str.contains("\"") || str.startsWith("-") ||

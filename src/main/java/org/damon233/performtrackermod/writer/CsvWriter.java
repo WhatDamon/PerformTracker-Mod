@@ -39,10 +39,14 @@ public class CsvWriter extends MetricsWriter {
 
     @Override
     public void writeHeader(String... headers) throws IOException {
-        if (headerWritten || writer == null) return;
+        if (headerWritten || writer == null) {
+            return;
+        }
 
         StringBuilder sb = new StringBuilder("unix_timestamp");
-        for (String h : headers) sb.append(",").append(h);
+        for (String h : headers) {
+            sb.append(",").append(h);
+        }
         writer.write(sb.toString());
         writer.newLine();
         headerWritten = true;

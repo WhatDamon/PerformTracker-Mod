@@ -231,7 +231,9 @@ public class ConfigAccess {
     }
 
     private static String normalizeOutputFormat(String format) {
-        if (format == null) return null;
+        if (format == null) {
+            return null;
+        }
         String lower = format.toLowerCase().trim();
         if (lower.equals("csv") || lower.equals("json") || lower.equals("yaml")) {
             return lower;

@@ -152,7 +152,9 @@ public class SystemInfoCollector {
 
     private static String getLinuxCpuName() {
         String output = readFile("/proc/cpuinfo");
-        if (output == null) return "Unknown";
+        if (output == null) {
+            return "Unknown";
+        }
 
         for (String line : output.split("\n")) {
             line = line.trim();

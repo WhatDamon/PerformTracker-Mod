@@ -261,14 +261,18 @@ public class TrackerController {
 
         MutableText result = Text.empty();
         for (int i = 0; i < chatMessagePartCount; i++) {
-            if (i > 0) result = result.append(Text.literal(" | ").withColor(0x888888));
+            if (i > 0) {
+                result = result.append(Text.literal(" | ").withColor(0x888888));
+            }
             result = result.append(chatMessageParts[i]);
         }
         return result;
     }
 
     private void addChatPart(String label, String value) {
-        if (chatMessagePartCount >= chatMessageParts.length) return;
+        if (chatMessagePartCount >= chatMessageParts.length) {
+            return;
+        }
         chatMessageParts[chatMessagePartCount++] = Text.literal(label).withColor(0x888888).append(TranslationService.colorValue(value));
     }
 

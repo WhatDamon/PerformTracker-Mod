@@ -71,7 +71,9 @@ public class CharsetDetector {
     
     private static Charset detectWindows() {
         String codepage = runCommand("chcp");
-        if (codepage == null) return null;
+        if (codepage == null) {
+            return null;
+        }
         
         try {
             String num = codepage.replaceAll("[^0-9]", "");
@@ -83,18 +85,20 @@ public class CharsetDetector {
     }
     
     private static Charset detectLinux() {
-        // Check LANG env var first (fast, no subprocess)
         String locale = System.getenv("LANG");
         Charset charset = parseLocaleToCharset(locale);
-        if (charset != null) return charset;
+        if (charset != null) {
+            return charset;
+        }
         
-        // Fallback to locale charmap command
         locale = runCommand("locale charmap");
         return parseLocaleToCharset(locale);
     }
     
     static Charset parseLocaleToCharset(String locale) {
-        if (locale == null) return null;
+        if (locale == null) {
+            return null;
+        }
         
         locale = locale.trim().toUpperCase();
         if (locale.contains("UTF-8") || locale.contains("UTF8")) {

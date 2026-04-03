@@ -88,8 +88,12 @@ public class JsonWriter extends MetricsWriter {
 
     private Object formatValue(Object v) {
         if (v instanceof Double d) {
-            if (Double.isNaN(d)) return null;
-            if (Double.isInfinite(d)) return "infinite";
+            if (Double.isNaN(d)) {
+                return null;
+            }
+            if (Double.isInfinite(d)) {
+                return "infinite";
+            }
             return d;
         }
         return v;

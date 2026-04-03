@@ -191,14 +191,25 @@ public class PtrackerCommand {
             LiteralArgumentBuilder<ServerCommandSource> config = CommandManager.literal("config");
             for (ConfigType cfg : ConfigType.values()) {
                 LiteralArgumentBuilder<ServerCommandSource> item = CommandManager.literal(cfg.key);
-                item.executes(ctx -> { cfg.sendInfo(ctx.getSource()); return 1; });
+                item.executes(ctx -> {
+                    cfg.sendInfo(ctx.getSource());
+                    return 1;
+                });
                 
                 if (cfg.defaultValue instanceof Integer) {
                     item.then(CommandManager.argument("value", IntegerArgumentType.integer(1, 3600))
-                        .executes(ctx -> { cfg.setter.accept(IntegerArgumentType.getInteger(ctx, "value")); cfg.sendSuccess(ctx.getSource(), cfg.getter.get()); return 1; }));
+                        .executes(ctx -> {
+                            cfg.setter.accept(IntegerArgumentType.getInteger(ctx, "value"));
+                            cfg.sendSuccess(ctx.getSource(), cfg.getter.get());
+                            return 1;
+                        }));
                 } else if (cfg.defaultValue instanceof Boolean) {
                     item.then(CommandManager.argument("value", BoolArgumentType.bool())
-                        .executes(ctx -> { cfg.setter.accept(BoolArgumentType.getBool(ctx, "value")); cfg.sendSuccess(ctx.getSource(), cfg.getter.get()); return 1; }));
+                        .executes(ctx -> {
+                            cfg.setter.accept(BoolArgumentType.getBool(ctx, "value"));
+                            cfg.sendSuccess(ctx.getSource(), cfg.getter.get());
+                            return 1;
+                        }));
                 } else {
                     item.then(CommandManager.argument("value", StringArgumentType.string())
                         .executes(ctx -> {
@@ -220,7 +231,9 @@ public class PtrackerCommand {
             }
             config.executes(ctx -> {
                 ctx.getSource().sendFeedback(() -> Text.literal("=== PerformTracker Config ==="), false);
-                for (ConfigType cfg : ConfigType.values()) cfg.sendLine(ctx.getSource());
+                for (ConfigType cfg : ConfigType.values()) {
+                    cfg.sendLine(ctx.getSource());
+                }
                 ctx.getSource().sendFeedback(() -> Text.literal("======================="), false);
                 ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.config.usage"), false);
                 return 1;
