@@ -77,7 +77,17 @@ public class PtrackerCommand {
             v -> ConfigAccess.setCollectHeap((Boolean) v),
             (Supplier<Object>) ConfigAccess::getDefaultCollectHeap),
         
-        BOOL8("binary_units", "performtracker.config.binary_units", true,
+        BOOL8("collect_heap", "performtracker.config.collect_heap", true,
+            (Supplier<Object>) ConfigAccess::isCollectHeap,
+            v -> ConfigAccess.setCollectHeap((Boolean) v),
+            (Supplier<Object>) ConfigAccess::getDefaultCollectHeap),
+
+        BOOL9("collect_cpu", "performtracker.config.collect_cpu", true,
+            (Supplier<Object>) ConfigAccess::isCollectCpu,
+            v -> ConfigAccess.setCollectCpu((Boolean) v),
+            (Supplier<Object>) ConfigAccess::getDefaultCollectCpu),
+        
+        BOOL10("binary_units", "performtracker.config.binary_units", true,
             (Supplier<Object>) ConfigAccess::isBinaryUnits,
             v -> ConfigAccess.setBinaryUnits((Boolean) v),
             (Supplier<Object>) ConfigAccess::getDefaultBinaryUnits);
