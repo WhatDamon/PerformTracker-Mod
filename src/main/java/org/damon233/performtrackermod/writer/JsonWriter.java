@@ -61,7 +61,13 @@ public class JsonWriter extends MetricsWriter {
 
         writer.write("  ");
         writer.write(GSON.toJson(row));
-        writer.flush();
+    }
+
+    @Override
+    protected void flushInternal() throws IOException {
+        if (writer != null) {
+            writer.flush();
+        }
     }
 
     private Object formatValue(Object v) {
@@ -79,6 +85,7 @@ public class JsonWriter extends MetricsWriter {
             if (headerWritten) {
                 writer.write("\n]");
             }
+            writer.flush();
             writer.close();
             writer = null;
         }

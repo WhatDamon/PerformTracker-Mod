@@ -47,7 +47,13 @@ public class YamlWriter extends MetricsWriter {
             Object v = values[i];
             writer.write(String.format("    %s: %s\n", key, formatValue(v)));
         }
-        writer.flush();
+    }
+
+    @Override
+    protected void flushInternal() throws IOException {
+        if (writer != null) {
+            writer.flush();
+        }
     }
 
     private String formatValue(Object v) {
@@ -73,6 +79,7 @@ public class YamlWriter extends MetricsWriter {
     @Override
     protected void onClose() throws IOException {
         if (writer != null) {
+            writer.flush();
             writer.close();
             writer = null;
         }

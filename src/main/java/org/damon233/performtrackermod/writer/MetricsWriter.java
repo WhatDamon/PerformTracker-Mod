@@ -3,7 +3,6 @@ package org.damon233.performtrackermod.writer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -20,6 +19,8 @@ import org.slf4j.LoggerFactory;
 public abstract class MetricsWriter implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
     private static final int MAX_QUEUE_SIZE = 100;
+    private static final int FLUSH_INTERVAL_ROWS = 100;
+    private static final long FLUSH_INTERVAL_MS = 30_000;
     protected static final DateTimeFormatter FILENAME_FORMAT =
             DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").withZone(ZoneId.systemDefault());
 
@@ -27,6 +28,9 @@ public abstract class MetricsWriter implements AutoCloseable {
     protected final ExecutorService executor;
     protected final AtomicBoolean running;
     protected final Path filePath;
+
+    private int rowCount;
+    private long lastFlushTime;
 
     protected MetricsWriter(String directory, String baseName, String extension) throws IOException {
         this.writeQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
@@ -39,6 +43,8 @@ public abstract class MetricsWriter implements AutoCloseable {
         String filename = String.format("%s_%s.%s", baseName, FILENAME_FORMAT.format(Instant.now()), extension);
         this.filePath = Path.of(directory, filename);
         Files.createDirectories(Path.of(directory));
+        this.rowCount = 0;
+        this.lastFlushTime = System.currentTimeMillis();
     }
 
     public Path getFilePath() {
@@ -67,12 +73,26 @@ public abstract class MetricsWriter implements AutoCloseable {
 
     protected abstract void writeRowInternal(Object... values) throws IOException;
 
+    protected abstract void flushInternal() throws IOException;
+
     protected void writeLoop() {
         while (running.get()) {
             try {
                 Object[] values = writeQueue.poll(1, TimeUnit.SECONDS);
                 if (values != null) {
                     writeRowInternal(values);
+                    rowCount++;
+                    if (rowCount >= FLUSH_INTERVAL_ROWS || System.currentTimeMillis() - lastFlushTime >= FLUSH_INTERVAL_MS) {
+                        flushInternal();
+                        rowCount = 0;
+                        lastFlushTime = System.currentTimeMillis();
+                    }
+                } else {
+                    if (rowCount > 0 && System.currentTimeMillis() - lastFlushTime >= FLUSH_INTERVAL_MS) {
+                        flushInternal();
+                        rowCount = 0;
+                        lastFlushTime = System.currentTimeMillis();
+                    }
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -84,6 +104,13 @@ public abstract class MetricsWriter implements AutoCloseable {
     }
 
     public void flush() {
+        try {
+            flushInternal();
+            rowCount = 0;
+            lastFlushTime = System.currentTimeMillis();
+        } catch (IOException e) {
+            LOGGER.error("Failed to flush writer", e);
+        }
     }
 
     @Override

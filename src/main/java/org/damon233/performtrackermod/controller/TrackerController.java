@@ -14,7 +14,6 @@ import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.collector.ServerMetricsCollector;
-import org.damon233.performtrackermod.collector.SystemInfoCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
@@ -43,6 +42,9 @@ public class TrackerController {
     private int sampleCount;
     private MinecraftServer server;
     private String currentOutputFormat;
+
+    private final Object[] rowValuesBuffer = new Object[6];
+    private final StringBuilder chatMessageBuilder = new StringBuilder(256);
 
     public TrackerController(ServerMetricsCollector serverCollector, IFpsProvider fpsProvider) {
         this.serverCollector = serverCollector;
@@ -222,47 +224,46 @@ public class TrackerController {
     }
     
     private String buildChatMessage(PerformanceMetrics metrics) {
-        StringBuilder sb = new StringBuilder();
+        chatMessageBuilder.setLength(0);
         boolean first = true;
         if (ConfigAccess.isCollectFps()) {
-            if (!first) sb.append(" | ");
-            sb.append(TranslationService.colorLabel("FPS: ")).append(TranslationService.colorValue(String.format("%.1f", metrics.fps())));
+            if (!first) chatMessageBuilder.append(" | ");
+            chatMessageBuilder.append(TranslationService.colorLabel("FPS: ")).append(TranslationService.colorValue(String.format("%.1f", metrics.fps())));
             first = false;
         }
         if (ConfigAccess.isCollectTps()) {
-            if (!first) sb.append(" | ");
-            sb.append(TranslationService.colorLabel("TPS: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.tps())));
+            if (!first) chatMessageBuilder.append(" | ");
+            chatMessageBuilder.append(TranslationService.colorLabel("TPS: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.tps())));
             first = false;
         }
         if (ConfigAccess.isCollectMspt()) {
-            if (!first) sb.append(" | ");
-            sb.append(TranslationService.colorLabel("MSPT: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.mspt())));
+            if (!first) chatMessageBuilder.append(" | ");
+            chatMessageBuilder.append(TranslationService.colorLabel("MSPT: ")).append(TranslationService.colorValue(PerformanceMetrics.formatValue(metrics.mspt())));
             first = false;
         }
         if (ConfigAccess.isCollectHeap()) {
-            if (!first) sb.append(" | ");
-            sb.append(TranslationService.colorLabel("Heap: "))
+            if (!first) chatMessageBuilder.append(" | ");
+            chatMessageBuilder.append(TranslationService.colorLabel("Heap: "))
               .append(TranslationService.colorValue(PerformanceMetrics.formatMemoryMB(metrics.heapUsed())))
               .append(" / ")
               .append(TranslationService.colorValue(PerformanceMetrics.formatMemoryMB(metrics.heapMax())));
         }
         if (ConfigAccess.isCollectCpu()) {
-            if (!first) sb.append(" | ");
-            sb.append(TranslationService.colorLabel("CPU: "))
+            if (!first) chatMessageBuilder.append(" | ");
+            chatMessageBuilder.append(TranslationService.colorLabel("CPU: "))
               .append(TranslationService.colorValue(String.format("%.1f%%", metrics.cpuUsage())));
         }
-        return sb.toString();
+        return chatMessageBuilder.toString();
     }
-    
+
     private Object[] buildRowValues(PerformanceMetrics metrics) {
-        return new Object[]{
-            ConfigAccess.isCollectFps() ? metrics.fps() : Double.NaN,
-            ConfigAccess.isCollectTps() ? metrics.tps() : Double.NaN,
-            ConfigAccess.isCollectMspt() ? metrics.mspt() : Double.NaN,
-            ConfigAccess.isCollectHeap() ? metrics.heapUsed() : Double.NaN,
-            ConfigAccess.isCollectHeap() ? metrics.heapMax() : Double.NaN,
-            ConfigAccess.isCollectCpu() ? metrics.cpuUsage() : Double.NaN
-        };
+        rowValuesBuffer[0] = ConfigAccess.isCollectFps() ? metrics.fps() : Double.NaN;
+        rowValuesBuffer[1] = ConfigAccess.isCollectTps() ? metrics.tps() : Double.NaN;
+        rowValuesBuffer[2] = ConfigAccess.isCollectMspt() ? metrics.mspt() : Double.NaN;
+        rowValuesBuffer[3] = ConfigAccess.isCollectHeap() ? metrics.heapUsed() : Double.NaN;
+        rowValuesBuffer[4] = ConfigAccess.isCollectHeap() ? metrics.heapMax() : Double.NaN;
+        rowValuesBuffer[5] = ConfigAccess.isCollectCpu() ? metrics.cpuUsage() : Double.NaN;
+        return rowValuesBuffer;
     }
 
     public PerformanceMetrics getMetrics() {

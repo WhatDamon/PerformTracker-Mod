@@ -52,6 +52,13 @@ public class CsvWriter extends MetricsWriter {
     }
 
     @Override
+    protected void flushInternal() throws IOException {
+        if (writer != null) {
+            writer.flush();
+        }
+    }
+
+    @Override
     protected void onClose() throws IOException {
         if (writer != null) {
             writer.flush();
