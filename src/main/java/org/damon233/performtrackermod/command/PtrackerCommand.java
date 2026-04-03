@@ -204,10 +204,11 @@ public class PtrackerCommand {
             
             ptracker.then(CommandManager.literal("deviceinfo").executes(ctx -> {
                 SystemInfo info = SystemInfoCollector.collect();
-                
+
                 String title = Text.translatable("performtracker.device.title").getString();
                 String unknown = Text.translatable("performtracker.device.unknown").getString();
                 String typeLabel = Text.translatable("performtracker.device.type").getString();
+                String modelLabel = Text.translatable("performtracker.device.model").getString();
                 String cpuLabel = Text.translatable("performtracker.device.cpu").getString();
                 String gpuLabel = Text.translatable("performtracker.device.gpu").getString();
                 String coresLabel = Text.translatable("performtracker.device.cpu_cores").getString();
@@ -215,9 +216,10 @@ public class PtrackerCommand {
                 String osLabel = Text.translatable("performtracker.device.os").getString();
                 String javaLabel = Text.translatable("performtracker.device.java").getString();
                 String typeValue = Text.translatable("performtracker.device.type." + info.deviceType().getCode()).getString();
-                
+
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(title)), false);
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(typeLabel) + TranslationService.colorValue(typeValue)), false);
+                ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(modelLabel) + TranslationService.colorValue(info.deviceModel() != null ? info.deviceModel() : unknown)), false);
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(cpuLabel) + TranslationService.colorValue(info.cpuName() != null ? info.cpuName() : unknown)), false);
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(gpuLabel) + TranslationService.colorValue(info.gpuName() != null ? info.gpuName() : unknown)), false);
                 ctx.getSource().sendFeedback(() -> Text.literal(TranslationService.colorLabel(coresLabel) + TranslationService.colorValue(String.valueOf(info.cpuCores()))), false);

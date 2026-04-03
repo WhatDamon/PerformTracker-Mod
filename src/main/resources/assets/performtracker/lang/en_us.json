@@ -57,6 +57,7 @@
   "performtracker.device.type.HWM": "HarmonyOS Device",
   "performtracker.device.title": "=== Device Info ===",
   "performtracker.device.type": "Type: ",
+  "performtracker.device.model": "Model: ",
   "performtracker.device.cpu": "CPU: ",
   "performtracker.device.gpu": "GPU: ",
   "performtracker.device.cpu_cores": "CPU Cores: ",

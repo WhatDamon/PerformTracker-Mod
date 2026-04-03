@@ -57,6 +57,7 @@
   "performtracker.device.type.HWM": "鴻蒙裝置",
   "performtracker.device.title": "=== 裝置資訊 ===",
   "performtracker.device.type": "類型: ",
+  "performtracker.device.model": "型號: ",
   "performtracker.device.cpu": "處理器: ",
   "performtracker.device.gpu": "顯示卡: ",
   "performtracker.device.cpu_cores": "核心數: ",

@@ -42,6 +42,7 @@ public class SystemInfoCollector {
     // Permanent caches - CPU info and memory never change at runtime
     private static String cachedCpuName;
     private static long cachedPhysicalMemory = -1;
+    private static String cachedDeviceModel;
 
     // SHA-256 checksums for chip rules files (update when file content changes)
     private static final String PHONE_CHIPS_SHA = "428b078c2ba8395b84f2dd2a7ed964ee80feef685ecc6335e9679606ec63162a";
@@ -79,7 +80,8 @@ public class SystemInfoCollector {
             javaVersion,
             jvmName,
             minecraftVersion,
-            modVersion
+            modVersion,
+            getDeviceModel()
         );
 
         return cachedInfo;
@@ -118,14 +120,14 @@ public class SystemInfoCollector {
 
     private static String getWindowsCpuName() {
         String[] commands = {
-            "powershell -NoProfile -Command Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty Name",
-            "powershell -NoProfile -Command (Get-WmiObject Win32_Processor).Name"
+            "powershell -NoProfile -Command \"Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name\"",
+            "powershell -NoProfile -Command \"(Get-WmiObject Win32_Processor).Name\""
         };
 
         for (String command : commands) {
             String result = runCommand(command);
             if (result != null && !result.trim().isEmpty()) {
-                return result.trim();
+                return result.lines().findFirst().orElse(result).trim();
             }
         }
 
@@ -136,23 +138,87 @@ public class SystemInfoCollector {
         String output = readFile("/proc/cpuinfo");
         if (output == null) return "Unknown";
 
-        String[] prefixes = {"model name", "Model name", "Processor", "Hardware", "model", "Model"};
-        for (String prefix : prefixes) {
-            for (String line : output.split("\n")) {
-                if (line.startsWith(prefix)) {
-                    int colon = line.indexOf(':');
-                    if (colon > 0) {
-                        return line.substring(colon + 1).trim();
-                    }
-                }
+        for (String line : output.split("\n")) {
+            line = line.trim();
+
+            if (line.startsWith("model name") || line.startsWith("Model name")) {
+                return line.split(":", 2)[1].trim();
+            }
+
+            if (line.startsWith("Hardware") || line.startsWith("Processor")) {
+                return line.split(":", 2)[1].trim();
             }
         }
-        return "Unknown";
+
+        return System.getProperty("os.arch");
     }
 
     private static String getMacCpuName() {
         String result = runCommand("sysctl -n machdep.cpu.brand_string");
-        return result != null ? result.trim() : System.getProperty("os.arch");
+        if (result != null && !result.isBlank()) {
+            return result.trim();
+        }
+        return System.getProperty("os.arch");
+    }
+
+    private static String getDeviceModel() {
+        if (cachedDeviceModel != null) {
+            return cachedDeviceModel;
+        }
+
+        String osName = System.getProperty("os.name").toLowerCase();
+
+        if (osName.contains("mac") || osName.contains("darwin")) {
+            cachedDeviceModel = getMacDeviceModel();
+        } else if (osName.contains("linux")) {
+            cachedDeviceModel = getLinuxDeviceModel();
+        } else if (osName.contains("windows")) {
+            cachedDeviceModel = getWindowsDeviceModel();
+        } else {
+            cachedDeviceModel = "Unknown";
+        }
+
+        if (cachedDeviceModel.equalsIgnoreCase("To Be Filled By O.E.M.") || cachedDeviceModel.equalsIgnoreCase("Default String")) {
+            cachedDeviceModel = "Unknown";
+        }
+
+        return cachedDeviceModel;
+    }
+
+    private static String getMacDeviceModel() {
+        String result = runCommand("sysctl -n hw.model");
+        return result != null ? result.trim() : "Unknown";
+    }
+
+    private static String getLinuxDeviceModel() {
+        String model = readFile("/sys/devices/virtual/dmi/id/product_name");
+        if (model != null && !model.isBlank()) {
+            return model.trim();
+        }
+
+        model = readFile("/proc/device-tree/model");
+        if (model != null && !model.isBlank()) {
+            return model.trim();
+        }
+
+        return "Unknown";
+    }
+
+    private static String getWindowsDeviceModel() {
+        String[] commands = {
+            "powershell -NoProfile -Command \"(Get-CimInstance Win32_ComputerSystem).Model\"",
+            "powershell -NoProfile -Command \"(Get-WmiObject Win32_ComputerSystem).Model\"",
+            "cmd /c for /f \"tokens=2 delims==\" %A in ('wmic computersystem get model /value') do @echo %A"
+        };
+
+        for (String command : commands) {
+            String result = runCommand(command);
+            if (result != null && !result.trim().isEmpty()) {
+                return result.trim();
+            }
+        }
+
+        return "Unknown";
     }
 
     private static String runCommand(String command) {

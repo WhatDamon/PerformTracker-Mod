@@ -57,6 +57,7 @@
   "performtracker.device.type.HWM": "鸿蒙设备",
   "performtracker.device.title": "=== 设备信息 ===",
   "performtracker.device.type": "类型: ",
+  "performtracker.device.model": "型号: ",
   "performtracker.device.cpu": "处理器: ",
   "performtracker.device.gpu": "显卡: ",
   "performtracker.device.cpu_cores": "核心数: ",

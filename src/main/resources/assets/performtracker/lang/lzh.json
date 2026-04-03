@@ -57,6 +57,7 @@
   "performtracker.device.type.HWM": "鴻蒙機",
   "performtracker.device.title": "=== 器械錄 ===",
   "performtracker.device.type": "類: ",
+  "performtracker.device.model": "型: ",
   "performtracker.device.cpu": "算牒: ",
   "performtracker.device.gpu": "圖牒: ",
   "performtracker.device.cpu_cores": "算核: ",
