@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.damon233.performtrackermod.utils.UrlUtils;
+
 public class ConfigAccess {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
     private static final String CONFIG_FILE_NAME = "performtracker.json";
@@ -128,23 +130,17 @@ public class ConfigAccess {
     public static String getLocalServerEndpoint() {
         return getNetworkEndpoint();
     }
-    
+
     public static int getLocalServerPort() {
-        return parsePort(getNetworkEndpoint());
+        return UrlUtils.parsePort(getNetworkEndpoint());
     }
-    
+
+    public static String getLocalServerHost() {
+        return UrlUtils.parseHost(getNetworkEndpoint());
+    }
+
     public static int parsePort(String url) {
-        try {
-            int start = url.indexOf("://") + 3;
-            int colon = url.indexOf(":", start);
-            int slash = url.indexOf("/", start);
-            if (colon > 0) {
-                int end = slash > 0 ? slash : url.length();
-                return Integer.parseInt(url.substring(colon + 1, end));
-            }
-        } catch (Exception ignored) {
-        }
-        return 31415;
+        return UrlUtils.parsePort(url);
     }
     
     public static boolean isCollectFps() {
@@ -203,14 +199,27 @@ public class ConfigAccess {
         if (configData != null) {
             configData.networkEnabled = enabled;
             save();
+            notifyNetworkEnabledChanged(enabled);
         }
     }
-    
+
     public static void setNetworkEndpoint(String endpoint) {
         if (configData != null) {
             String validated = validateNetworkEndpoint(endpoint);
             configData.networkEndpoint = validated != null ? validated : DEFAULT_NETWORK_ENDPOINT;
             save();
+        }
+    }
+
+    private static Runnable networkEnabledCallback;
+
+    public static void setOnNetworkEnabledChanged(Runnable callback) {
+        networkEnabledCallback = callback;
+    }
+
+    private static void notifyNetworkEnabledChanged(boolean enabled) {
+        if (networkEnabledCallback != null) {
+            networkEnabledCallback.run();
         }
     }
 
@@ -223,7 +232,7 @@ public class ConfigAccess {
         if (!matcher.matches()) {
             return null;
         }
-        int port = parsePort(trimmed);
+        int port = UrlUtils.parsePort(trimmed);
         if (port < 1 || port > 65535) {
             return null;
         }

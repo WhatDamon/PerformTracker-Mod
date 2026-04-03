@@ -9,8 +9,8 @@ import org.damon233.performtrackermod.utils.CharsetDetector;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ManagementFactory;
+import com.sun.management.OperatingSystemMXBean;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -191,32 +191,11 @@ public class SystemInfoCollector {
             return cachedPhysicalMemory;
         }
 
-        String osName = System.getProperty("os.name").toLowerCase();
-
-        if (osName.contains("linux")) {
-            String meminfo = readFile("/proc/meminfo");
-            if (meminfo != null) {
-                for (String line : meminfo.split("\n")) {
-                    if (line.startsWith("MemTotal:")) {
-                        String[] parts = line.split("\\s+");
-                        if (parts.length >= 2) {
-                            try {
-                                cachedPhysicalMemory = Long.parseLong(parts[1]) * 1024;
-                                return cachedPhysicalMemory;
-                            } catch (NumberFormatException ignored) {
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         try {
-            OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
-            java.lang.reflect.Method method = osBean.getClass().getMethod("getTotalMemorySize");
-            Object result = method.invoke(osBean);
-            if (result instanceof Number num && num.longValue() > 0) {
-                cachedPhysicalMemory = num.longValue();
+            OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            long totalMemory = osBean.getTotalMemorySize();
+            if (totalMemory > 0) {
+                cachedPhysicalMemory = totalMemory;
                 return cachedPhysicalMemory;
             }
         } catch (Exception ignored) {

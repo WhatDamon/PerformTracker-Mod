@@ -88,14 +88,15 @@ public class HttpService {
 
     private boolean startServerInternal() {
         try {
-            server = HttpServer.create(new InetSocketAddress(localPort), 0);
+            String bindHost = ConfigAccess.getLocalServerHost();
+            server = HttpServer.create(new InetSocketAddress(bindHost, localPort), 0);
             server.setExecutor(serverExecutor);
 
             server.createContext("/api/deviceinfo", new DeviceInfoHandler());
 
             server.start();
             serverRunning.set(true);
-            LOGGER.info("HttpService server started on port {}", localPort);
+            LOGGER.info("HttpService server started on {}:{}", bindHost, localPort);
             return true;
         } catch (IOException e) {
             LOGGER.error("Failed to start HttpService server: {}", e.getMessage());
