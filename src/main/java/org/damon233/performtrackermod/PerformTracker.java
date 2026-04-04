@@ -65,10 +65,19 @@ public class PerformTracker implements ModInitializer {
 			} else {
 				// Network was disabled - stop server and clear HttpService
 				if (httpService != null) {
+					httpService.stop();
 					httpService.stopServer();
 					httpService = null;
 					LOGGER.info("HttpService unloaded due to network being disabled.");
 				}
+			}
+		});
+		
+		// Register callback for network endpoint changes
+		ConfigAccess.setOnNetworkEndpointChanged(() -> {
+			if (httpService != null && ConfigAccess.isNetworkEnabled()) {
+				httpService.reinitialize(ConfigAccess.getNetworkUrl());
+				LOGGER.info("HttpService reinitialized with new endpoint: {}", ConfigAccess.getNetworkUrl());
 			}
 		});
 		

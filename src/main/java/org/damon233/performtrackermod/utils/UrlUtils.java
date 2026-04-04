@@ -19,6 +19,10 @@ package org.damon233.performtrackermod.utils;
 import java.net.URI;
 
 public class UrlUtils {
+    private static final String[] LOCALHOST_HOSTS = {
+        "localhost", "127.0.0.1", "::1", "0:0:0:0:0:0:0:1"
+    };
+    
     public static int parsePort(String url) {
         try {
             URI uri = URI.create(url);
@@ -41,5 +45,18 @@ public class UrlUtils {
         } catch (Exception ignored) {
         }
         return "localhost";
+    }
+    
+    public static boolean isLocalhost(String host) {
+        if (host == null) {
+            return true;
+        }
+        String lowerHost = host.toLowerCase();
+        for (String localhost : LOCALHOST_HOSTS) {
+            if (localhost.equals(lowerHost)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

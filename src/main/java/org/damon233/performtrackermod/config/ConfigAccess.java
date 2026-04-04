@@ -147,7 +147,11 @@ public class ConfigAccess {
     }
     
     public static String getNetworkUrl() {
-        return getNetworkEndpoint() + API_PATH;
+        String endpoint = getNetworkEndpoint();
+        if (endpoint.endsWith("/")) {
+            return endpoint + API_PATH.substring(1);
+        }
+        return endpoint + API_PATH;
     }
 
     public static int getLocalServerPort() {
@@ -245,27 +249,42 @@ public class ConfigAccess {
         if (configData != null) {
             configData.networkEnabled = enabled;
             save();
-            notifyNetworkEnabledChanged(enabled);
+            notifyNetworkEnabledChanged();
         }
     }
 
     public static void setNetworkEndpoint(String endpoint) {
         if (configData != null) {
             String validated = validateNetworkEndpoint(endpoint);
+            String oldEndpoint = configData.networkEndpoint;
             configData.networkEndpoint = validated != null ? validated : DEFAULT_NETWORK_ENDPOINT;
             save();
+            if (configData.networkEnabled && !configData.networkEndpoint.equals(oldEndpoint)) {
+                notifyNetworkEndpointChanged();
+            }
         }
     }
 
     private static Runnable networkEnabledCallback;
+    private static Runnable networkEndpointCallback;
 
     public static void setOnNetworkEnabledChanged(Runnable callback) {
         networkEnabledCallback = callback;
     }
+    
+    public static void setOnNetworkEndpointChanged(Runnable callback) {
+        networkEndpointCallback = callback;
+    }
 
-    private static void notifyNetworkEnabledChanged(boolean enabled) {
+    private static void notifyNetworkEnabledChanged() {
         if (networkEnabledCallback != null) {
             networkEnabledCallback.run();
+        }
+    }
+
+    private static void notifyNetworkEndpointChanged() {
+        if (networkEndpointCallback != null) {
+            networkEndpointCallback.run();
         }
     }
 

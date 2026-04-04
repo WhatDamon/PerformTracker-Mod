@@ -22,10 +22,12 @@ import com.sun.net.httpserver.HttpServer;
 import org.damon233.performtrackermod.collector.SystemInfoCollector;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.SystemInfo;
+import org.damon233.performtrackermod.utils.UrlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -85,6 +87,18 @@ public class HttpService {
                 .build();
     }
     
+    public void reinitialize(String remoteUrl) {
+        boolean wasRunning = serverRunning.get();
+        if (wasRunning) {
+            stopServer();
+        }
+        stopSender();
+        initialize(remoteUrl);
+        if (wasRunning) {
+            tryStartServer();
+        }
+    }
+    
     public synchronized void start() {
         startSender();
     }
@@ -97,12 +111,19 @@ public class HttpService {
     }
 
     private boolean startServerInternal() {
+        String bindHost = ConfigAccess.getLocalServerHost();
+        
+        if (UrlUtils.isLocalhost(bindHost)) {
+            LOGGER.info("HttpService server not started: endpoint is localhost, assuming external server handles requests");
+            return false;
+        }
+        
         try {
-            String bindHost = ConfigAccess.getLocalServerHost();
             server = HttpServer.create(new InetSocketAddress(bindHost, localPort), 0);
             server.setExecutor(serverExecutor);
 
             server.createContext("/api/deviceinfo", new DeviceInfoHandler());
+            server.createContext("/api/metrics", new MetricsHandler());
 
             server.start();
             serverRunning.set(true);
@@ -128,7 +149,7 @@ public class HttpService {
     public synchronized void stopServer() {
         if (server != null && serverRunning.compareAndSet(true, false)) {
             server.stop(0);
-            serverExecutor.shutdownNow();
+            server = null;
             LOGGER.info("HttpService server stopped");
         }
     }
@@ -140,7 +161,6 @@ public class HttpService {
                 sendQueue.poll();
                 dropped++;
             }
-            senderExecutor.shutdownNow();
             LOGGER.info("HttpService sender stopped, {} items dropped", dropped);
         }
     }
@@ -223,6 +243,43 @@ public class HttpService {
             );
             
             sendResponse(exchange, 200, json);
+        }
+        
+        private void sendResponse(HttpExchange exchange, int statusCode, String body) {
+            try {
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(statusCode, bytes.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
+                }
+            } catch (IOException e) {
+                LOGGER.debug("Failed to send response: {}", e.getMessage());
+            }
+        }
+    }
+
+    private static class MetricsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) {
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+            
+            try {
+                int contentLength = Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
+                if (contentLength > 0) {
+                    try (InputStream is = exchange.getRequestBody()) {
+                        byte[] body = is.readAllBytes();
+                        LOGGER.debug("Received metrics payload: {} bytes", body.length);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.debug("Failed to read metrics payload: {}", e.getMessage());
+            }
+            
+            sendResponse(exchange, 200, "{\"status\":\"ok\"}");
         }
         
         private void sendResponse(HttpExchange exchange, int statusCode, String body) {
