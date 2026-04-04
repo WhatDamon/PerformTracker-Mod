@@ -119,16 +119,6 @@ public abstract class MetricsWriter implements AutoCloseable {
         }
     }
 
-    public void flush() {
-        try {
-            flushInternal();
-            rowCount = 0;
-            lastFlushTime = System.currentTimeMillis();
-        } catch (IOException e) {
-            LOGGER.error("Failed to flush writer", e);
-        }
-    }
-
     @Override
     public void close() {
         stop();

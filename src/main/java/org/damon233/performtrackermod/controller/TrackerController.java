@@ -115,12 +115,14 @@ public class TrackerController {
 
         if (ConfigAccess.isNetworkEnabled()) {
             HttpService httpService = PerformTracker.getHttpService();
-            if (httpService != null && !httpService.tryStartServer()) {
-                server.getPlayerManager().getPlayerList().forEach(player ->
-                    player.sendMessage(FormattingService.chatError("performtracker.error.http_server_failed", ConfigAccess.getLocalServerPort()))
-                );
+            if (httpService != null) {
+                if (!httpService.tryStartServer()) {
+                    server.getPlayerManager().getPlayerList().forEach(player ->
+                        player.sendMessage(FormattingService.chatError("performtracker.error.http_server_failed", ConfigAccess.getLocalServerPort()))
+                    );
+                }
+                httpService.start();
             }
-            httpService.start();
         }
 
         state.set(TrackerState.RUNNING);
@@ -262,9 +264,9 @@ public class TrackerController {
         MutableText result = Text.empty();
         for (int i = 0; i < chatMessagePartCount; i++) {
             if (i > 0) {
-                result = result.append(Text.literal(" | ").withColor(0x888888));
+                result.append(Text.literal(" | ").withColor(0x888888));
             }
-            result = result.append(chatMessageParts[i]);
+            result.append(chatMessageParts[i]);
         }
         return result;
     }

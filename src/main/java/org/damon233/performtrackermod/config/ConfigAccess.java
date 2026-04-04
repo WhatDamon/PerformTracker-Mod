@@ -149,10 +149,6 @@ public class ConfigAccess {
     public static String getNetworkUrl() {
         return getNetworkEndpoint() + API_PATH;
     }
-    
-    public static String getLocalServerEndpoint() {
-        return getNetworkEndpoint();
-    }
 
     public static int getLocalServerPort() {
         return UrlUtils.parsePort(getNetworkEndpoint());
@@ -192,7 +188,7 @@ public class ConfigAccess {
     
     public static void setOutputIntervalSeconds(int seconds) {
         if (configData != null) {
-            configData.outputIntervalSeconds = Math.max(1, Math.min(3600, seconds));
+            configData.outputIntervalSeconds = Math.clamp(seconds, 1, 3600);
             save();
         }
     }

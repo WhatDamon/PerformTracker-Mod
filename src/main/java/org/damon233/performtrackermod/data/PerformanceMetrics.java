@@ -26,7 +26,6 @@ public record PerformanceMetrics(
     double heapMax,
     double cpuUsage
 ) {
-    public static final PerformanceMetrics EMPTY = new PerformanceMetrics(0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
 
     public PerformanceMetrics {
         fps = Math.max(0.0, fps);

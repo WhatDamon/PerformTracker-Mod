@@ -35,13 +35,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import org.damon233.performtrackermod.PerformTracker;
-import org.damon233.performtrackermod.data.DeviceType;
-import org.damon233.performtrackermod.data.SystemInfo;
-import org.damon233.performtrackermod.utils.CharsetDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -302,11 +295,6 @@ public class SystemInfoCollector {
             String cpuName = getCpuName();
             String gpuName = getGpuName();
             return classifyArmDevice(cpuName, gpuName);
-        }
-
-        if (osName.contains("windows") ||
-            (osName.contains("linux") && (osArch.contains("amd64") || osArch.contains("x86")))) {
-            return DeviceType.PC;
         }
 
         return DeviceType.PC;

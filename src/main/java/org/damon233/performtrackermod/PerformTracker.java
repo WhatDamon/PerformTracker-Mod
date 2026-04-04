@@ -34,8 +34,7 @@ public class PerformTracker implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static TrackerController trackerController;
-	private static ServerMetricsCollector serverMetricsCollector;
-	private static HttpService httpService;
+    private static HttpService httpService;
 	private static IFpsProvider fpsProvider;
 	private static IGpuProvider gpuProvider;
 
@@ -44,7 +43,7 @@ public class PerformTracker implements ModInitializer {
 		ConfigAccess.init();
 		
 		LOGGER.info("PerformTracker initialized.");
-		serverMetricsCollector = new ServerMetricsCollector();
+        ServerMetricsCollector serverMetricsCollector = new ServerMetricsCollector();
 		trackerController = new TrackerController(serverMetricsCollector, null);
 		PtrackerCommand.register();
 		
@@ -85,10 +84,6 @@ public class PerformTracker implements ModInitializer {
 
 	public static TrackerController getTrackerController() {
 		return trackerController;
-	}
-
-	public static ServerMetricsCollector getServerMetricsCollector() {
-		return serverMetricsCollector;
 	}
 
 	public static HttpService getHttpService() {

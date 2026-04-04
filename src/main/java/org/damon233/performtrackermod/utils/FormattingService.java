@@ -40,14 +40,6 @@ public class FormattingService {
         return Text.translatable(PREFIX + key, args);
     }
 
-    public static MutableText chat(String key) {
-        return Text.literal("").append(PREFIX_TEXT).append(get(key));
-    }
-
-    public static MutableText chat(String key, Object... args) {
-        return Text.literal("").append(PREFIX_TEXT).append(get(key, args));
-    }
-
     public static MutableText chatSuccess(String key) {
         return Text.literal("").append(PREFIX_TEXT).append(Text.literal("").withColor(getColorValue(Formatting.GREEN))).append(get(key));
     }

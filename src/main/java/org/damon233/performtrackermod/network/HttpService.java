@@ -96,12 +96,6 @@ public class HttpService {
         return startServerInternal();
     }
 
-    public synchronized void startServer() {
-        if (!serverRunning.get()) {
-            startServerInternal();
-        }
-    }
-
     private boolean startServerInternal() {
         try {
             String bindHost = ConfigAccess.getLocalServerHost();
@@ -197,18 +191,10 @@ public class HttpService {
             LOGGER.debug("Send failed: {}", e.getMessage());
         }
     }
-    
-    public boolean isServerRunning() {
-        return serverRunning.get();
-    }
-    
-    public int getLocalPort() {
-        return localPort;
-    }
-    
-    private class DeviceInfoHandler implements HttpHandler {
+
+    private static class DeviceInfoHandler implements HttpHandler {
         @Override
-        public void handle(HttpExchange exchange) throws IOException {
+        public void handle(HttpExchange exchange) {
             if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 sendResponse(exchange, 405, "{\"error\":\"Method not allowed\"}");
                 return;

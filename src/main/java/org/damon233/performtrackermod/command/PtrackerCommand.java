@@ -39,74 +39,69 @@ public class PtrackerCommand {
     
     private enum ConfigType {
         INT("output_interval", "performtracker.config.output_interval", 5,
-            (Supplier<Object>) ConfigAccess::getOutputIntervalSeconds,
+            ConfigAccess::getOutputIntervalSeconds,
             v -> ConfigAccess.setOutputIntervalSeconds((Integer) v),
-            (Supplier<Object>) ConfigAccess::getDefaultOutputIntervalSeconds),
+            ConfigAccess::getDefaultOutputIntervalSeconds),
         
         BOOL("chat_enabled", "performtracker.config.chat_enabled", true,
-            (Supplier<Object>) ConfigAccess::isChatEnabled,
+            ConfigAccess::isChatEnabled,
             v -> ConfigAccess.setChatEnabled((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultChatEnabled),
+            ConfigAccess::getDefaultChatEnabled),
         
         BOOL2("export_enabled", "performtracker.config.export_enabled", true,
-            (Supplier<Object>) ConfigAccess::isExportEnabled,
+            ConfigAccess::isExportEnabled,
             v -> ConfigAccess.setExportEnabled((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultExportEnabled),
+            ConfigAccess::getDefaultExportEnabled),
 
         STRING("export_directory", "performtracker.config.export_directory", "performance_data",
-            (Supplier<Object>) ConfigAccess::getExportDirectory,
+            ConfigAccess::getExportDirectory,
             v -> ConfigAccess.setExportDirectory((String) v),
-            (Supplier<Object>) ConfigAccess::getDefaultExportDirectory),
+            ConfigAccess::getDefaultExportDirectory),
         
         BOOL3("network_enabled", "performtracker.config.network_enabled", false,
-            (Supplier<Object>) ConfigAccess::isNetworkEnabled,
+            ConfigAccess::isNetworkEnabled,
             v -> ConfigAccess.setNetworkEnabled((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultNetworkEnabled),
+            ConfigAccess::getDefaultNetworkEnabled),
         
         STRING2("network_endpoint", "performtracker.config.network_endpoint", "http://localhost:31415",
-            (Supplier<Object>) ConfigAccess::getNetworkEndpoint,
+            ConfigAccess::getNetworkEndpoint,
             v -> ConfigAccess.setNetworkEndpoint((String) v),
-            (Supplier<Object>) ConfigAccess::getDefaultNetworkEndpoint),
+            ConfigAccess::getDefaultNetworkEndpoint),
 
         STRING3("output_format", "performtracker.config.output_format", "csv",
-            (Supplier<Object>) ConfigAccess::getOutputFormat,
+            ConfigAccess::getOutputFormat,
             v -> ConfigAccess.setOutputFormat((String) v),
-            (Supplier<Object>) ConfigAccess::getDefaultOutputFormat),
+            ConfigAccess::getDefaultOutputFormat),
 
         BOOL4("collect_fps", "performtracker.config.collect_fps", true,
-            (Supplier<Object>) ConfigAccess::isCollectFps,
+            ConfigAccess::isCollectFps,
             v -> ConfigAccess.setCollectFps((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCollectFps),
+            ConfigAccess::getDefaultCollectFps),
         
         BOOL5("collect_tps", "performtracker.config.collect_tps", true,
-            (Supplier<Object>) ConfigAccess::isCollectTps,
+            ConfigAccess::isCollectTps,
             v -> ConfigAccess.setCollectTps((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCollectTps),
+            ConfigAccess::getDefaultCollectTps),
         
         BOOL6("collect_mspt", "performtracker.config.collect_mspt", true,
-            (Supplier<Object>) ConfigAccess::isCollectMspt,
+            ConfigAccess::isCollectMspt,
             v -> ConfigAccess.setCollectMspt((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCollectMspt),
+            ConfigAccess::getDefaultCollectMspt),
         
         BOOL7("collect_heap", "performtracker.config.collect_heap", true,
-            (Supplier<Object>) ConfigAccess::isCollectHeap,
+            ConfigAccess::isCollectHeap,
             v -> ConfigAccess.setCollectHeap((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCollectHeap),
-        
-        BOOL8("collect_heap", "performtracker.config.collect_heap", true,
-            (Supplier<Object>) ConfigAccess::isCollectHeap,
-            v -> ConfigAccess.setCollectHeap((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCollectHeap),
+            ConfigAccess::getDefaultCollectHeap),
 
-        BOOL9("collect_cpu", "performtracker.config.collect_cpu", true,
-            (Supplier<Object>) ConfigAccess::isCollectCpu,
+        BOOL8("collect_cpu", "performtracker.config.collect_cpu", true,
+            ConfigAccess::isCollectCpu,
             v -> ConfigAccess.setCollectCpu((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultCollectCpu),
+            ConfigAccess::getDefaultCollectCpu),
         
         BOOL10("binary_units", "performtracker.config.binary_units", true,
-            (Supplier<Object>) ConfigAccess::isBinaryUnits,
+            ConfigAccess::isBinaryUnits,
             v -> ConfigAccess.setBinaryUnits((Boolean) v),
-            (Supplier<Object>) ConfigAccess::getDefaultBinaryUnits);
+            ConfigAccess::getDefaultBinaryUnits);
         
         final String key;
         final String translationKey;
@@ -143,9 +138,9 @@ public class PtrackerCommand {
         
         void sendLine(ServerCommandSource source) {
             MutableText current = FormattingService.colorValue(
-                Boolean.TRUE.equals(getter.get()) ? "true" : "false");
+                Boolean.toString(Boolean.TRUE.equals(getter.get())));
             MutableText def = FormattingService.colorValue(
-                Boolean.TRUE.equals(defaultGetter.get()) ? "true" : "false");
+                Boolean.toString(Boolean.TRUE.equals(defaultGetter.get())));
             source.sendFeedback(() -> Text.translatable(translationKey).append(": ").append(current).append(" (default: ").append(def).append(")"), false);
         }
     }

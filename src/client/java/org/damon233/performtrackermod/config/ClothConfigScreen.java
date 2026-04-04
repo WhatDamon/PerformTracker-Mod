@@ -23,7 +23,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
-import java.util.List;
 import java.util.Optional;
 
 public class ClothConfigScreen {

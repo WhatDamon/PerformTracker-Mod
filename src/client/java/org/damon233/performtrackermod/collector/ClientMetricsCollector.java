@@ -19,6 +19,8 @@ package org.damon233.performtrackermod.collector;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 
+import java.util.Arrays;
+
 public class ClientMetricsCollector implements IFpsProvider {
     
     private static final int DEFAULT_WINDOW_SIZE = 60;
@@ -76,8 +78,6 @@ public class ClientMetricsCollector implements IFpsProvider {
         windowIndex = 0;
         sampleCount = 0;
 
-        for (int i = 0; i < fpsWindow.length; i++) {
-            fpsWindow[i] = 0;
-        }
+        Arrays.fill(fpsWindow, 0);
     }
 }

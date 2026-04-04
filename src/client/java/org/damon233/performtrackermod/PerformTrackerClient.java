@@ -26,19 +26,17 @@ import org.damon233.performtrackermod.config.ConfigAccess;
 
 public class PerformTrackerClient implements ClientModInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PerformTracker.MOD_ID);
-	private static ClientMetricsCollector clientMetricsCollector;
-	private static ClientGpuCollector clientGpuCollector;
 
-	@Override
+    @Override
 	public void onInitializeClient() {
 		LOGGER.info("PerformTrackerClient initializing...");
 		
 		ConfigAccess.init();
-		
-		clientMetricsCollector = new ClientMetricsCollector();
+
+        ClientMetricsCollector clientMetricsCollector = new ClientMetricsCollector();
 		PerformTracker.setFpsProvider(clientMetricsCollector);
-		
-		clientGpuCollector = new ClientGpuCollector();
+
+        ClientGpuCollector clientGpuCollector = new ClientGpuCollector();
 		PerformTracker.setGpuProvider(clientGpuCollector);
 		LOGGER.info("GPU: {}", clientGpuCollector.getGpuName());
 		
