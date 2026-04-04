@@ -44,7 +44,7 @@
   "performtracker.config.binary_units.tooltip": "使用二进制 (1024进制) 单位代替十进制 (1000进制) 单位",
   "performtracker.config.output_format": "输出格式",
   "performtracker.config.output_format.tooltip": "导出指标的文件格式 (csv, json, yaml)",
-  "performtracker.config.output_format.error": "无效格式，请使用: csv, json, yaml",
+  "performtracker.config.output_format.error": "无效格式, 请使用: csv, json, yaml",
   "performtracker.config.info": "%s: %s (默认: %s)",
   "performtracker.config.set.success": "配置已更新: %s 设置为 %s",
   "performtracker.config.value.true": "是",
