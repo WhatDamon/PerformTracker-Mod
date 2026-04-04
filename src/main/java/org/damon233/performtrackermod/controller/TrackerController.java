@@ -130,7 +130,7 @@ public class TrackerController {
 
         serverCollector.reset();
 
-        LOGGER.info("Performance tracking started, sessionId: {}", sessionId);
+        LOGGER.debug("Performance tracking started, sessionId: {}", sessionId);
     }
 
     private boolean hasAnyMetricEnabled() {
@@ -158,7 +158,7 @@ public class TrackerController {
             httpService.stop();
         }
 
-        LOGGER.info("Performance tracking stopped, samples: {}", sampleCount);
+        LOGGER.debug("Performance tracking stopped, samples: {}", sampleCount);
         
         state.set(TrackerState.IDLE);
         lastOutputTime = 0;
@@ -191,7 +191,7 @@ public class TrackerController {
         if (ConfigAccess.isExportEnabled() && metricsWriter != null) {
             String newFormat = ConfigAccess.getOutputFormat();
             if (!newFormat.equals(currentOutputFormat)) {
-                LOGGER.info("Output format changed from {} to {}, creating new file", currentOutputFormat, newFormat);
+                LOGGER.debug("Output format changed from {} to {}, creating new file", currentOutputFormat, newFormat);
                 try {
                     metricsWriter.close();
                     metricsWriter = createMetricsWriter();
