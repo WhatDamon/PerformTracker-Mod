@@ -93,9 +93,10 @@ tasks.test {
  }
 
 checkstyle {
- 	toolVersion = "10.17.0"
- 	configFile = file("checkstyle.xml")
- }
+  	toolVersion = "10.17.0"
+  	configFile = file("config/checkstyle/checkstyle.xml")
+  	configProperties["checkstyle.config.location"] = "${project.rootDir}/config/checkstyle"
+  }
 
 tasks.checkstyleMain {
  	reports {

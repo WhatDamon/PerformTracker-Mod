@@ -6,6 +6,10 @@
 <module name="Checker">
     <property name="severity" value="warning"/>
     <property name="fileExtensions" value="java"/>
+    
+    <module name="RegexpHeader">
+        <property name="headerFile" value="${checkstyle.config.location}/license_header.txt"/>
+    </module>
 
     <module name="TreeWalker">
         <module name="NeedBraces">
