@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Others
+    url: https://github.com/WhatDamon/PerformTracker/discussions/new/choose
+    about: Report other problems in Discussions.

@@ -1,0 +1,95 @@
+name: Bug report
+description: Report something that is not working correctly
+title: '[Bug]: '
+labels: type:bug
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Thank you for taking the time to file this issue to report a bug. Before doing so, please make sure you have completed the following preparatory steps:
+
+        - I’ve already gone to [GitHub Actions](https://github.com/WhatDamon/PerformTracker-Mod/actions/workflows/build.yml) to download and use the latest automated build version, but the bug is still there.
+        - I have searched and confirmed that there are no duplicate issues.
+        - I understand that this issue will be closed if the information is incomplete.
+
+        If you have already completed the necessary preparations, please fill out the form.
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      description:
+        Please provide the Minecraft version.
+        If you can provide logs, this field is optional.
+      placeholder: 1.21.11
+  - type: input
+    id: fabric-version
+    attributes:
+      label: Fabric Loader Version
+      description: >-
+        Please provide the Fabric Loader version.
+        If you can provide logs, this field is optional.
+        If you are loading this mod using the Sinytra Connector in another mod loader, please note this separately.
+      placeholder: 0.18.0
+  - type: input
+    id: fabric-api-version
+    attributes:
+      label: Fabric API Version
+      description: >-
+        Please provide the Fabric API version.
+        If you can provide logs, this field is optional.
+        If you are using the Sinytra Connector to load this mod in another mod loader, please provide the Forgified Fabric API version.
+      placeholder: 0.141.3+1.21.11
+  - type: input
+    id: performtracker-version
+    attributes:
+      label: PerformTracker Version
+      description: >-
+        Please provide the PerformTracker version.
+        If you can provide logs, this field is optional.
+      placeholder: 0.1.0
+  - type: dropdown
+    id: client-or-server
+    attributes:
+      label: Client or Server
+      description: On which end of the client-server architecture does this issue occur?
+      multiple: true
+      options:
+        - Client
+        - Delicated Server
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear description of the bug.
+      placeholder: Describe the bug here...
+    validations:
+      required: true
+  - type: textarea
+    id: step
+    attributes:
+      label: Steps to Reproduce
+      description: >-
+        How to reproduce the bug?
+        If you can provide logs, this field is optional.
+      placeholder: >-
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Attachments
+      description: For example, game logs, crash reports, etc.
+      placeholder: Drag the log to here directly.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: Did you load this mod via the Sinytra Connector?
+          required: false
+        - label: >-
+            I confirm that the above information is accurate and agree to answer any questions others may have regarding this issue.
+          required: true
