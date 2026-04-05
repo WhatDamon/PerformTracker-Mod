@@ -128,32 +128,65 @@ public class ClothConfigScreen {
                 .setTooltip(Text.translatable("performtracker.config.collect_cpu.tooltip"))
                 .setSaveConsumer(ConfigAccess::setCollectCpu)
                 .build());
-        
+
         ConfigCategory network = builder.getOrCreateCategory(Text.translatable("performtracker.config.category.network"));
-        
+
+        network.addEntry(entryBuilder.startTextDescription(
+                        Text.translatable("performtracker.config.network_warning")
+                        )
+                .build());
+
         network.addEntry(entryBuilder.startBooleanToggle(
-                Text.translatable("performtracker.config.network_enabled"),
-                ConfigAccess.isNetworkEnabled())
+                        Text.translatable("performtracker.config.network_enabled"),
+                        ConfigAccess.isNetworkEnabled())
                 .setDefaultValue(false)
                 .setTooltip(Text.translatable("performtracker.config.network_enabled.tooltip"))
                 .setSaveConsumer(ConfigAccess::setNetworkEnabled)
                 .build());
-        
+
         network.addEntry(entryBuilder.startTextField(
-                Text.translatable("performtracker.config.network_endpoint"),
-                ConfigAccess.getNetworkEndpoint())
-                .setDefaultValue("http://localhost:31415")
-                .setTooltip(Text.translatable("performtracker.config.network_endpoint.tooltip"))
+                        Text.translatable("performtracker.config.network_host"),
+                        ConfigAccess.getNetworkUrl())
+                .setDefaultValue("localhost")
+                .setTooltip(Text.translatable("performtracker.config.network_host.tooltip"))
                 .setSaveConsumer(newValue -> {
-                    if (ConfigAccess.isValidNetworkEndpoint(newValue)) {
-                        ConfigAccess.setNetworkEndpoint(newValue);
+                    if (ConfigAccess.isValidNetworkUrl(newValue)) {
+                        ConfigAccess.setNetworkUrl(newValue);
                     }
                 })
                 .setErrorSupplier(newValue -> {
-                    if (!ConfigAccess.isValidNetworkEndpoint(newValue)) {
-                        return Optional.of(Text.translatable("performtracker.config.network_endpoint.error"));
+                    if (!ConfigAccess.isValidNetworkUrl(newValue)) {
+                        return Optional.of(Text.translatable("performtracker.config.network_host.error"));
                     }
                     return Optional.empty();
+                })
+                .build());
+
+        network.addEntry(entryBuilder.startIntField(
+                        Text.translatable("performtracker.config.receiver_port"),
+                        ConfigAccess.getReceiverPort())
+                .setDefaultValue(31415)
+                .setMin(1)
+                .setMax(65535)
+                .setTooltip(Text.translatable("performtracker.config.receiver_port.tooltip"))
+                .setSaveConsumer(port -> {
+                    if (port >= 1 && port <= 65535) {
+                        ConfigAccess.setReceiverPort(port);
+                    }
+                })
+                .build());
+
+        network.addEntry(entryBuilder.startIntField(
+                        Text.translatable("performtracker.config.sender_port"),
+                        ConfigAccess.getSenderPort())
+                .setDefaultValue(31416)
+                .setMin(1)
+                .setMax(65535)
+                .setTooltip(Text.translatable("performtracker.config.sender_port.tooltip"))
+                .setSaveConsumer(port -> {
+                    if (port >= 1 && port <= 65535) {
+                        ConfigAccess.setSenderPort(port);
+                    }
                 })
                 .build());
         

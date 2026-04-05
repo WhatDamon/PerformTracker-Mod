@@ -16,6 +16,8 @@
 
 package org.damon233.performtrackermod.network;
 
+import org.damon233.performtrackermod.data.SystemInfo;
+
 public class JsonFormatter {
     
     public static String formatMetrics(long timestamp, String sessionId,
@@ -68,7 +70,29 @@ public class JsonFormatter {
         
         return sb.toString();
     }
-    
+
+    public static String formatDeviceInfo(SystemInfo info, boolean chipRulesTrusted) {
+        return String.format(
+            "{\"deviceType\":\"%s\",\"deviceModel\":\"%s\",\"cpuName\":\"%s\",\"gpuName\":\"%s\",\"cpuCores\":%d,\"memory\":%d," +
+            "\"os\":\"%s\",\"osVersion\":\"%s\",\"osArch\":\"%s\"," +
+            "\"javaVersion\":\"%s\",\"minecraftVersion\":\"%s\",\"modVersion\":\"%s\"," +
+            "\"chipRulesTrusted\":%b}",
+            escapeJson(info.deviceType().getCode()),
+            escapeJson(info.deviceModel() != null ? info.deviceModel() : "Unknown"),
+            escapeJson(info.cpuName() != null ? info.cpuName() : "Unknown"),
+            escapeJson(info.gpuName() != null ? info.gpuName() : "Unknown"),
+            info.cpuCores(),
+            info.totalMemoryBytes(),
+            escapeJson(info.osName()),
+            escapeJson(info.osVersion()),
+            escapeJson(info.osArch()),
+            escapeJson(info.javaVersion()),
+            escapeJson(info.minecraftVersion()),
+            escapeJson(info.modVersion()),
+            chipRulesTrusted
+        );
+    }
+
     public static String escapeJson(String s) {
         if (s == null) {
             return "";

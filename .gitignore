@@ -44,3 +44,8 @@ replay_*.log
 logs/
 *.log
 *.log.gz
+
+# Python
+
+*.pyc
+__pycache__/

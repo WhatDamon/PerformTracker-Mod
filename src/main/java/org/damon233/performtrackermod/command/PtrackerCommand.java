@@ -57,18 +57,8 @@ public class PtrackerCommand {
             ConfigAccess::getExportDirectory,
             v -> ConfigAccess.setExportDirectory((String) v),
             ConfigAccess::getDefaultExportDirectory),
-        
-        BOOL3("network_enabled", "performtracker.config.network_enabled", false,
-            ConfigAccess::isNetworkEnabled,
-            v -> ConfigAccess.setNetworkEnabled((Boolean) v),
-            ConfigAccess::getDefaultNetworkEnabled),
-        
-        STRING2("network_endpoint", "performtracker.config.network_endpoint", "http://localhost:31415",
-            ConfigAccess::getNetworkEndpoint,
-            v -> ConfigAccess.setNetworkEndpoint((String) v),
-            ConfigAccess::getDefaultNetworkEndpoint),
 
-        STRING3("output_format", "performtracker.config.output_format", "csv",
+        STRING2("output_format", "performtracker.config.output_format", "csv",
             ConfigAccess::getOutputFormat,
             v -> ConfigAccess.setOutputFormat((String) v),
             ConfigAccess::getDefaultOutputFormat),
@@ -101,7 +91,27 @@ public class PtrackerCommand {
         BOOL10("binary_units", "performtracker.config.binary_units", true,
             ConfigAccess::isBinaryUnits,
             v -> ConfigAccess.setBinaryUnits((Boolean) v),
-            ConfigAccess::getDefaultBinaryUnits);
+            ConfigAccess::getDefaultBinaryUnits),
+        
+        BOOL11("network_enabled", "performtracker.config.network_enabled", false,
+            ConfigAccess::isNetworkEnabled,
+            v -> ConfigAccess.setNetworkEnabled((Boolean) v),
+            ConfigAccess::getDefaultNetworkEnabled),
+        
+        STRING4("network_host", "performtracker.config.network_host", "localhost",
+            ConfigAccess::getNetworkUrl,
+            v -> ConfigAccess.setNetworkUrl((String) v),
+            ConfigAccess::getDefaultNetworkUrl),
+        
+        INT2("receiver_port", "performtracker.config.receiver_port", 31415,
+            ConfigAccess::getReceiverPort,
+            v -> ConfigAccess.setReceiverPort((Integer) v),
+            ConfigAccess::getDefaultReceiverPort),
+        
+        INT3("sender_port", "performtracker.config.sender_port", 31416,
+            ConfigAccess::getSenderPort,
+            v -> ConfigAccess.setSenderPort((Integer) v),
+            ConfigAccess::getDefaultSenderPort);
         
         final String key;
         final String translationKey;
@@ -137,10 +147,8 @@ public class PtrackerCommand {
         }
         
         void sendLine(ServerCommandSource source) {
-            MutableText current = FormattingService.colorValue(
-                Boolean.toString(Boolean.TRUE.equals(getter.get())));
-            MutableText def = FormattingService.colorValue(
-                Boolean.toString(Boolean.TRUE.equals(defaultGetter.get())));
+            MutableText current = FormattingService.colorValue(String.valueOf(getter.get()));
+            MutableText def = FormattingService.colorValue(String.valueOf(defaultGetter.get()));
             source.sendFeedback(() -> Text.translatable(translationKey).append(": ").append(current).append(" (default: ").append(def).append(")"), false);
         }
     }
@@ -209,11 +217,7 @@ public class PtrackerCommand {
                     item.then(CommandManager.argument("value", StringArgumentType.string())
                         .executes(ctx -> {
                             String val = StringArgumentType.getString(ctx, "value");
-                            if (cfg == ConfigType.STRING2 && !ConfigAccess.isValidNetworkEndpoint(val)) {
-                                ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.config.network_endpoint.error"), false);
-                                return 0;
-                            }
-                            if (cfg == ConfigType.STRING3 && !ConfigAccess.isValidOutputFormat(val)) {
+                            if (cfg == ConfigType.STRING2 && !ConfigAccess.isValidOutputFormat(val)) {
                                 ctx.getSource().sendFeedback(() -> Text.translatable("performtracker.config.output_format.error"), false);
                                 return 0;
                             }

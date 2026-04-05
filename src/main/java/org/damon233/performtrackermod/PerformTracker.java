@@ -27,76 +27,42 @@ import org.damon233.performtrackermod.collector.IGpuProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.controller.TrackerController;
 import org.damon233.performtrackermod.command.PtrackerCommand;
-import org.damon233.performtrackermod.network.HttpService;
+import org.damon233.performtrackermod.network.HttpServerManager;
+import org.damon233.performtrackermod.network.UdpMetricsClient;
 
 public class PerformTracker implements ModInitializer {
 	public static final String MOD_ID = "performtracker";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static TrackerController trackerController;
-    private static HttpService httpService;
 	private static IFpsProvider fpsProvider;
 	private static IGpuProvider gpuProvider;
 
 	@Override
 	public void onInitialize() {
 		ConfigAccess.init();
-		
+
 		LOGGER.info("PerformTracker initialized.");
-        ServerMetricsCollector serverMetricsCollector = new ServerMetricsCollector();
+		ServerMetricsCollector serverMetricsCollector = new ServerMetricsCollector();
 		trackerController = new TrackerController(serverMetricsCollector, null);
 		PtrackerCommand.register();
-		
+
 		if (ConfigAccess.isNetworkEnabled()) {
-			httpService = new HttpService();
-			httpService.initialize(ConfigAccess.getNetworkUrl());
-			httpService.tryStartServer();
+			String host = ConfigAccess.getNetworkUrl();
+			int port = ConfigAccess.getReceiverPort();
+			HttpServerManager.getInstance().start(host, port);
 		}
-		
-		// Register callback for network enable/disable changes
-		ConfigAccess.setOnNetworkEnabledChanged(() -> {
-			if (ConfigAccess.isNetworkEnabled()) {
-				// Network was enabled - create and start HttpService if not exists
-				if (httpService == null) {
-					httpService = new HttpService();
-					httpService.initialize(ConfigAccess.getNetworkUrl());
-				}
-				httpService.tryStartServer();
-			} else {
-				// Network was disabled - stop server and clear HttpService
-				if (httpService != null) {
-					httpService.stop();
-					httpService.stopServer();
-					httpService = null;
-					LOGGER.info("HttpService unloaded due to network being disabled.");
-				}
-			}
-		});
-		
-		// Register callback for network endpoint changes
-		ConfigAccess.setOnNetworkEndpointChanged(() -> {
-			if (httpService != null && ConfigAccess.isNetworkEnabled()) {
-				httpService.reinitialize(ConfigAccess.getNetworkUrl());
-				LOGGER.info("HttpService reinitialized with new endpoint: {}", ConfigAccess.getNetworkUrl());
-			}
-		});
-		
+
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-			if (httpService != null) {
-				httpService.stopServer();
-				LOGGER.info("HttpService server stopped.");
-			}
+			HttpServerManager.getInstance().stop();
+			UdpMetricsClient.getInstance().close();
 		});
-		
+
 		LOGGER.info("PerformTracker server components ready.");
 	}
 
 	public static TrackerController getTrackerController() {
 		return trackerController;
-	}
-
-	public static HttpService getHttpService() {
-		return httpService;
 	}
 
 	public static void setFpsProvider(Object fpsProvider) {

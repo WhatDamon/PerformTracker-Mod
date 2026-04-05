@@ -17,8 +17,6 @@
 package org.damon233.performtrackermod.controller;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,12 +27,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
-import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.collector.ServerMetricsCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.data.PerformanceMetrics;
-import org.damon233.performtrackermod.network.HttpService;
+import org.damon233.performtrackermod.network.UdpMetricsClient;
 import org.damon233.performtrackermod.network.JsonFormatter;
 import org.damon233.performtrackermod.utils.FormattingService;
 import org.damon233.performtrackermod.writer.CsvWriter;
@@ -54,11 +51,11 @@ public class TrackerController {
     private final AtomicBoolean active;
 
     private MetricsWriter metricsWriter;
-    private String sessionId;
     private long lastOutputTime;
     private int sampleCount;
     private MinecraftServer server;
     private String currentOutputFormat;
+    private String sessionId;
 
     private final Object[] rowValuesBuffer = new Object[6];
     private final MutableText[] chatMessageParts = new MutableText[10];
@@ -72,7 +69,6 @@ public class TrackerController {
         this.lastOutputTime = 0;
         this.sampleCount = 0;
         this.metricsWriter = null;
-        this.sessionId = null;
         this.server = null;
 
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
@@ -99,7 +95,6 @@ public class TrackerController {
             throw new IllegalStateException("error.no_metrics_enabled");
         }
 
-        this.sessionId = generateSessionId();
         this.server = server;
 
         if (ConfigAccess.isExportEnabled()) {
@@ -113,24 +108,13 @@ public class TrackerController {
             }
         }
 
-        if (ConfigAccess.isNetworkEnabled()) {
-            HttpService httpService = PerformTracker.getHttpService();
-            if (httpService != null) {
-                if (!httpService.tryStartServer()) {
-                    server.getPlayerManager().getPlayerList().forEach(player ->
-                        player.sendMessage(FormattingService.chatError("performtracker.error.http_server_failed", ConfigAccess.getLocalServerPort()))
-                    );
-                }
-                httpService.start();
-            }
-        }
-
         state.set(TrackerState.RUNNING);
         active.set(true);
+        sessionId = UUID.randomUUID().toString().substring(0, 8);
 
         serverCollector.reset();
 
-        LOGGER.debug("Performance tracking started, sessionId: {}", sessionId);
+        LOGGER.debug("Performance tracking started");
     }
 
     private boolean hasAnyMetricEnabled() {
@@ -153,11 +137,6 @@ public class TrackerController {
             metricsWriter = null;
         }
 
-        HttpService httpService = PerformTracker.getHttpService();
-        if (httpService != null) {
-            httpService.stop();
-        }
-
         LOGGER.debug("Performance tracking stopped, samples: {}", sampleCount);
         
         state.set(TrackerState.IDLE);
@@ -169,12 +148,7 @@ public class TrackerController {
         if (fpsProvider != null) {
             fpsProvider.reset();
         }
-    }
-    
-    private String generateSessionId() {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String uuid = UUID.randomUUID().toString().substring(0, 6);
-        return timestamp + "_" + uuid;
+        UdpMetricsClient.getInstance().close();
     }
 
     private String[] buildHeaders() {
@@ -216,7 +190,6 @@ public class TrackerController {
     private void outputMetrics() {
         PerformanceMetrics metrics = getMetrics();
         sampleCount++;
-        long timestamp = System.currentTimeMillis();
 
         if (ConfigAccess.isChatEnabled() && server != null) {
             MutableText chatMsg = FormattingService.chatWithMetrics(buildChatMessage(metrics));
@@ -230,16 +203,17 @@ public class TrackerController {
         }
 
         if (ConfigAccess.isNetworkEnabled() && sessionId != null) {
-            HttpService httpService = PerformTracker.getHttpService();
-            if (httpService != null) {
-                String json = JsonFormatter.formatMetrics(timestamp, sessionId, sampleCount,
+            String json = JsonFormatter.formatMetrics(
+                    System.currentTimeMillis(),
+                    sessionId,
+                    sampleCount,
                     ConfigAccess.isCollectFps(), metrics.fps(),
                     ConfigAccess.isCollectTps(), metrics.tps(),
                     ConfigAccess.isCollectMspt(), metrics.mspt(),
                     ConfigAccess.isCollectHeap(), metrics.heapUsed(), metrics.heapMax(),
-                    ConfigAccess.isCollectCpu(), metrics.cpuUsage());
-                httpService.send(json);
-            }
+                    ConfigAccess.isCollectCpu(), metrics.cpuUsage()
+            );
+            UdpMetricsClient.getInstance().postMetrics(json);
         }
     }
     
@@ -315,10 +289,6 @@ public class TrackerController {
 
     public int getSampleCount() {
         return sampleCount;
-    }
-
-    public boolean isNetworkEnabled() {
-        return ConfigAccess.isNetworkEnabled();
     }
 
     private MetricsWriter createMetricsWriter() throws IOException {
