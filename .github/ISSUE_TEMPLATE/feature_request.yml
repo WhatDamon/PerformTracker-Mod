@@ -8,8 +8,11 @@ body:
       value: |
         Thanks for taking the time to suggest a new feature! Before doing so, please make sure you have completed the following preparatory steps:
         
+        
         - I have searched and confirmed that there are no duplicate issues.
+        
         - I understand that this issue will be closed if the information is incomplete.
+        
         
         If you have already completed the necessary preparations, please fill out the form.
   - type: textarea
