@@ -72,25 +72,32 @@ public class JsonFormatter {
     }
 
     public static String formatDeviceInfo(SystemInfo info, boolean chipRulesTrusted) {
-        return String.format(
-            "{\"deviceType\":\"%s\",\"deviceModel\":\"%s\",\"cpuName\":\"%s\",\"gpuName\":\"%s\",\"cpuCores\":%d,\"memory\":%d," +
-            "\"os\":\"%s\",\"osVersion\":\"%s\",\"osArch\":\"%s\"," +
-            "\"javaVersion\":\"%s\",\"minecraftVersion\":\"%s\",\"modVersion\":\"%s\"," +
-            "\"chipRulesTrusted\":%b}",
-            escapeJson(info.deviceType().getCode()),
-            escapeJson(info.deviceModel() != null ? info.deviceModel() : "Unknown"),
-            escapeJson(info.cpuName() != null ? info.cpuName() : "Unknown"),
-            escapeJson(info.gpuName() != null ? info.gpuName() : "Unknown"),
-            info.cpuCores(),
-            info.totalMemoryBytes(),
-            escapeJson(info.osName()),
-            escapeJson(info.osVersion()),
-            escapeJson(info.osArch()),
-            escapeJson(info.javaVersion()),
-            escapeJson(info.minecraftVersion()),
-            escapeJson(info.modVersion()),
-            chipRulesTrusted
-        );
+        StringBuilder sb = new StringBuilder(256);
+        sb.append("{\"deviceType\":\"").append(escapeJson(info.deviceType().getCode())).append('"');
+        sb.append(",\"deviceModel\":\"").append(escapeJson(info.deviceModel() != null ? info.deviceModel() : "Unknown")).append('"');
+        sb.append(",\"cpuName\":\"").append(escapeJson(info.cpuName() != null ? info.cpuName() : "Unknown")).append('"');
+        sb.append(",\"gpuName\":\"").append(escapeJson(info.gpuName() != null ? info.gpuName() : "Unknown")).append('"');
+        sb.append(",\"cpuCores\":").append(info.cpuCores());
+        sb.append(",\"memory\":").append(info.totalMemoryBytes());
+        sb.append(",\"os\":\"").append(escapeJson(info.osName())).append('"');
+        sb.append(",\"osVersion\":\"").append(escapeJson(info.osVersion())).append('"');
+        sb.append(",\"osArch\":\"").append(escapeJson(info.osArch())).append('"');
+        sb.append(",\"javaVersion\":\"").append(escapeJson(info.javaVersion())).append('"');
+        sb.append(",\"jvmName\":\"").append(escapeJson(info.jvmName())).append('"');
+        sb.append(",\"minecraftVersion\":\"").append(escapeJson(info.minecraftVersion())).append('"');
+        sb.append(",\"modVersion\":\"").append(escapeJson(info.modVersion())).append('"');
+        sb.append(",\"jvmArgs\":[");
+        String[] jvmArgs = info.jvmArgs();
+        if (jvmArgs != null) {
+            for (int i = 0; i < jvmArgs.length; i++) {
+                if (i > 0) {
+                    sb.append(',');
+                }
+                sb.append('"').append(escapeJson(jvmArgs[i])).append('"');
+            }
+        }
+        sb.append("],\"chipRulesTrusted\":").append(chipRulesTrusted).append('}');
+        return sb.toString();
     }
 
     public static String escapeJson(String s) {

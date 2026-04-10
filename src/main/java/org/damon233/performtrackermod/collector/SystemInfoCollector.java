@@ -34,6 +34,8 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,30 @@ public class SystemInfoCollector {
     // SHA-256 checksums for chip rules files (update when file content changes)
     private static final String PHONE_CHIPS_SHA = "428b078c2ba8395b84f2dd2a7ed964ee80feef685ecc6335e9679606ec63162a";
     private static final String SERVER_CHIPS_SHA = "ee3468d6b04970750967004ca71ec0339126fbef69df8c8ea397e023098c473c";
+
+    private static String[] getJvmArgs() {
+        List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
+        List<String> sanitized = new ArrayList<>();
+        for (String arg : args) {
+            sanitized.add(sanitizeJvmArg(arg));
+        }
+        return sanitized.toArray(new String[0]);
+    }
+
+    private static String sanitizeJvmArg(String arg) {
+        String lower = arg.toLowerCase();
+        String[] sensitivePatterns = {"token", "password", "secret", "auth", "key", "credential"};
+        for (String pattern : sensitivePatterns) {
+            if (lower.contains(pattern)) {
+                int eqIndex = arg.indexOf('=');
+                if (eqIndex > 0) {
+                    return arg.substring(0, eqIndex + 1) + "***";
+                }
+                return arg.split("\\s+")[0] + " ***";
+            }
+        }
+        return arg;
+    }
 
     public static SystemInfo collect() {
         if (cachedInfo != null) {
@@ -90,7 +116,8 @@ public class SystemInfoCollector {
             jvmName,
             minecraftVersion,
             modVersion,
-            getDeviceModel()
+            getDeviceModel(),
+            getJvmArgs()
         );
 
         return cachedInfo;
