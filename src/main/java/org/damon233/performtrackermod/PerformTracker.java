@@ -24,7 +24,7 @@ import org.damon233.performtrackermod.data.SystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.damon233.performtrackermod.collector.ServerMetricsCollector;
-import org.damon233.performtrackermod.collector.SystemInfoCollector;
+import org.damon233.performtrackermod.collector.system.SystemInfoCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
 import org.damon233.performtrackermod.collector.IGpuProvider;
 import org.damon233.performtrackermod.config.ConfigAccess;

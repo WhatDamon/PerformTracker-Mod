@@ -26,133 +26,14 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.damon233.performtrackermod.PerformTracker;
-import org.damon233.performtrackermod.collector.SystemInfoCollector;
+import org.damon233.performtrackermod.collector.system.SystemInfoCollector;
 import org.damon233.performtrackermod.config.ConfigAccess;
 import org.damon233.performtrackermod.controller.TrackerController;
 import org.damon233.performtrackermod.data.SystemInfo;
 import org.damon233.performtrackermod.utils.FormattingService;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 public class PtrackerCommand {
-    
-    private enum ConfigType {
-        INT("output_interval", "performtracker.config.output_interval", 5,
-            ConfigAccess::getOutputIntervalSeconds,
-            v -> ConfigAccess.setOutputIntervalSeconds((Integer) v),
-            ConfigAccess::getDefaultOutputIntervalSeconds),
-        
-        BOOL("chat_enabled", "performtracker.config.chat_enabled", true,
-            ConfigAccess::isChatEnabled,
-            v -> ConfigAccess.setChatEnabled((Boolean) v),
-            ConfigAccess::getDefaultChatEnabled),
-        
-        BOOL2("export_enabled", "performtracker.config.export_enabled", true,
-            ConfigAccess::isExportEnabled,
-            v -> ConfigAccess.setExportEnabled((Boolean) v),
-            ConfigAccess::getDefaultExportEnabled),
 
-        STRING("export_directory", "performtracker.config.export_directory", "performance_data",
-            ConfigAccess::getExportDirectory,
-            v -> ConfigAccess.setExportDirectory((String) v),
-            ConfigAccess::getDefaultExportDirectory),
-
-        STRING2("output_format", "performtracker.config.output_format", "csv",
-            ConfigAccess::getOutputFormat,
-            v -> ConfigAccess.setOutputFormat((String) v),
-            ConfigAccess::getDefaultOutputFormat),
-
-        BOOL4("collect_fps", "performtracker.config.collect_fps", true,
-            ConfigAccess::isCollectFps,
-            v -> ConfigAccess.setCollectFps((Boolean) v),
-            ConfigAccess::getDefaultCollectFps),
-        
-        BOOL5("collect_tps", "performtracker.config.collect_tps", true,
-            ConfigAccess::isCollectTps,
-            v -> ConfigAccess.setCollectTps((Boolean) v),
-            ConfigAccess::getDefaultCollectTps),
-        
-        BOOL6("collect_mspt", "performtracker.config.collect_mspt", true,
-            ConfigAccess::isCollectMspt,
-            v -> ConfigAccess.setCollectMspt((Boolean) v),
-            ConfigAccess::getDefaultCollectMspt),
-        
-        BOOL7("collect_heap", "performtracker.config.collect_heap", true,
-            ConfigAccess::isCollectHeap,
-            v -> ConfigAccess.setCollectHeap((Boolean) v),
-            ConfigAccess::getDefaultCollectHeap),
-
-        BOOL8("collect_cpu", "performtracker.config.collect_cpu", true,
-            ConfigAccess::isCollectCpu,
-            v -> ConfigAccess.setCollectCpu((Boolean) v),
-            ConfigAccess::getDefaultCollectCpu),
-        
-        BOOL10("binary_units", "performtracker.config.binary_units", true,
-            ConfigAccess::isBinaryUnits,
-            v -> ConfigAccess.setBinaryUnits((Boolean) v),
-            ConfigAccess::getDefaultBinaryUnits),
-        
-        BOOL11("network_enabled", "performtracker.config.network_enabled", false,
-            ConfigAccess::isNetworkEnabled,
-            v -> ConfigAccess.setNetworkEnabled((Boolean) v),
-            ConfigAccess::getDefaultNetworkEnabled),
-        
-        STRING4("network_host", "performtracker.config.network_host", "localhost",
-            ConfigAccess::getNetworkUrl,
-            v -> ConfigAccess.setNetworkUrl((String) v),
-            ConfigAccess::getDefaultNetworkUrl),
-        
-        INT2("receiver_port", "performtracker.config.receiver_port", 31415,
-            ConfigAccess::getReceiverPort,
-            v -> ConfigAccess.setReceiverPort((Integer) v),
-            ConfigAccess::getDefaultReceiverPort),
-        
-        INT3("sender_port", "performtracker.config.sender_port", 31416,
-            ConfigAccess::getSenderPort,
-            v -> ConfigAccess.setSenderPort((Integer) v),
-            ConfigAccess::getDefaultSenderPort);
-        
-        final String key;
-        final String translationKey;
-        final Object defaultValue;
-        final Supplier<Object> getter;
-        final Consumer<Object> setter;
-        final Supplier<Object> defaultGetter;
-        
-        ConfigType(String key, String translationKey, Object defaultValue,
-                   Supplier<Object> getter, Consumer<Object> setter, Supplier<Object> defaultGetter) {
-            this.key = key;
-            this.translationKey = translationKey;
-            this.defaultValue = defaultValue;
-            this.getter = getter;
-            this.setter = setter;
-            this.defaultGetter = defaultGetter;
-        }
-        
-        void sendSuccess(ServerCommandSource source, Object value) {
-            Text name = Text.translatable(translationKey);
-            Text val = value instanceof Boolean ? 
-                Text.translatable(Boolean.TRUE.equals(value) ? "performtracker.config.value.true" : "performtracker.config.value.false") :
-                FormattingService.colorValue(String.valueOf(value));
-            source.sendFeedback(() -> Text.translatable("performtracker.config.set.success", 
-                FormattingService.colorLabel(name.getString()), val), false);
-        }
-        
-        void sendInfo(ServerCommandSource source) {
-            source.sendFeedback(() -> Text.translatable("performtracker.config.info",
-                FormattingService.colorLabel(Text.translatable(translationKey).getString()), 
-                FormattingService.colorValue(String.valueOf(getter.get())), 
-                FormattingService.colorValue(String.valueOf(defaultGetter.get()))), false);
-        }
-        
-        void sendLine(ServerCommandSource source) {
-            MutableText current = FormattingService.colorValue(String.valueOf(getter.get()));
-            MutableText def = FormattingService.colorValue(String.valueOf(defaultGetter.get()));
-            source.sendFeedback(() -> Text.translatable(translationKey).append(": ").append(current).append(" (default: ").append(def).append(")"), false);
-        }
-    }
-    
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             LiteralArgumentBuilder<ServerCommandSource> ptracker = CommandManager.literal("ptracker")

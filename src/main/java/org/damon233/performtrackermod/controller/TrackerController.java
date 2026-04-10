@@ -25,7 +25,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
 
 import org.damon233.performtrackermod.collector.ServerMetricsCollector;
 import org.damon233.performtrackermod.collector.IFpsProvider;
@@ -58,8 +57,7 @@ public class TrackerController {
     private String sessionId;
 
     private final Object[] rowValuesBuffer = new Object[6];
-    private final MutableText[] chatMessageParts = new MutableText[10];
-    private int chatMessagePartCount;
+    private final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder();
 
     public TrackerController(ServerMetricsCollector serverCollector, IFpsProvider fpsProvider) {
         this.serverCollector = serverCollector;
@@ -192,7 +190,7 @@ public class TrackerController {
         sampleCount++;
 
         if (ConfigAccess.isChatEnabled() && server != null) {
-            MutableText chatMsg = FormattingService.chatWithMetrics(buildChatMessage(metrics));
+            MutableText chatMsg = FormattingService.chatWithMetrics(chatMessageBuilder.build(metrics));
             server.getPlayerManager().getPlayerList().forEach(player -> 
                 player.sendMessage(chatMsg)
             );
@@ -217,41 +215,6 @@ public class TrackerController {
         }
     }
     
-    private MutableText buildChatMessage(PerformanceMetrics metrics) {
-        chatMessagePartCount = 0;
-        if (ConfigAccess.isCollectFps()) {
-            addChatPart("FPS: ", String.format("%.1f", metrics.fps()));
-        }
-        if (ConfigAccess.isCollectTps()) {
-            addChatPart("TPS: ", PerformanceMetrics.formatValue(metrics.tps()));
-        }
-        if (ConfigAccess.isCollectMspt()) {
-            addChatPart("MSPT: ", PerformanceMetrics.formatValue(metrics.mspt()));
-        }
-        if (ConfigAccess.isCollectHeap()) {
-            addChatPart("Heap: ", PerformanceMetrics.formatMemoryMB(metrics.heapUsed()) + " / " + PerformanceMetrics.formatMemoryMB(metrics.heapMax()));
-        }
-        if (ConfigAccess.isCollectCpu()) {
-            addChatPart("CPU: ", String.format("%.1f%%", metrics.cpuUsage()));
-        }
-
-        MutableText result = Text.empty();
-        for (int i = 0; i < chatMessagePartCount; i++) {
-            if (i > 0) {
-                result.append(Text.literal(" | ").withColor(0x888888));
-            }
-            result.append(chatMessageParts[i]);
-        }
-        return result;
-    }
-
-    private void addChatPart(String label, String value) {
-        if (chatMessagePartCount >= chatMessageParts.length) {
-            return;
-        }
-        chatMessageParts[chatMessagePartCount++] = Text.literal(label).withColor(0x888888).append(FormattingService.colorValue(value));
-    }
-
     private Object[] buildRowValues(PerformanceMetrics metrics) {
         rowValuesBuffer[0] = ConfigAccess.isCollectFps() ? metrics.fps() : Double.NaN;
         rowValuesBuffer[1] = ConfigAccess.isCollectTps() ? metrics.tps() : Double.NaN;

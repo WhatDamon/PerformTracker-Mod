@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.damon233.performtrackermod.collector;
+package org.damon233.performtrackermod.collector.system;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,25 +26,25 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SystemInfoCollectorTest {
+class ChipRulesManagerTest {
 
     private static final String DUMMY_SHA = "0000000000000000000000000000000000000000000000000000000000000000";
 
     @BeforeEach
     void setUp() {
-        SystemInfoCollector.releaseChipRules();
-        SystemInfoCollector.loadChipRules();
+        ChipRulesManager.releaseChipRules();
+        ChipRulesManager.loadChipRules();
     }
 
     @AfterEach
     void tearDown() {
-        SystemInfoCollector.releaseChipRules();
+        ChipRulesManager.releaseChipRules();
     }
 
     @Test
     void loadChipRules_loadsPhoneAndServerChips() {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
-        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
+        List<String> phoneChips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> serverChips = ChipRulesManager.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
 
         assertFalse(phoneChips.isEmpty(), "Phone chips list should not be empty");
         assertFalse(serverChips.isEmpty(), "Server chips list should not be empty");
@@ -52,7 +52,7 @@ class SystemInfoCollectorTest {
 
     @Test
     void loadChipList_ignoresCommentsAndEmptyLines() {
-        List<String> chips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> chips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
         assertFalse(chips.stream().anyMatch(c -> c.startsWith("#")), "Should not contain comments");
         assertFalse(chips.contains(""), "Should not contain empty strings");
@@ -60,7 +60,7 @@ class SystemInfoCollectorTest {
 
     @Test
     void loadChipList_convertsToUpperCase() {
-        List<String> chips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> chips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
         assertTrue(chips.stream().allMatch(c -> c.equals(c.toUpperCase())), "All chips should be uppercase");
     }
@@ -76,9 +76,9 @@ class SystemInfoCollectorTest {
         "TENSOR, true"
     })
     void matchesAnyChip_phoneChips_matchesCorrectly(String cpuName, boolean expected) {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> phoneChips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
-        assertEquals(expected, SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), phoneChips),
+        assertEquals(expected, ChipRulesManager.matchesAnyChip(cpuName.toUpperCase(), phoneChips),
             "Should match phone chip: " + cpuName);
     }
 
@@ -93,9 +93,9 @@ class SystemInfoCollectorTest {
         "FT2000, true"
     })
     void matchesAnyChip_serverChips_matchesCorrectly(String cpuName, boolean expected) {
-        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
+        List<String> serverChips = ChipRulesManager.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
 
-        assertEquals(expected, SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), serverChips),
+        assertEquals(expected, ChipRulesManager.matchesAnyChip(cpuName.toUpperCase(), serverChips),
             "Should match server chip: " + cpuName);
     }
 
@@ -106,44 +106,44 @@ class SystemInfoCollectorTest {
         "Generic Chipset, false"
     })
     void matchesAnyChip_noMatch_returnsFalse(String cpuName, boolean expected) {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
-        List<String> serverChips = SystemInfoCollector.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
+        List<String> phoneChips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> serverChips = ChipRulesManager.loadChipList("/assets/performtracker/server_chips.txt", DUMMY_SHA);
 
-        boolean result = SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), phoneChips) ||
-                        SystemInfoCollector.matchesAnyChip(cpuName.toUpperCase(), serverChips);
+        boolean result = ChipRulesManager.matchesAnyChip(cpuName.toUpperCase(), phoneChips) ||
+                        ChipRulesManager.matchesAnyChip(cpuName.toUpperCase(), serverChips);
         assertEquals(expected, result);
     }
 
     @Test
     void matchesAnyChip_partialMatch_works() {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> phoneChips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
 
-        assertTrue(SystemInfoCollector.matchesAnyChip("Qualcomm SNAPDRAGON 8 Gen 3", phoneChips));
-        assertTrue(SystemInfoCollector.matchesAnyChip("MT6800", phoneChips));
+        assertTrue(ChipRulesManager.matchesAnyChip("Qualcomm SNAPDRAGON 8 Gen 3", phoneChips));
+        assertTrue(ChipRulesManager.matchesAnyChip("MT6800", phoneChips));
     }
 
     @Test
     void releaseChipRules_clearsChips() {
-        List<String> phoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        List<String> phoneChips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
         assertFalse(phoneChips.isEmpty());
 
-        SystemInfoCollector.releaseChipRules();
+        ChipRulesManager.releaseChipRules();
 
-        SystemInfoCollector.loadChipRules();
-        List<String> newPhoneChips = SystemInfoCollector.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
+        ChipRulesManager.loadChipRules();
+        List<String> newPhoneChips = ChipRulesManager.loadChipList("/assets/performtracker/phone_chips.txt", DUMMY_SHA);
         assertFalse(newPhoneChips.isEmpty());
     }
 
     @Test
     void loadChipList_nonexistentPath_returnsEmptyList() {
-        List<String> chips = SystemInfoCollector.loadChipList("/nonexistent/chips.txt", DUMMY_SHA);
+        List<String> chips = ChipRulesManager.loadChipList("/nonexistent/chips.txt", DUMMY_SHA);
         assertTrue(chips.isEmpty());
     }
 
     @Test
     void isChipRulesValid_withValidSha_returnsTrue() {
-        SystemInfoCollector.releaseChipRules();
-        SystemInfoCollector.loadChipRules();
-        assertTrue(SystemInfoCollector.isChipRulesValid());
+        ChipRulesManager.releaseChipRules();
+        ChipRulesManager.loadChipRules();
+        assertTrue(ChipRulesManager.isChipRulesValid());
     }
 }

@@ -16,6 +16,8 @@
 
 package org.damon233.performtrackermod.config;
 
+import static org.damon233.performtrackermod.config.ConfigDefaults.*;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
@@ -25,51 +27,15 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.regex.Pattern;
 
 public class ConfigAccess {
     private static final Logger LOGGER = LoggerFactory.getLogger("performtracker");
     private static final String CONFIG_FILE_NAME = "performtracker.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final int DEFAULT_OUTPUT_INTERVAL_SECONDS = 5;
-    private static final boolean DEFAULT_CHAT_ENABLED = true;
-    private static final boolean DEFAULT_EXPORT_ENABLED = true;
-    private static final String DEFAULT_EXPORT_DIRECTORY = "performance_data";
-    private static final String DEFAULT_OUTPUT_FORMAT = "csv";
-    private static final boolean DEFAULT_COLLECT_FPS = true;
-    private static final boolean DEFAULT_COLLECT_TPS = true;
-    private static final boolean DEFAULT_COLLECT_MSPT = true;
-    private static final boolean DEFAULT_COLLECT_HEAP = true;
-    private static final boolean DEFAULT_COLLECT_CPU = true;
-    private static final boolean DEFAULT_BINARY_UNITS = true;
-    private static final boolean DEFAULT_NETWORK_ENABLED = false;
-    private static final String DEFAULT_NETWORK_URL = "localhost";
-    private static final int DEFAULT_RECEIVER_PORT = 31415;
-    private static final int DEFAULT_SENDER_PORT = 31416;
-    private static final Pattern RECEIVER_HOST_PATTERN = Pattern.compile("^[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?)*$");
-
     private static ConfigData configData;
     private static boolean initialized = false;
     private static Path configFilePath;
-
-    private static class ConfigData {
-        int outputIntervalSeconds = DEFAULT_OUTPUT_INTERVAL_SECONDS;
-        boolean chatEnabled = DEFAULT_CHAT_ENABLED;
-        boolean exportEnabled = DEFAULT_EXPORT_ENABLED;
-        String exportDirectory = DEFAULT_EXPORT_DIRECTORY;
-        String outputFormat = DEFAULT_OUTPUT_FORMAT;
-        boolean collectFps = DEFAULT_COLLECT_FPS;
-        boolean collectTps = DEFAULT_COLLECT_TPS;
-        boolean collectMspt = DEFAULT_COLLECT_MSPT;
-        boolean collectHeap = DEFAULT_COLLECT_HEAP;
-        boolean collectCpu = DEFAULT_COLLECT_CPU;
-        boolean binaryUnits = DEFAULT_BINARY_UNITS;
-        boolean networkEnabled = DEFAULT_NETWORK_ENABLED;
-        String networkHost = DEFAULT_NETWORK_URL;
-        int receiverPort = DEFAULT_RECEIVER_PORT;
-        int senderPort = DEFAULT_SENDER_PORT;
-    }
 
     public static void init() {
         if (initialized) {

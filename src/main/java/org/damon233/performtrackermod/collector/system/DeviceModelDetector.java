@@ -1,0 +1,81 @@
+/*
+ * Copyright 2026 Damon Lu and open-source contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.damon233.performtrackermod.collector.system;
+
+public class DeviceModelDetector {
+    private static String cachedDeviceModel;
+
+    public static String getDeviceModel() {
+        if (cachedDeviceModel != null) {
+            return cachedDeviceModel;
+        }
+
+        String osName = System.getProperty("os.name").toLowerCase();
+
+        if (osName.contains("mac") || osName.contains("darwin")) {
+            cachedDeviceModel = getMacDeviceModel();
+        } else if (osName.contains("linux")) {
+            cachedDeviceModel = getLinuxDeviceModel();
+        } else if (osName.contains("windows")) {
+            cachedDeviceModel = getWindowsDeviceModel();
+        } else {
+            cachedDeviceModel = "Unknown";
+        }
+
+        if (cachedDeviceModel.equalsIgnoreCase("To Be Filled By O.E.M.") || cachedDeviceModel.equalsIgnoreCase("Default String")) {
+            cachedDeviceModel = "Unknown";
+        }
+
+        return cachedDeviceModel;
+    }
+
+    private static String getMacDeviceModel() {
+        String result = CpuNameDetector.runCommand("sysctl -n hw.model");
+        return result != null ? result.trim() : "Unknown";
+    }
+
+    private static String getLinuxDeviceModel() {
+        String model = CpuNameDetector.readFile("/sys/devices/virtual/dmi/id/product_name");
+        if (model != null && !model.isBlank()) {
+            return model.trim();
+        }
+
+        model = CpuNameDetector.readFile("/proc/device-tree/model");
+        if (model != null && !model.isBlank()) {
+            return model.trim();
+        }
+
+        return "Unknown";
+    }
+
+    private static String getWindowsDeviceModel() {
+        String[] commands = {
+            "powershell -NoProfile -Command \"(Get-CimInstance Win32_ComputerSystem).Model\"",
+            "powershell -NoProfile -Command \"(Get-WmiObject Win32_ComputerSystem).Model\"",
+            "cmd /c for /f \"tokens=2 delims==\" %A in ('wmic computersystem get model /value') do @echo %A"
+        };
+
+        for (String command : commands) {
+            String result = CpuNameDetector.runCommand(command);
+            if (result != null && !result.trim().isEmpty()) {
+                return result.trim();
+            }
+        }
+
+        return "Unknown";
+    }
+}
