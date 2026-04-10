@@ -17,28 +17,41 @@
 package org.damon233.performtrackermod;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.damon233.performtrackermod.collector.ClientGpuCollector;
 import org.damon233.performtrackermod.collector.ClientMetricsCollector;
+import org.damon233.performtrackermod.collector.SystemInfoCollector;
 import org.damon233.performtrackermod.config.ConfigAccess;
 
 public class PerformTrackerClient implements ClientModInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PerformTracker.MOD_ID);
+	private static volatile boolean deviceInfoLogged = false;
 
     @Override
 	public void onInitializeClient() {
 		LOGGER.info("PerformTrackerClient initializing...");
-		
 		ConfigAccess.init();
 
-        ClientMetricsCollector clientMetricsCollector = new ClientMetricsCollector();
-		PerformTracker.setFpsProvider(clientMetricsCollector);
+		PerformTracker.setFpsProvider(new ClientMetricsCollector());
 
-        ClientGpuCollector clientGpuCollector = new ClientGpuCollector();
-		PerformTracker.setGpuProvider(clientGpuCollector);
-		LOGGER.info("GPU: {}", clientGpuCollector.getGpuName());
+		ClientGpuCollector gpuCollector = new ClientGpuCollector();
+		PerformTracker.setGpuProvider(gpuCollector);
+		
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (deviceInfoLogged || !gpuCollector.isInitialized()) {
+				return;
+			}
+			deviceInfoLogged = true;
+			SystemInfoCollector.releaseCache();
+			var info = SystemInfoCollector.collect();
+			LOGGER.info("Device Info - Type: {}, CPU: {} ({} cores), GPU: {}, Memory: {}, OS: {} {} ({})",
+					info.deviceType(), info.cpuName(), info.cpuCores(),
+					info.gpuName(), info.formatBytes(info.totalMemoryBytes()),
+					info.osName(), info.osVersion(), info.osArch());
+		});
 		
 		LOGGER.info("PerformTracker client components ready.");
 		if (ConfigAccess.isClothConfigLoaded()) {
