@@ -42,7 +42,7 @@ public class SystemInfoCollector {
         long totalMemoryBytes = getPhysicalMemory();
 
         String osName = System.getProperty("os.name");
-        String osVersion = System.getProperty("os.version");
+        String osVersion = isWindows() ? WindowsVersionDetector.getWindowsVersion() : System.getProperty("os.version");
         String osArch = System.getProperty("os.arch");
         String javaVersion = System.getProperty("java.version");
         String jvmName = System.getProperty("java.vm.name");
@@ -148,5 +148,9 @@ public class SystemInfoCollector {
 
     public static void releaseChipRules() {
         ChipRulesManager.releaseChipRules();
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
     }
 }

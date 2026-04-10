@@ -70,7 +70,7 @@ public class CharsetDetector {
     }
     
     private static Charset detectWindows() {
-        String codepage = runCommand("chcp");
+        String codepage = runCommand("chcp.com");
         if (codepage == null) {
             return null;
         }
