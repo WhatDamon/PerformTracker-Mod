@@ -114,7 +114,7 @@ public class CpuNameDetector {
         return null;
     }
 
-    static String readFile(String path) {
+    public static String readFile(String path) {
         try {
             byte[] bytes = Files.readAllBytes(Path.of(path));
             return CharsetDetector.decode(bytes);

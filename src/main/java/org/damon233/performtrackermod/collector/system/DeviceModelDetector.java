@@ -16,6 +16,8 @@
 
 package org.damon233.performtrackermod.collector.system;
 
+import org.damon233.performtrackermod.utils.platform.linux.LinuxDeviceModelDetector;
+import org.damon233.performtrackermod.utils.platform.macos.MacDeviceModelDetector;
 import org.damon233.performtrackermod.utils.platform.windows.WindowsDeviceModelDetector;
 
 public class DeviceModelDetector {
@@ -29,9 +31,9 @@ public class DeviceModelDetector {
         String osName = System.getProperty("os.name").toLowerCase();
 
         if (osName.contains("mac") || osName.contains("darwin")) {
-            cachedDeviceModel = getMacDeviceModel();
+            cachedDeviceModel = MacDeviceModelDetector.getDeviceModel();
         } else if (osName.contains("linux")) {
-            cachedDeviceModel = getLinuxDeviceModel();
+            cachedDeviceModel = LinuxDeviceModelDetector.getDeviceModel();
         } else if (osName.contains("windows")) {
             cachedDeviceModel = WindowsDeviceModelDetector.getDeviceModel();
         } else {
@@ -43,24 +45,5 @@ public class DeviceModelDetector {
         }
 
         return cachedDeviceModel;
-    }
-
-    private static String getMacDeviceModel() {
-        String result = CpuNameDetector.runCommand("sysctl -n hw.model");
-        return result != null ? result.trim() : "Unknown";
-    }
-
-    private static String getLinuxDeviceModel() {
-        String model = CpuNameDetector.readFile("/sys/devices/virtual/dmi/id/product_name");
-        if (model != null && !model.isBlank()) {
-            return model.trim();
-        }
-
-        model = CpuNameDetector.readFile("/proc/device-tree/model");
-        if (model != null && !model.isBlank()) {
-            return model.trim();
-        }
-
-        return "Unknown";
     }
 }
