@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.damon233.performtrackermod.collector.system;
+package org.damon233.performtrackermod.utils.platform.windows;
+
+import org.damon233.performtrackermod.collector.system.CpuNameDetector;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

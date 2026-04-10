@@ -21,6 +21,7 @@ import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.data.DeviceType;
 import org.damon233.performtrackermod.data.SystemInfo;
 import org.damon233.performtrackermod.collector.IGpuProvider;
+import org.damon233.performtrackermod.utils.platform.windows.WindowsVersionDetector;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;

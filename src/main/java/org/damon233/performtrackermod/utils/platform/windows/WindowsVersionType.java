@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.damon233.performtrackermod.collector.system;
+package org.damon233.performtrackermod.utils.platform.windows;
 
 public enum WindowsVersionType {
     WINDOWS_XP("Windows XP", 5, 1),

@@ -16,6 +16,8 @@
 
 package org.damon233.performtrackermod.collector.system;
 
+import org.damon233.performtrackermod.utils.platform.windows.WindowsDeviceModelDetector;
+
 public class DeviceModelDetector {
     private static String cachedDeviceModel;
 
@@ -31,7 +33,7 @@ public class DeviceModelDetector {
         } else if (osName.contains("linux")) {
             cachedDeviceModel = getLinuxDeviceModel();
         } else if (osName.contains("windows")) {
-            cachedDeviceModel = getWindowsDeviceModel();
+            cachedDeviceModel = WindowsDeviceModelDetector.getDeviceModel();
         } else {
             cachedDeviceModel = "Unknown";
         }
@@ -57,23 +59,6 @@ public class DeviceModelDetector {
         model = CpuNameDetector.readFile("/proc/device-tree/model");
         if (model != null && !model.isBlank()) {
             return model.trim();
-        }
-
-        return "Unknown";
-    }
-
-    private static String getWindowsDeviceModel() {
-        String[] commands = {
-            "powershell -NoProfile -Command \"(Get-CimInstance Win32_ComputerSystem).Model\"",
-            "powershell -NoProfile -Command \"(Get-WmiObject Win32_ComputerSystem).Model\"",
-            "cmd /c for /f \"tokens=2 delims==\" %A in ('wmic computersystem get model /value') do @echo %A"
-        };
-
-        for (String command : commands) {
-            String result = CpuNameDetector.runCommand(command);
-            if (result != null && !result.trim().isEmpty()) {
-                return result.trim();
-            }
         }
 
         return "Unknown";

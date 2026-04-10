@@ -92,7 +92,7 @@ public class CpuNameDetector {
         return System.getProperty("os.arch");
     }
 
-    static String runCommand(String command) {
+    public static String runCommand(String command) {
         try {
             ProcessBuilder pb = new ProcessBuilder(command.split("\\s+"));
             pb.redirectErrorStream(true);
