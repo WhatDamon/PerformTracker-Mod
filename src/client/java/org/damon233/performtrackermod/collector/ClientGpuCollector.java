@@ -22,31 +22,29 @@ import net.minecraft.client.MinecraftClient;
 public class ClientGpuCollector implements IGpuProvider {
     private String gpuName = null;
     private boolean initialized = false;
+    private boolean logged = false;
 
     public ClientGpuCollector() {
         ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
     }
 
     private void onClientTick(MinecraftClient client) {
-        if (initialized || client == null) {
-            return;
-        }
-
-        MinecraftClient instance = MinecraftClient.getInstance();
-        if (instance == null) {
+        if (initialized) {
             return;
         }
 
         try {
-            gpuName = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER);
-            if (gpuName == null || gpuName.isEmpty()) {
-                gpuName = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_VENDOR);
+            String renderer = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER);
+            String vendor = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_VENDOR);
+
+            if (renderer != null && !renderer.isEmpty()) {
+                gpuName = renderer;
+            } else if (vendor != null && !vendor.isEmpty()) {
+                gpuName = vendor;
+            } else {
+                gpuName = "Unknown";
             }
         } catch (Exception e) {
-            gpuName = "Unknown";
-        }
-
-        if (gpuName == null || gpuName.isEmpty()) {
             gpuName = "Unknown";
         }
 
@@ -55,9 +53,18 @@ public class ClientGpuCollector implements IGpuProvider {
 
     @Override
     public String getGpuName() {
-        if (!initialized) {
-            onClientTick(null);
-        }
         return gpuName != null ? gpuName : "Unknown";
+    }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    public boolean isLogged() {
+        return logged;
+    }
+
+    public void setLogged(boolean logged) {
+        this.logged = logged;
     }
 }

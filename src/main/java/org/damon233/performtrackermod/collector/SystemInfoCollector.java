@@ -348,6 +348,10 @@ public class SystemInfoCollector {
         chipRulesUsedForClassification = false;
     }
 
+    public static void releaseCache() {
+        cachedInfo = null;
+    }
+
     static void loadChipRules() {
         if (phoneChips != null && serverChips != null) {
             return;
