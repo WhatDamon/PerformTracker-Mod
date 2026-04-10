@@ -21,6 +21,7 @@ import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.data.DeviceType;
 import org.damon233.performtrackermod.data.SystemInfo;
 import org.damon233.performtrackermod.collector.IGpuProvider;
+import org.damon233.performtrackermod.utils.platform.linux.LinuxOSInfoDetector;
 import org.damon233.performtrackermod.utils.platform.windows.WindowsVersionDetector;
 
 import java.lang.management.ManagementFactory;
@@ -43,7 +44,7 @@ public class SystemInfoCollector {
         long totalMemoryBytes = getPhysicalMemory();
 
         String osName = System.getProperty("os.name");
-        String osVersion = isWindows() ? WindowsVersionDetector.getWindowsVersion() : System.getProperty("os.version");
+        String osVersion = getOSVersion();
         String osArch = System.getProperty("os.arch");
         String javaVersion = System.getProperty("java.version");
         String jvmName = System.getProperty("java.vm.name");
@@ -153,5 +154,22 @@ public class SystemInfoCollector {
 
     private static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("windows");
+    }
+
+    private static boolean isLinux() {
+        return System.getProperty("os.name").toLowerCase().contains("linux");
+    }
+
+    private static String getOSVersion() {
+        if (isWindows()) {
+            return WindowsVersionDetector.getWindowsVersion();
+        }
+        if (isLinux()) {
+            String prettyName = LinuxOSInfoDetector.getOSReleasePrettyName();
+            if (prettyName != null && !prettyName.isBlank()) {
+                return prettyName;
+            }
+        }
+        return System.getProperty("os.version");
     }
 }
