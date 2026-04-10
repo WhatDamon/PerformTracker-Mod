@@ -16,33 +16,34 @@
 
 package org.damon233.performtrackermod.collector.system;
 
+import org.damon233.performtrackermod.utils.CachedValue;
 import org.damon233.performtrackermod.utils.platform.PlatformDetector;
 import org.damon233.performtrackermod.utils.platform.linux.LinuxDeviceModelDetector;
 import org.damon233.performtrackermod.utils.platform.macos.MacDeviceModelDetector;
 import org.damon233.performtrackermod.utils.platform.windows.WindowsDeviceModelDetector;
 
 public class DeviceModelDetector {
-    private static String cachedDeviceModel;
+    private static final CachedValue<String> DEVICE_MODEL = new CachedValue<>(DeviceModelDetector::computeDeviceModel);
 
     public static String getDeviceModel() {
-        if (cachedDeviceModel != null) {
-            return cachedDeviceModel;
-        }
+        return DEVICE_MODEL.get();
+    }
 
+    private static String computeDeviceModel() {
+        String model;
         if (PlatformDetector.isMac()) {
-            cachedDeviceModel = MacDeviceModelDetector.getDeviceModel();
+            model = MacDeviceModelDetector.getDeviceModel();
         } else if (PlatformDetector.isLinux()) {
-            cachedDeviceModel = LinuxDeviceModelDetector.getDeviceModel();
+            model = LinuxDeviceModelDetector.getDeviceModel();
         } else if (PlatformDetector.isWindows()) {
-            cachedDeviceModel = WindowsDeviceModelDetector.getDeviceModel();
+            model = WindowsDeviceModelDetector.getDeviceModel();
         } else {
-            cachedDeviceModel = "Unknown";
+            model = "Unknown";
         }
 
-        if (cachedDeviceModel.equalsIgnoreCase("To Be Filled By O.E.M.") || cachedDeviceModel.equalsIgnoreCase("Default String")) {
-            cachedDeviceModel = "Unknown";
+        if (model.equalsIgnoreCase("To Be Filled By O.E.M.") || model.equalsIgnoreCase("Default String")) {
+            model = "Unknown";
         }
-
-        return cachedDeviceModel;
+        return model;
     }
 }

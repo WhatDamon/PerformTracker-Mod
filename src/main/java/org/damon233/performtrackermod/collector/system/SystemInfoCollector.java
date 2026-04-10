@@ -21,6 +21,7 @@ import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.data.DeviceType;
 import org.damon233.performtrackermod.data.SystemInfo;
 import org.damon233.performtrackermod.collector.IGpuProvider;
+import org.damon233.performtrackermod.utils.CachedValue;
 import org.damon233.performtrackermod.utils.platform.PlatformDetector;
 import org.damon233.performtrackermod.utils.platform.linux.LinuxOSInfoDetector;
 import org.damon233.performtrackermod.utils.platform.windows.WindowsVersionDetector;
@@ -30,19 +31,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SystemInfoCollector {
-    private static SystemInfo cachedInfo;
-    private static long cachedPhysicalMemory = -1;
+    private static final CachedValue<SystemInfo> SYSTEM_INFO = new CachedValue<>(SystemInfoCollector::computeSystemInfo);
+    private static final CachedValue<Long> PHYSICAL_MEMORY = new CachedValue<>(SystemInfoCollector::computePhysicalMemory);
 
     public static SystemInfo collect() {
-        if (cachedInfo != null) {
-            return cachedInfo;
-        }
+        return SYSTEM_INFO.get();
+    }
 
+    private static SystemInfo computeSystemInfo() {
         DeviceType deviceType = DeviceClassifier.classifyDevice();
         String cpuName = CpuNameDetector.getCpuName();
         String gpuName = getGpuName();
         int cpuCores = Runtime.getRuntime().availableProcessors();
-        long totalMemoryBytes = getPhysicalMemory();
+        long totalMemoryBytes = PHYSICAL_MEMORY.get();
 
         String osName = System.getProperty("os.name");
         String osVersion = getOSVersion();
@@ -53,7 +54,7 @@ public class SystemInfoCollector {
         String modVersion = getModVersion();
         String deviceModel = DeviceModelDetector.getDeviceModel();
 
-        cachedInfo = new SystemInfo(
+        return new SystemInfo(
             deviceType,
             deviceType.getCode(),
             cpuName,
@@ -70,8 +71,6 @@ public class SystemInfoCollector {
             deviceModel,
             getJvmArgs()
         );
-
-        return cachedInfo;
     }
 
     private static String getGpuName() {
@@ -85,24 +84,17 @@ public class SystemInfoCollector {
         return "Unknown";
     }
 
-    private static long getPhysicalMemory() {
-        if (cachedPhysicalMemory > 0) {
-            return cachedPhysicalMemory;
-        }
-
+    private static long computePhysicalMemory() {
         try {
-            com.sun.management.OperatingSystemMXBean osBean = 
+            com.sun.management.OperatingSystemMXBean osBean =
                 (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             long totalMemory = osBean.getTotalMemorySize();
             if (totalMemory > 0) {
-                cachedPhysicalMemory = totalMemory;
-                return cachedPhysicalMemory;
+                return totalMemory;
             }
         } catch (Exception ignored) {
         }
-
-        cachedPhysicalMemory = Runtime.getRuntime().maxMemory();
-        return cachedPhysicalMemory;
+        return Runtime.getRuntime().maxMemory();
     }
 
     private static String[] getJvmArgs() {
@@ -142,15 +134,12 @@ public class SystemInfoCollector {
     }
 
     public static void releaseCache() {
-        cachedInfo = null;
+        SYSTEM_INFO.invalidate();
+        PHYSICAL_MEMORY.invalidate();
     }
 
     public static boolean isChipRulesValid() {
         return ChipRulesManager.isChipRulesValid();
-    }
-
-    public static void releaseChipRules() {
-        ChipRulesManager.releaseChipRules();
     }
 
     private static String getOSVersion() {

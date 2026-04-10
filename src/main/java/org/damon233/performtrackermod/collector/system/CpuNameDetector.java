@@ -16,28 +16,28 @@
 
 package org.damon233.performtrackermod.collector.system;
 
+import org.damon233.performtrackermod.utils.CachedValue;
 import org.damon233.performtrackermod.utils.CommandExecutor;
 import org.damon233.performtrackermod.utils.platform.PlatformDetector;
 
 public class CpuNameDetector {
-    private static String cachedCpuName;
+    private static final CachedValue<String> CPU_NAME = new CachedValue<>(CpuNameDetector::computeCpuName);
 
     public static String getCpuName() {
-        if (cachedCpuName != null) {
-            return cachedCpuName;
-        }
+        return CPU_NAME.get();
+    }
 
+    private static String computeCpuName() {
         if (PlatformDetector.isWindows()) {
-            cachedCpuName = getWindowsCpuName();
-        } else if (PlatformDetector.isLinux()) {
-            cachedCpuName = getLinuxCpuName();
-        } else if (PlatformDetector.isMac()) {
-            cachedCpuName = getMacCpuName();
-        } else {
-            cachedCpuName = System.getProperty("os.arch");
+            return getWindowsCpuName();
         }
-
-        return cachedCpuName;
+        if (PlatformDetector.isLinux()) {
+            return getLinuxCpuName();
+        }
+        if (PlatformDetector.isMac()) {
+            return getMacCpuName();
+        }
+        return System.getProperty("os.arch");
     }
 
     private static String getWindowsCpuName() {
