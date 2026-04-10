@@ -61,18 +61,22 @@ public class DeviceClassifier {
         String upper = cpuInfo != null ? cpuInfo.toUpperCase() : "";
         String gpuUpper = gpuInfo != null ? gpuInfo.toUpperCase() : "";
 
+        DeviceType result;
         if (upper.contains("APPLE")) {
-            return DeviceType.MAC;
+            result = DeviceType.MAC;
         } else if (gpuUpper.contains("APPLE")) {
-            return DeviceType.PHONE;
+            result = DeviceType.PHONE;
         } else if (upper.isEmpty() || cpuInfo == null || cpuInfo.equals("Unknown")) {
-            return DeviceType.EMB;
+            result = DeviceType.EMB;
         } else if (ChipRulesManager.matchesAnyChip(upper, ChipRulesManager.getPhoneChips())) {
-            return DeviceType.PHONE;
+            result = DeviceType.PHONE;
         } else if (ChipRulesManager.matchesAnyChip(upper, ChipRulesManager.getServerChips())) {
-            return DeviceType.PC;
+            result = DeviceType.PC;
         } else {
-            return DeviceType.EMB;
+            result = DeviceType.EMB;
         }
+
+        ChipRulesManager.releaseChipRules();
+        return result;
     }
 }
