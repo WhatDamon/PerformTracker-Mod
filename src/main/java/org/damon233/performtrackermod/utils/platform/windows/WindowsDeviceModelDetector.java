@@ -16,7 +16,7 @@
 
 package org.damon233.performtrackermod.utils.platform.windows;
 
-import org.damon233.performtrackermod.collector.system.CpuNameDetector;
+import org.damon233.performtrackermod.utils.CommandExecutor;
 
 public class WindowsDeviceModelDetector {
     public static String getDeviceModel() {
@@ -27,7 +27,7 @@ public class WindowsDeviceModelDetector {
         };
 
         for (String command : commands) {
-            String result = CpuNameDetector.runCommand(command);
+            String result = CommandExecutor.runCommand(command);
             if (result != null && !result.trim().isEmpty()) {
                 return result.trim();
             }

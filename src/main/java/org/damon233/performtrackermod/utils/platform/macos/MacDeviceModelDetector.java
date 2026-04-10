@@ -16,11 +16,11 @@
 
 package org.damon233.performtrackermod.utils.platform.macos;
 
-import org.damon233.performtrackermod.collector.system.CpuNameDetector;
+import org.damon233.performtrackermod.utils.CommandExecutor;
 
 public class MacDeviceModelDetector {
     public static String getDeviceModel() {
-        String result = CpuNameDetector.runCommand("sysctl -n hw.model");
+        String result = CommandExecutor.runCommand("sysctl -n hw.model");
         return result != null ? result.trim() : "Unknown";
     }
 }

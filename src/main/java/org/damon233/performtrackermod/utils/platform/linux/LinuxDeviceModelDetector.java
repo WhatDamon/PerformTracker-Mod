@@ -16,16 +16,16 @@
 
 package org.damon233.performtrackermod.utils.platform.linux;
 
-import org.damon233.performtrackermod.collector.system.CpuNameDetector;
+import org.damon233.performtrackermod.utils.CommandExecutor;
 
 public class LinuxDeviceModelDetector {
     public static String getDeviceModel() {
-        String model = CpuNameDetector.readFile("/sys/devices/virtual/dmi/id/product_name");
+        String model = CommandExecutor.readFile("/sys/devices/virtual/dmi/id/product_name");
         if (model != null && !model.isBlank()) {
             return model.trim();
         }
 
-        model = CpuNameDetector.readFile("/proc/device-tree/model");
+        model = CommandExecutor.readFile("/proc/device-tree/model");
         if (model != null && !model.isBlank()) {
             return model.trim();
         }

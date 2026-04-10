@@ -16,7 +16,7 @@
 
 package org.damon233.performtrackermod.utils.platform.windows;
 
-import org.damon233.performtrackermod.collector.system.CpuNameDetector;
+import org.damon233.performtrackermod.utils.CommandExecutor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,7 +102,7 @@ public class WindowsVersionDetector {
 
     private static String queryRegistry(String valueName) {
         String command = "reg query \"" + "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion" + "\" /v " + valueName;
-        String result = CpuNameDetector.runCommand(command);
+        String result = CommandExecutor.runCommand(command);
         if (result == null) {
             return null;
         }
@@ -121,7 +121,7 @@ public class WindowsVersionDetector {
     }
 
     private static String getVersionFromCmdVer() {
-        String result = CpuNameDetector.runCommand("cmd /c ver");
+        String result = CommandExecutor.runCommand("cmd /c ver");
         if (result == null) {
             return null;
         }
