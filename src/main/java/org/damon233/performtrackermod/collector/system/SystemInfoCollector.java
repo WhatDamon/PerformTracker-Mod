@@ -16,12 +16,12 @@
 
 package org.damon233.performtrackermod.collector.system;
 
-import net.fabricmc.loader.api.FabricLoader;
 import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.data.DeviceType;
 import org.damon233.performtrackermod.data.SystemInfo;
 import org.damon233.performtrackermod.collector.IGpuProvider;
 import org.damon233.performtrackermod.utils.CachedValue;
+import org.damon233.performtrackermod.utils.ModInfoHelper;
 import org.damon233.performtrackermod.utils.platform.PlatformDetector;
 import org.damon233.performtrackermod.utils.platform.linux.LinuxOSInfoDetector;
 import org.damon233.performtrackermod.utils.platform.windows.WindowsVersionDetector;
@@ -122,15 +122,11 @@ public class SystemInfoCollector {
     }
 
     private static String getMinecraftVersion() {
-        return FabricLoader.getInstance().getModContainer("minecraft")
-                .map(c -> c.getMetadata().getVersion().getFriendlyString())
-                .orElse("Unknown");
+        return ModInfoHelper.getModVersion("minecraft");
     }
 
     private static String getModVersion() {
-        return FabricLoader.getInstance().getModContainer("performtracker")
-                .map(c -> c.getMetadata().getVersion().getFriendlyString())
-                .orElse("Unknown");
+        return ModInfoHelper.getModVersion("performtracker");
     }
 
     public static void releaseCache() {
