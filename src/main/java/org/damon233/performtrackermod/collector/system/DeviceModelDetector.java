@@ -16,6 +16,7 @@
 
 package org.damon233.performtrackermod.collector.system;
 
+import org.damon233.performtrackermod.utils.platform.PlatformDetector;
 import org.damon233.performtrackermod.utils.platform.linux.LinuxDeviceModelDetector;
 import org.damon233.performtrackermod.utils.platform.macos.MacDeviceModelDetector;
 import org.damon233.performtrackermod.utils.platform.windows.WindowsDeviceModelDetector;
@@ -28,13 +29,11 @@ public class DeviceModelDetector {
             return cachedDeviceModel;
         }
 
-        String osName = System.getProperty("os.name").toLowerCase();
-
-        if (osName.contains("mac") || osName.contains("darwin")) {
+        if (PlatformDetector.isMac()) {
             cachedDeviceModel = MacDeviceModelDetector.getDeviceModel();
-        } else if (osName.contains("linux")) {
+        } else if (PlatformDetector.isLinux()) {
             cachedDeviceModel = LinuxDeviceModelDetector.getDeviceModel();
-        } else if (osName.contains("windows")) {
+        } else if (PlatformDetector.isWindows()) {
             cachedDeviceModel = WindowsDeviceModelDetector.getDeviceModel();
         } else {
             cachedDeviceModel = "Unknown";

@@ -17,18 +17,18 @@
 package org.damon233.performtrackermod.collector.system;
 
 import org.damon233.performtrackermod.data.DeviceType;
+import org.damon233.performtrackermod.utils.platform.PlatformDetector;
 
 public class DeviceClassifier {
     public static DeviceType classifyDevice() {
-        String osName = System.getProperty("os.name").toLowerCase();
         String osArch = System.getProperty("os.arch").toLowerCase();
 
-        if (osName.contains("mac") || osName.contains("darwin")) {
+        if (PlatformDetector.isMac()) {
             return DeviceType.MAC;
         }
 
         boolean isArm = osArch.contains("arm") || osArch.contains("aarch64");
-        if (osName.contains("linux") && isArm) {
+        if (PlatformDetector.isLinux() && isArm) {
             String cpuName = CpuNameDetector.getCpuName();
             String gpuName = getGpuName();
             return classifyArmDevice(cpuName, gpuName);

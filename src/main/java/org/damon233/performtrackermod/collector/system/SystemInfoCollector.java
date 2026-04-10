@@ -21,6 +21,7 @@ import org.damon233.performtrackermod.PerformTracker;
 import org.damon233.performtrackermod.data.DeviceType;
 import org.damon233.performtrackermod.data.SystemInfo;
 import org.damon233.performtrackermod.collector.IGpuProvider;
+import org.damon233.performtrackermod.utils.platform.PlatformDetector;
 import org.damon233.performtrackermod.utils.platform.linux.LinuxOSInfoDetector;
 import org.damon233.performtrackermod.utils.platform.windows.WindowsVersionDetector;
 
@@ -152,19 +153,11 @@ public class SystemInfoCollector {
         ChipRulesManager.releaseChipRules();
     }
 
-    private static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("windows");
-    }
-
-    private static boolean isLinux() {
-        return System.getProperty("os.name").toLowerCase().contains("linux");
-    }
-
     private static String getOSVersion() {
-        if (isWindows()) {
+        if (PlatformDetector.isWindows()) {
             return WindowsVersionDetector.getWindowsVersion();
         }
-        if (isLinux()) {
+        if (PlatformDetector.isLinux()) {
             String prettyName = LinuxOSInfoDetector.getOSReleasePrettyName();
             if (prettyName != null && !prettyName.isBlank()) {
                 return prettyName;

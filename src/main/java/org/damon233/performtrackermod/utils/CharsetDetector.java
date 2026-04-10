@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.damon233.performtrackermod.utils.platform.PlatformDetector;
+
 public class CharsetDetector {
     
     public static String decode(byte[] bytes) {
@@ -54,18 +56,16 @@ public class CharsetDetector {
     }
     
     public static Charset detect() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        
-        if (osName.contains("windows")) {
+        if (PlatformDetector.isWindows()) {
             return detectWindows();
         }
-        if (osName.contains("linux")) {
+        if (PlatformDetector.isLinux()) {
             return detectLinux();
         }
-        if (osName.contains("mac") || osName.contains("darwin")) {
+        if (PlatformDetector.isMac()) {
             return StandardCharsets.UTF_8;
         }
-        
+
         return null;
     }
     
