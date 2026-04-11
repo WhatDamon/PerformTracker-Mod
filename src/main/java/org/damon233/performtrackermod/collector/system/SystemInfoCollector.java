@@ -69,7 +69,8 @@ public class SystemInfoCollector {
             minecraftVersion,
             modVersion,
             deviceModel,
-            getJvmArgs()
+            getJvmArgs(),
+            ModInfoHelper.getModListArray()
         );
     }
 

@@ -20,7 +20,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ModInfoHelper {
     public static String getModVersion(String modId) {
@@ -33,9 +32,9 @@ public class ModInfoHelper {
         return List.copyOf(FabricLoader.getInstance().getAllMods());
     }
 
-    public static String getModList() {
+    public static String[] getModListArray() {
         return getAllMods().stream()
                 .map(mod -> mod.getMetadata().getId() + " " + mod.getMetadata().getVersion().getFriendlyString())
-                .collect(Collectors.joining(", "));
+                .toArray(String[]::new);
     }
 }

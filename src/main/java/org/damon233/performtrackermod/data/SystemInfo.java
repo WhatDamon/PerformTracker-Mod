@@ -31,7 +31,8 @@ public record SystemInfo(
     String minecraftVersion,
     String modVersion,
     String deviceModel,
-    String[] jvmArgs
+    String[] jvmArgs,
+    String[] modList
 ) {
     public static String formatBytes(long bytes) {
         if (bytes >= 1073741824) {
