@@ -33,21 +33,7 @@ public class ClientGpuCollector implements IGpuProvider {
             return;
         }
 
-        try {
-            String renderer = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER);
-            String vendor = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_VENDOR);
-
-            if (renderer != null && !renderer.isEmpty()) {
-                gpuName = renderer;
-            } else if (vendor != null && !vendor.isEmpty()) {
-                gpuName = vendor;
-            } else {
-                gpuName = "Unknown";
-            }
-        } catch (Exception e) {
-            gpuName = "Unknown";
-        }
-
+        gpuName = GpuDetector.getGpuName();
         initialized = true;
     }
 
